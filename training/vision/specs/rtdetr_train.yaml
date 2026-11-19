@@ -1,0 +1,8 @@
+# TODO: spec de entrenamiento RT-DETR para TAO Toolkit.
+# Generar la plantilla oficial con la versión de TAO instalada en el DGX Spark
+# (no copiar valores sin verificar) y ajustar:
+#   - dataset.train_data_sources / val_data_sources -> data/splits
+#   - dataset.num_classes -> número de clases de catalogo.json
+#   - train.num_epochs, batch_size, learning rate
+#   - model.backbone / pretrained_backbone_path (registrar licencia en README)
+# Registrar cada corrida en logs/ (fecha, duración, GPU, épocas).

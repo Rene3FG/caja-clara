@@ -1,0 +1,10 @@
+# Plan B: YOLO (ultralytics). Archivo de dataset.
+# TODO: confirmar rutas y nombres de clase (deben coincidir con backend/catalogo.json "clase").
+path: ../data
+train: splits/train.txt
+val: splits/val.txt
+test: splits/test.txt
+names:
+  0: TODO_clase_1
+  1: TODO_clase_2
+  2: TODO_clase_3

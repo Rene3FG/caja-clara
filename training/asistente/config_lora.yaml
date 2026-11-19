@@ -1,0 +1,31 @@
+# Configuración LoRA para NeMo AutoModel sobre Nemotron 3 Nano 4B.
+# TODO: verificar los nombres exactos de las llaves contra la versión de NeMo
+# AutoModel instalada en el DGX Spark (generar su recipe de ejemplo y adaptar).
+# No reportar hiperparámetros "óptimos" sin haberlos probado.
+
+modelo:
+  nombre: TODO  # id exacto del checkpoint de Nemotron 3 Nano 4B (y su licencia en README)
+
+datos:
+  train: data/train.jsonl
+  val: data/val.jsonl
+  campo_entrada: entrada
+  campo_salida: salida
+
+peft:
+  tipo: lora
+  rango: 16          # TODO: ajustar
+  alpha: 32          # TODO: ajustar
+  dropout: 0.05
+  modulos_objetivo: TODO  # p. ej. proyecciones de atención
+
+entrenamiento:
+  epocas: TODO
+  tamano_lote: TODO
+  tasa_aprendizaje: TODO
+  semilla: 42
+  precision: bf16
+
+salida:
+  dir: ../../modelos/lora_asistente   # fuera de git; registrar sha256 en modelos/README.md
+  logs: ../../logs

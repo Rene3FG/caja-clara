@@ -1,0 +1,60 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Base de datos local
+*.db
+*.sqlite3
+
+# Flutter / Dart
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/android/.gradle/
+app/android/local.properties
+app/ios/Pods/
+*.apk
+*.aab
+
+# Datasets (no se suben imágenes ni datos crudos)
+training/vision/data/*
+!training/vision/data/README.md
+training/asistente/data/*
+!training/asistente/data/README.md
+rag/fuentes/*
+!rag/fuentes/README.md
+rag/indice.json
+
+# Pesos y artefactos de modelos
+*.pt
+*.pth
+*.engine
+*.onnx
+*.safetensors
+*.tlt
+*.hdf5
+*.ckpt
+*.bin
+*.gguf
+modelos/*
+!modelos/README.md
+
+# Logs (solo se versionan los copiados a logs/ como evidencia)
+*.log
+!logs/*.log
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
