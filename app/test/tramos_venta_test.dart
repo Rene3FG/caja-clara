@@ -31,4 +31,10 @@ void main() {
     expect(tramosSinCubrir('dame tres memelas y un café de olla', ['memela', 'cafe_olla'], tienda), isEmpty);
     expect(tramosSinCubrir('cobra 2 sabritas y 3 cocas por favor', ['sabritas', 'coca_cola'], tienda), isEmpty);
   });
+
+  test('libreta: renglones y comas; lo no reconocido sobra con su cantidad', () {
+    final t = tramosSinCubrir('2 papas\n3 cocas, 1 barrita\n2 tortas', ['sabritas', 'coca_cola'], tienda);
+    expect([for (final x in t) (x.producto?.id, x.cantidad, x.tramo)], [('p1', 1, '1 barrita'), (null, 2, '2 tortas')]);
+    expect(tramosSinCubrir('2 papas y 3 cocas', ['sabritas', 'coca_cola'], tienda), isEmpty);
+  });
 }

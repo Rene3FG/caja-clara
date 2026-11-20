@@ -206,7 +206,7 @@ List<TramoVenta> tramosSinCubrir(String texto, Iterable<String> clasesCubiertas,
 
   final cubiertas = clasesCubiertas.toList();
   final fuera = <TramoVenta>[];
-  for (final t in texto.split(RegExp(r',|\s+(?:y|e)\s+', caseSensitive: false))) {
+  for (final t in texto.split(RegExp(r'[,;\n]|\s+(?:y|e)\s+', caseSensitive: false))) {
     final tramo = t.trim();
     if (tramo.isEmpty || cubiertas.any((c) => nombra(tramo, c))) continue;
     final venta = desarmarVenta(tramo);

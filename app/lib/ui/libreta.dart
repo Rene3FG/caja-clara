@@ -86,7 +86,7 @@ class _PasarLibretaState extends State<PasarLibreta> {
           renglon: '${x['renglon'] ?? x['nombre'] ?? 'renglón'}',
           producto: pid,
           nombre: prod?.nombre ?? nombreBonito('${x['nombre'] ?? pid ?? x['renglon'] ?? ''}'),
-          precio: prod?.precio ?? (pid == null ? null : preciosRespaldo[pid]),
+          precio: prod?.precio ?? (pid == null ? null : preciosRespaldo[pid]) ?? (x['precio'] as num?)?.toDouble(),
           cantidad: (x['cantidad'] as num?)?.toDouble(),
         ));
       }
@@ -160,8 +160,29 @@ class _PasarLibretaState extends State<PasarLibreta> {
       if (!mounted) return;
       final acc = r['accion'];
       final tipo = acc is Map ? acc['accion'] : null;
-      if (r['ok'] == true && (tipo == 'registrar_libreta' || tipo == 'agregar')) {
-        _cargar({...r, 'requiere_fecha': true}, transcripcion: _texto.text.trim());
+      final ok = r['ok'] == true && (tipo == 'registrar_libreta' || tipo == 'agregar');
+      // Lo que el asistente no conoce ("1 barrita") no se pierde: queda como renglón pendiente,
+      // con el producto y precio de la tienda si lo tiene dado de alta.
+      final escrito = _texto.text.trim().replaceFirst(RegExp(r'^p[aá]same[^:]*:\s*', caseSensitive: false), '');
+      final items = ok && r['items'] is List ? r['items'] as List : const [];
+      final clases = [for (final i in items) if (i is Map) '${i['producto']}'];
+      final faltan = [
+        for (final x in tramosSinCubrir(escrito, clases, Caja.of(context).productos))
+          {
+            'renglon': x.tramo,
+            'producto': x.producto?.id,
+            'nombre': x.producto?.nombre ?? desarmarVenta(x.tramo).nombre,
+            'precio': x.producto?.precio,
+            'cantidad': x.cantidad,
+          },
+      ];
+      if (ok || faltan.isNotEmpty) {
+        _cargar({
+          ...r,
+          'items': items,
+          'pendientes': [...(r['pendientes'] is List ? r['pendientes'] as List : const []), ...faltan],
+          'requiere_fecha': true,
+        }, transcripcion: _texto.text.trim());
       } else {
         setState(() => _duda = (r['error'] as String?) ?? (acc is Map ? acc['pregunta'] as String? : null) ?? 'No entendí. Escribe cantidad y producto, por ejemplo: 2 coca, 3 sabritas.');
       }
