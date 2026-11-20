@@ -122,6 +122,7 @@ class _FormularioPerfilState extends State<FormularioPerfil> {
             controller: _clabe,
             placeholder: '18 números',
             teclado: TextInputType.number,
+            tope: 18,
           ),
           const SizedBox(height: 12),
           Campo(

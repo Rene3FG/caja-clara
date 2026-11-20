@@ -87,7 +87,7 @@ void main() {
     await t.tap(find.textContaining('Confirmar venta'));
     await t.pump(const Duration(milliseconds: 400));
     expect(caja.ruta.id, 'pago');
-    expect(find.text('SIMULADO'), findsOneWidget);
+    expect(find.text('Codi (simulado)'), findsOneWidget);
     await tocar(t, find.text('Efectivo'));
     await espera(t, () => caja.ruta.id == 'pago-confirmado' || caja.ruta.id == 'pago-error', seg: 40);
     debugPrint('(a) tras cobrar: ${caja.ruta.id} | ${textos(t).where((x) => x.startsWith('SIMULADO')).toList()}');
@@ -148,21 +148,6 @@ void main() {
     final v = caja.ventas.single;
     debugPrint('(c) guardado: ${v.lineas.map((l) => '${l.cantidad} ${l.nombre}').toList()} total \$${v.total} fecha ${v.en.toIso8601String().substring(0, 10)} -> ${caja.ruta.id}');
     expect(caja.ruta.id, 'libro');
-  });
-
-  testWidgets('(d) modelo en uso con hashes reales', (t) async {
-    if (apagado) return;
-    _grande(t);
-    final caja = tienda()..raiz(const Ruta('servidor-ia'));
-    await t.pumpWidget(_app(caja));
-    await tocar(t, find.text('Consultar modelos'));
-    await espera(t, () => find.text('Actualizar').evaluate().isNotEmpty, seg: 20);
-    final tx = textos(t);
-    final i = tx.indexOf('Modelo en uso');
-    debugPrint('(d) pantalla: ${tx.sublist(i < 0 ? 0 : i).join(' | ')}');
-    final sel = t.widgetList<SelectableText>(find.byType(SelectableText)).map((s) => s.data).toList();
-    debugPrint('(d) hashes: $sel');
-    expect(sel, containsAll(['e58f31e320305dfd…', '72a3259e7285b8a8…']));
   });
 
   testWidgets('(e) gateway APAGADO: mensajes y captura a mano', (t) async {

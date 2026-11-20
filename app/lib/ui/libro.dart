@@ -15,10 +15,9 @@ class Libro extends StatelessWidget {
     final caja = Caja.of(context);
     final ahora = DateTime.now();
     final rango = rangoDe(caja.periodo, ahora);
-    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final vs = caja.ventas.where((v) => enRango(v.en, rango)).toList();
     final gs = caja.gastos.where((g) => enRango(g.en, rango)).toList();
-    final corte = servidor == null ? ganancia([for (final v in vs) v.total], [for (final g in gs) g.monto]) : Corte(servidor.ventas, servidor.gastos, servidor.balance);
+    final corte = ganancia([for (final v in vs) v.total], [for (final g in gs) g.monto]);
     final estado = caja.conectado && caja.pendientes == 0
         ? 'Todas tus cuentas están respaldadas y al día.'
         : 'Guardado en este teléfono. Se envía cuando haya señal.';
@@ -195,12 +194,10 @@ class _DesgloseVentasState extends State<DesgloseVentas> {
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
     final ahora = DateTime.now();
-    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final rango = rangoDe(caja.periodo, ahora);
     final lista = caja.ventas.where((v) => enRango(v.en, rango)).toList();
-    final delServidor = servidor?.movimientos.where((m) => m.tipo == 'venta').toList();
-    final total = delServidor == null ? lista.fold<double>(0, (s, v) => s + v.total) : delServidor.fold<double>(0, (s, m) => s + m.monto);
-    final n = delServidor?.length ?? lista.length;
+    final total = lista.fold<double>(0, (s, v) => s + v.total);
+    final n = lista.length;
     return Scaffold(
       appBar: Barra(titulo: 'Desglose Ventas', onBack: caja.atras, accion: const PerfilBoton()),
       body: ListView(
@@ -218,11 +215,8 @@ class _DesgloseVentasState extends State<DesgloseVentas> {
           const SizedBox(height: 14),
           const Text('Detalle de cobros', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          if (delServidor != null)
-            for (final m in delServidor) _cobro(m.concepto, m.monto, horaCorta(m.en), _metodoApi(m.metodo))
-          else
-            for (final v in lista)
-              _cobro(listaLineas([for (final l in v.lineas) (nombre: l.nombre, cantidad: l.cantidad)]), v.total, horaCorta(v.en), _metodo(v.metodo)),
+          for (final v in lista)
+            _cobro(listaLineas([for (final l in v.lineas) (nombre: l.nombre, cantidad: l.cantidad)]), v.total, horaCorta(v.en), _metodo(v.metodo)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
@@ -271,14 +265,10 @@ class DesglosePagos extends StatelessWidget {
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
     final ahora = DateTime.now();
-    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final rango = rangoDe(caja.periodo, ahora);
     final lista = caja.gastos.where((g) => enRango(g.en, rango)).toList();
-    final delServidor = servidor?.movimientos.where((m) => m.tipo == 'gasto').toList();
-    final gastos = delServidor == null ? lista.fold<double>(0, (s, g) => s + g.monto) : delServidor.fold<double>(0, (s, m) => s + m.monto);
-    final ventas = servidor == null
-        ? caja.ventas.where((v) => enRango(v.en, rango)).fold<double>(0, (s, v) => s + v.total)
-        : servidor.ventas;
+    final gastos = lista.fold<double>(0, (s, g) => s + g.monto);
+    final ventas = caja.ventas.where((v) => enRango(v.en, rango)).fold<double>(0, (s, v) => s + v.total);
     return Scaffold(
       appBar: Barra(titulo: 'Desglose Pagos', onBack: caja.atras, accion: const PerfilBoton()),
       body: ListView(
@@ -290,7 +280,7 @@ class DesglosePagos extends StatelessWidget {
             const Text('Corte al momento', style: TextStyle(fontWeight: FontWeight.w700, color: maguey)),
           ]),
           const SizedBox(height: 8),
-          const Text('Total pagado hoy', style: TextStyle(color: stone)),
+          Text('Total pagado · ${tituloPeriodo(caja.periodo, ahora)}', style: const TextStyle(color: stone)),
           Text('−${pesos(gastos)} MXN', style: epilogo(32, peso: FontWeight.w800, color: grana)),
           const SizedBox(height: 14),
           const Row(children: [
@@ -298,10 +288,7 @@ class DesglosePagos extends StatelessWidget {
             Text('Efectivo y SPEI', style: TextStyle(fontSize: 13, color: stone)),
           ]),
           const SizedBox(height: 8),
-          if (delServidor != null)
-            for (final m in delServidor) _pago(m.concepto, 'Anotado en la libreta', m.monto, _metodoApi(m.metodo), m.metodo == 'transferencia')
-          else
-            for (final g in lista) _pago(g.concepto, 'Anotado en la libreta', g.monto, _metodo(g.metodo), g.metodo == Metodo.transferencia),
+          for (final g in lista) _pago(g.concepto, 'Anotado en la libreta', g.monto, _metodo(g.metodo), g.metodo == Metodo.transferencia),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
@@ -309,7 +296,7 @@ class DesglosePagos extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Text('Cálculo de tu ganancia neta', style: TextStyle(fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
-              _linea('Ventas totales hoy:', pesos(ventas), maguey),
+              _linea('Ventas · ${tituloPeriodo(caja.periodo, ahora)}:', pesos(ventas), maguey),
               _linea('Menos gastos registrados:', '−${pesos(gastos)}', grana),
               const Divider(),
               _linea('Ganancia libre disponible:', pesos(ventas - gastos), maguey),
@@ -366,12 +353,6 @@ class DesglosePagos extends StatelessWidget {
 }
 
 String _eti(String? iso) => iso == null || iso.isEmpty ? '' : etiquetaDia(parseDia(iso));
-
-String _metodoApi(String metodo) => switch (metodo) {
-      'qr' => 'QR CoDi',
-      'transferencia' => 'Transferencia SPEI',
-      _ => 'Efectivo',
-    };
 
 String _metodo(Metodo m) => switch (m) {
       Metodo.efectivo => 'Efectivo',

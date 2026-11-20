@@ -80,6 +80,7 @@ class Campo extends StatelessWidget {
     this.grande = false,
     this.teclado,
     this.placeholder,
+    this.tope,
     super.key,
   });
 
@@ -88,6 +89,7 @@ class Campo extends StatelessWidget {
   final bool grande;
   final TextInputType? teclado;
   final String? placeholder;
+  final int? tope;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,7 @@ class Campo extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: teclado,
+          inputFormatters: [if (tope != null) LengthLimitingTextInputFormatter(tope)],
           style: grande ? epilogo(36) : const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             hintText: placeholder,

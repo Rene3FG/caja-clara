@@ -2,12 +2,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../tema.dart';
 
-/// Etiqueta visible en todo el cobro: ningún dinero real se mueve (bases 11).
+/// El cobro por CoDi no mueve dinero de un banco.
 class EtiquetaSimulado extends StatelessWidget {
-  const EtiquetaSimulado({this.estado, super.key});
-
-  /// pendiente / pagado / falló
-  final String? estado;
+  const EtiquetaSimulado({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +19,12 @@ class EtiquetaSimulado extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: cempasuchil, width: 1.5),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.science_outlined, size: 14, color: Color(0xFF9A3412)),
-          const SizedBox(width: 6),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.science_outlined, size: 14, color: Color(0xFF9A3412)),
+          SizedBox(width: 6),
           Text(
-            estado == null ? 'SIMULADO' : 'SIMULADO · $estado',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: Color(0xFF9A3412)),
+            'Codi (simulado)',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: Color(0xFF9A3412)),
           ),
         ]),
       ),

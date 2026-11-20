@@ -1,7 +1,11 @@
 {
-  "_nota": "Catálogo de ejemplo. TODO: reemplazar con los productos reales y las clases con que se entrenó el detector (la 'clase' debe coincidir con el nombre de clase del modelo).",
   "productos": [
-    {"id": 1, "clase": "TODO_clase_1", "nombre": "TODO producto 1", "precio": 0.0, "giro": "comida"},
-    {"id": 2, "clase": "TODO_clase_2", "nombre": "TODO producto 2", "precio": 0.0, "giro": "tienda"}
+    {"id": 1, "clase": "chokis", "nombre": "Chokis", "precio": 22.0, "giro": "tienda"},
+    {"id": 2, "clase": "coca_cola", "nombre": "Coca cola", "precio": 22.0, "giro": "tienda"},
+    {"id": 3, "clase": "doritos", "nombre": "Doritos", "precio": 20.0, "giro": "tienda"},
+    {"id": 4, "clase": "gansito", "nombre": "Gansito", "precio": 18.0, "giro": "tienda"},
+    {"id": 5, "clase": "panditas", "nombre": "Panditas", "precio": 15.0, "giro": "tienda"},
+    {"id": 6, "clase": "sabritas", "nombre": "Sabritas", "precio": 20.0, "giro": "tienda"},
+    {"id": 7, "clase": "skittles", "nombre": "Skittles", "precio": 18.0, "giro": "tienda"}
   ]
 }

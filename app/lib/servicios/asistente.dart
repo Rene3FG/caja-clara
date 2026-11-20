@@ -3,14 +3,13 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../datos.dart';
 import '../modelos.dart';
 import '../pedido.dart';
 import 'config.dart';
 
 export 'config.dart' show apiBase, gundaniBase, servidorIa, servidorApi;
 
-const esperaGundani = Duration(seconds: 30);
+const esperaGundani = Duration(seconds: 45);
 
 /// ponytail: los tests ponen un cliente falso. En la app queda null y se usa el de siempre.
 http.Client? clienteHttp;
@@ -231,19 +230,31 @@ Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) asy
   }
 }
 
-String _local(TemaGuia tema, String texto) {
-  final paso = pasos.firstWhere((p) => p.id == tema);
-  final t = texto.toLowerCase();
-  if (tema == TemaGuia.cuenta && RegExp(r'poco|cobr|comisi|saldo|minimo|mínimo').hasMatch(t)) return paso.respuesta;
-  if (tema == TemaGuia.transferencia && RegExp(r'peligr|clabe|nip|clave|codigo|código|celular').hasMatch(t)) {
-    return paso.respuesta;
-  }
-  if (tema == TemaGuia.sat && RegExp(r'cuando|cuándo|empiez|alta|rfc|sat').hasMatch(t)) return paso.respuesta;
-  return paso.respuesta;
-}
+Future<String> preguntar(String texto, TemaGuia tema, {PasoGuia? paso}) async {
+  final contenido = paso == null
+      ? ''
+      : [
+          paso.mensaje,
+          '${paso.detalleTitulo}: ${paso.detalle}',
+          if (paso.nota != null) paso.nota!,
+          if (paso.comparteSi != null) 'Sí compartir: ${paso.comparteSi}. Nunca compartir: ${paso.comparteNo}.',
+          'Pasos: ${paso.pasos.join(" | ")}',
+          '${paso.tituloAcude} ${paso.acude}',
+        ].join('\n');
 
-/// La guía de la libreta responde en el teléfono.
-/// El modelo del VPS se usa al registrar una venta o un gasto.
-Future<String> preguntar(String texto, TemaGuia tema) async => _local(tema, texto);
+  try {
+    final data = await _post('/api/guia/preguntar', {
+      'pregunta': texto,
+      'tema': tema.name,
+      'titulo_pantalla': paso?.titulo ?? '',
+      'contenido_pantalla': contenido,
+    });
+    final resp = data['respuesta'] as String?;
+    if (resp != null && resp.trim().isNotEmpty) return resp.trim();
+  } on ErrorGundani {
+    // Sin conexión o timeout: no inventar respuesta
+  }
+  return 'No pude conectar con Cempasúchil ahora para responder esa duda. Revisa los pasos en pantalla o inténtalo de nuevo cuando tengas señal.';
+}
 
 List<Linea> proponerVenta(String texto, List<Producto> productos) => armarPedido(texto, productos);

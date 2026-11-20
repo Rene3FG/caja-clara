@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../caja.dart';
 import '../cuentas.dart';
 import '../modelos.dart';
+import '../servicios/asistente.dart';
 import '../servicios/carrito_ia.dart';
 import '../servicios/foto.dart';
 import '../servicios/ia_service.dart';
@@ -240,6 +241,13 @@ class _PasarLibretaState extends State<PasarLibreta> {
   bool get _puedeGuardar =>
       _pendientes.every((p) => p.listo) && (!_requiereFecha || _fecha != null) && _todas.isNotEmpty;
 
+  bool get _esHoy {
+    final f = _fecha;
+    if (f == null) return false;
+    final hoy = DateTime.now();
+    return f.year == hoy.year && f.month == hoy.month && f.day == hoy.day;
+  }
+
   void _guardar() {
     final caja = Caja.of(context);
     final lineas = _todas;
@@ -249,6 +257,22 @@ class _PasarLibretaState extends State<PasarLibreta> {
     caja.setPeriodo(Periodo('fechas', desde: isoDia(dia), hasta: isoDia(dia)));
     caja.setAviso('Libreta guardada: ${pesos(total)} del ${etiquetaDia(dia)}.');
     caja.tab('libro');
+  }
+
+  void _cobrar() {
+    final caja = Caja.of(context);
+    final lineas = _todas;
+    final total = lineas.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
+    caja.setBorrador(lineas);
+    caja.ponerCobro(Cobro(
+      tipo: 'venta',
+      concepto: listaLineas([for (final l in lineas) (nombre: l.nombre, cantidad: l.cantidad)]),
+      cantidad: 1,
+      monto: total,
+      metodo: 'efectivo',
+      origen: 'manual',
+    ));
+    caja.ir(const Ruta('pago'));
   }
 
   @override
@@ -389,6 +413,14 @@ class _PasarLibretaState extends State<PasarLibreta> {
         icono: Icons.check_circle_outline,
         onPressed: _puedeGuardar ? _guardar : null,
       ),
+      if (_esHoy) ...[
+        const SizedBox(height: 8),
+        Boton(
+          texto: 'Guardar en el libro (cobrando)',
+          icono: Icons.point_of_sale,
+          onPressed: _puedeGuardar ? _cobrar : null,
+        ),
+      ],
       const SizedBox(height: 8),
       TextButton(
         onPressed: () => setState(() {

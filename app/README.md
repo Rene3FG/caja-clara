@@ -12,23 +12,13 @@ flutter test
 flutter run -d chrome
 ```
 
-El asistente Gundani usa `http://80.241.220.188:8000`.
-Otro servidor: `--dart-define=GUNDANI_URL=http://127.0.0.1:8000`.
-`API_URL` es solo el detector de fotos.
-
-Para apuntar al backend:
-
-```bash
-flutter run -d chrome --dart-define=API_URL=http://127.0.0.1:8000
-```
-
-Sin `API_URL`, la guía, la voz y la foto usan respuestas locales y la cola se marca enviada al volver la señal.
+Las direcciones están fijas en `lib/servicios/config.dart`. La IA usa `https://ordered-herein-avatar-incorporate.trycloudflare.com`. La caja usa Gundani en `http://80.241.220.188:8000`.
 
 APK y web:
 
 ```bash
-flutter build apk --dart-define=API_URL=http://127.0.0.1:8000
-flutter build web --dart-define=API_URL=http://127.0.0.1:8000
+flutter build apk
+flutter build web
 ```
 
 ## Demo de conexión

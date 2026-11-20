@@ -48,6 +48,60 @@ CREATE TABLE IF NOT EXISTS mostrador_productos (
     detalle  TEXT NOT NULL DEFAULT '',
     precio   REAL NOT NULL CHECK (precio >= 0)
 );
+CREATE TABLE IF NOT EXISTS usuarios (
+    id           TEXT PRIMARY KEY,
+    negocio      TEXT NOT NULL DEFAULT '',
+    nombre       TEXT NOT NULL DEFAULT '',
+    clabe        TEXT NOT NULL DEFAULT '',
+    guia_hecha   INTEGER NOT NULL DEFAULT 0,
+    actualizado  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS productos_usuario (
+    id           TEXT PRIMARY KEY,
+    usuario_id   TEXT NOT NULL REFERENCES usuarios(id),
+    nombre       TEXT NOT NULL,
+    detalle      TEXT NOT NULL DEFAULT '',
+    precio       REAL NOT NULL CHECK (precio >= 0),
+    actualizado  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS ventas_usuario (
+    id           TEXT PRIMARY KEY,
+    usuario_id   TEXT NOT NULL REFERENCES usuarios(id),
+    en           TEXT NOT NULL,
+    metodo       TEXT NOT NULL,
+    total        REAL NOT NULL CHECK (total >= 0),
+    pendiente    INTEGER NOT NULL DEFAULT 0,
+    error        TEXT,
+    actualizado  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS lineas_venta (
+    venta_id     TEXT NOT NULL REFERENCES ventas_usuario(id) ON DELETE CASCADE,
+    orden        INTEGER NOT NULL,
+    producto_id  TEXT NOT NULL DEFAULT '',
+    nombre       TEXT NOT NULL,
+    precio       REAL NOT NULL,
+    cantidad     INTEGER NOT NULL CHECK (cantidad > 0),
+    PRIMARY KEY (venta_id, orden)
+);
+CREATE TABLE IF NOT EXISTS gastos_usuario (
+    id           TEXT PRIMARY KEY,
+    usuario_id   TEXT NOT NULL REFERENCES usuarios(id),
+    en           TEXT NOT NULL,
+    concepto     TEXT NOT NULL,
+    monto        REAL NOT NULL CHECK (monto >= 0),
+    metodo       TEXT NOT NULL,
+    pendiente    INTEGER NOT NULL DEFAULT 0,
+    error        TEXT,
+    actualizado  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS pagos_simulados (
+    pago_id    TEXT PRIMARY KEY,
+    monto      REAL NOT NULL,
+    referencia TEXT NOT NULL,
+    estado     TEXT NOT NULL,
+    creado     REAL NOT NULL,
+    falla      INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS venta_items (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     venta_id     INTEGER NOT NULL REFERENCES ventas(id) ON DELETE CASCADE,
@@ -76,6 +130,7 @@ def iniciar():
     """Crea tablas y carga el catálogo (idempotente)."""
     with conexion() as con:
         con.executescript(ESQUEMA)
+        con.execute("DROP TABLE IF EXISTS copia")
         productos = json.loads(CATALOGO.read_text(encoding="utf-8"))["productos"]
         con.executemany(
             "INSERT OR REPLACE INTO productos (id, clase, nombre, precio, giro) "
@@ -259,6 +314,162 @@ def editar_mostrador(producto_id, nombre, detalle, precio):
 
 def _fila_mostrador(fila) -> dict:
     return {"id": fila["id"], "nombre": fila["nombre"], "detalle": fila["detalle"], "precio": fila["precio"]}
+
+
+def mezclar_caja(usuario: dict, productos: list[dict], ventas: list[dict], gastos: list[dict]) -> dict:
+    """Cada fila vive en su tabla. Gana la fecha más nueva.
+
+    ponytail: un teléfono nuevo se une al único usuario que haya. Con dos usuarios
+    hace falta un ingreso; si no, el id desconocido se vuelve el segundo.
+    """
+    uid = str(usuario.get("id") or "").strip()
+    if not uid:
+        raise ValueError("falta el usuario")
+    with conexion() as con:
+        uid = _resolver_usuario(con, uid)
+        _guardar_usuario(con, uid, usuario)
+        for p in productos:
+            _poner_producto(con, uid, p)
+        for v in ventas:
+            _poner_venta(con, uid, v)
+        for g in gastos:
+            _poner_gasto(con, uid, g)
+        return leer_caja(con, uid)
+
+
+def _resolver_usuario(con, uid: str) -> str:
+    if con.execute("SELECT 1 FROM usuarios WHERE id = ?", (uid,)).fetchone():
+        return uid
+    todos = con.execute("SELECT id FROM usuarios").fetchall()
+    if len(todos) == 1:
+        return todos[0]["id"]
+    return uid
+
+
+def _guardar_usuario(con, uid: str, usuario: dict):
+    actualizado = str(usuario.get("actualizado") or "")
+    valores = (
+        usuario.get("negocio") or "",
+        usuario.get("nombre") or "",
+        usuario.get("clabe") or "",
+        int(bool(usuario.get("guiaHecha"))),
+        actualizado,
+    )
+    prev = con.execute("SELECT actualizado FROM usuarios WHERE id = ?", (uid,)).fetchone()
+    if prev is None:
+        con.execute(
+            "INSERT INTO usuarios (negocio, nombre, clabe, guia_hecha, actualizado, id) VALUES (?,?,?,?,?,?)",
+            (*valores, uid),
+        )
+        return
+    if actualizado < prev["actualizado"]:
+        return
+    con.execute(
+        "UPDATE usuarios SET negocio = ?, nombre = ?, clabe = ?, guia_hecha = ?, actualizado = ? WHERE id = ?",
+        (*valores, uid),
+    )
+
+
+def _mas_nuevo(con, tabla: str, fila_id: str, actualizado: str) -> bool:
+    prev = con.execute(f"SELECT actualizado FROM {tabla} WHERE id = ?", (fila_id,)).fetchone()
+    return prev is None or actualizado >= prev["actualizado"]
+
+
+def _poner_producto(con, uid: str, p: dict):
+    actualizado = str(p.get("actualizado") or "")
+    if not _mas_nuevo(con, "productos_usuario", p["id"], actualizado):
+        return
+    con.execute(
+        "INSERT OR REPLACE INTO productos_usuario (id, usuario_id, nombre, detalle, precio, actualizado) "
+        "VALUES (?,?,?,?,?,?)",
+        (p["id"], uid, p.get("nombre") or "", p.get("detalle") or "", p.get("precio") or 0, actualizado),
+    )
+
+
+def _poner_venta(con, uid: str, v: dict):
+    actualizado = str(v.get("actualizado") or "")
+    if not _mas_nuevo(con, "ventas_usuario", v["id"], actualizado):
+        return
+    con.execute(
+        "INSERT OR REPLACE INTO ventas_usuario (id, usuario_id, en, metodo, total, pendiente, error, actualizado) "
+        "VALUES (?,?,?,?,?,?,?,?)",
+        (v["id"], uid, v.get("en") or "", v.get("metodo") or "efectivo", v.get("total") or 0,
+         int(bool(v.get("pendiente"))), v.get("error"), actualizado),
+    )
+    con.execute("DELETE FROM lineas_venta WHERE venta_id = ?", (v["id"],))
+    for orden, linea in enumerate(v.get("lineas") or []):
+        con.execute(
+            "INSERT INTO lineas_venta (venta_id, orden, producto_id, nombre, precio, cantidad) VALUES (?,?,?,?,?,?)",
+            (v["id"], orden, linea.get("productoId") or "", linea.get("nombre") or "",
+             linea.get("precio") or 0, linea.get("cantidad") or 1),
+        )
+
+
+def _poner_gasto(con, uid: str, g: dict):
+    actualizado = str(g.get("actualizado") or "")
+    if not _mas_nuevo(con, "gastos_usuario", g["id"], actualizado):
+        return
+    con.execute(
+        "INSERT OR REPLACE INTO gastos_usuario "
+        "(id, usuario_id, en, concepto, monto, metodo, pendiente, error, actualizado) "
+        "VALUES (?,?,?,?,?,?,?,?,?)",
+        (g["id"], uid, g.get("en") or "", g.get("concepto") or "", g.get("monto") or 0,
+         g.get("metodo") or "efectivo", int(bool(g.get("pendiente"))), g.get("error"), actualizado),
+    )
+
+
+def leer_caja(con, uid: str) -> dict:
+    u = con.execute("SELECT * FROM usuarios WHERE id = ?", (uid,)).fetchone()
+    productos = con.execute(
+        "SELECT * FROM productos_usuario WHERE usuario_id = ? ORDER BY nombre", (uid,)
+    ).fetchall()
+    ventas = con.execute(
+        "SELECT * FROM ventas_usuario WHERE usuario_id = ? ORDER BY en", (uid,)
+    ).fetchall()
+    gastos = con.execute(
+        "SELECT * FROM gastos_usuario WHERE usuario_id = ? ORDER BY en", (uid,)
+    ).fetchall()
+    return {
+        "usuario": {
+            "id": u["id"],
+            "negocio": u["negocio"],
+            "nombre": u["nombre"],
+            "clabe": u["clabe"],
+            "guiaHecha": bool(u["guia_hecha"]),
+            "actualizado": u["actualizado"],
+        },
+        "productos": [
+            {"id": p["id"], "nombre": p["nombre"], "detalle": p["detalle"], "precio": p["precio"],
+             "actualizado": p["actualizado"]}
+            for p in productos
+        ],
+        "ventas": [_venta(con, v) for v in ventas],
+        "gastos": [
+            {"id": g["id"], "en": g["en"], "concepto": g["concepto"], "monto": g["monto"],
+             "metodo": g["metodo"], "pendiente": bool(g["pendiente"]), "error": g["error"],
+             "actualizado": g["actualizado"]}
+            for g in gastos
+        ],
+    }
+
+
+def _venta(con, v) -> dict:
+    lineas = con.execute(
+        "SELECT * FROM lineas_venta WHERE venta_id = ? ORDER BY orden", (v["id"],)
+    ).fetchall()
+    return {
+        "id": v["id"],
+        "en": v["en"],
+        "metodo": v["metodo"],
+        "total": v["total"],
+        "pendiente": bool(v["pendiente"]),
+        "error": v["error"],
+        "actualizado": v["actualizado"],
+        "lineas": [
+            {"productoId": ln["producto_id"], "nombre": ln["nombre"], "precio": ln["precio"], "cantidad": ln["cantidad"]}
+            for ln in lineas
+        ],
+    }
 
 
 def sembrar_verificacion(dia: str):

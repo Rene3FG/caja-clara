@@ -6,12 +6,12 @@ La barra del marco muestra Productos en el lugar de Fiados, y el avatar del enca
 
 ## ADDED Requirements
 
-### Requirement: Cuatro pestañas
-El marco SHALL mostrar cuatro pestañas, en este orden: Inicio, Sin red, Libro y Productos. SHALL NOT mostrar una pestaña Fiados.
+### Requirement: Tres pestañas
+El marco SHALL mostrar tres pestañas, en este orden: Inicio, Libro y Productos. SHALL NOT mostrar una pestaña Fiados ni una pestaña Sin red.
 
 #### Scenario: Barra visible
 - **WHEN** se abre una pantalla del marco
-- **THEN** las pestañas son Inicio, Sin red, Libro y Productos, y no hay una pestaña Fiados
+- **THEN** las pestañas son Inicio, Libro y Productos, y no hay una pestaña Fiados ni Sin red
 
 ### Requirement: La pestaña Productos abre la lista
 Al elegir Productos, el sistema SHALL mostrar la lista de productos del teléfono y SHALL marcar esa pestaña.
