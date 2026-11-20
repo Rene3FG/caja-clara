@@ -1,0 +1,12 @@
+flowchart LR
+  A["📱 App Flutter<br/>(Galaxy S24)<br/>Perfil → Servidor IA"] -- "HTTPS" --> T["Túnel Cloudflare<br/>(trycloudflare.com)"]
+  T --> G["Gateway FastAPI :8000<br/>scripts/ia_gateway.py"]
+  subgraph L["Laptop · RTX 2060 6 GB"]
+    G -- "/detectar" --> D["Detector :8002<br/>DINO ResNet-50 v3<br/>TensorRT 11.5"]
+    G -- "/asistente, /libreta" --> S["Asistente :8001<br/>Qwen2.5-1.5B + LoRA<br/>(PyTorch, GPU)"]
+  end
+  S -- "foto de libreta" --> N["API NVIDIA<br/>Nemotron 3.5 Super VL"]
+  G -- "/api/*" --> V["VPS del equipo<br/>Gundani: FastAPI + SQLite<br/>Qwen2.5-3B QLoRA (GGUF, CPU)"]
+  classDef nv fill:#eaf4dc,stroke:#76b900,color:#1f1b16;
+  classDef x fill:#f6ede3,stroke:#9a2a1e,color:#1f1b16;
+  class D,S,N nv; class A,T,G,V x;

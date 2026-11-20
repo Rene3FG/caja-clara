@@ -25,6 +25,10 @@ pandoc docs/ficha_proyecto.md -s --metadata pagetitle="Caja Clara — Ficha" -c 
 google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/pdf/ficha_proyecto.pdf /tmp/ficha.html
 google-chrome --headless --no-pdf-header-footer --allow-file-access-from-files \
   --print-to-pdf=docs/pdf/presentacion.pdf docs/presentacion/presentacion.html
+# Documento 02 (modelos de IA); figuras: img/*.mmd → mermaid-cli, curvas desde los logs de entrenamiento
+pandoc docs/entregas/02_modelos_ia.md -s --resource-path=docs/entregas:. --metadata pagetitle="Caja Clara — Modelos de IA" \
+  -c docs/pdf/ficha.css -c docs/entregas/entregas.css --self-contained -o /tmp/02.html
+google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/entregas/02_modelos_ia.pdf /tmp/02.html
 ```
 
 Antes de cerrar: revocar la `NVIDIA_API_KEY` usada en desarrollo y verificar que los enlaces del Panel abran
