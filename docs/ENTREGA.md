@@ -11,7 +11,7 @@
 | **B.** Funciones implementadas / simuladas / pendientes | `docs/funciones.md` | ✅ |
 | **C.** Paquete de entrenamiento — detector | `training/vision/` (cuaderno, specs, logs, distribución, evaluaciones) + pesos | ✍️ subir `.pth`/`.onnx`/`.engine` (ubicación en el Panel) |
 | **C.** Paquete de entrenamiento — asistente | `training/asistente/` (datos, config, logs, evaluaciones) + adaptador | ✍️ subir `lora_adaptador/` (ubicación en el Panel) |
-| **C.** Evaluación del detector v3 en el test (106) | `tao model dino evaluate` en el servidor DLI con el checkpoint v3 | ⏳ |
+| **C.** Evaluación del detector v1–v3 en el test (106) | `training/detector/evaluar_test_publico.py` (TensorRT, RTX 2060) → `logs/eval_test_publico_v*.json`, tabla en `docs/evidencias.md` | ✅ |
 | **D.** Ficha (PDF, ≤ 4 páginas) | `docs/pdf/ficha_proyecto.pdf` (fuente `docs/ficha_proyecto.md`) | ✍️ nombres y cifras de las pruebas de uso |
 | **E.** Evidencias | `docs/evidencias.md`, `logs/pruebas_app_2026-11-20.json` | ⏳ pruebas de uso y tiempos |
 | **E.** Pruebas con 2 usuarios ajenos | `docs/pruebas_uso.md` | ⏳ |

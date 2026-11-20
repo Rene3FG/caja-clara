@@ -75,13 +75,29 @@ se miden en las pruebas de uso.
 
 | Versión | Datos de train | val mAP50 | test mAP / mAP50 (106 imágenes públicas) | Fotos propias p03 (36), umbral 0.5: conteo exacto / detecta / falsos positivos |
 |---|---|---|---|---|
-| v1 | públicos | 0.997 | **0.915 / 1.000** (cuaderno, celda 26) | 31% / 41% / 100% |
-| v2 | + p01, p02 | 0.997 | **PENDIENTE** | 64% / 52% / 0% |
-| v3 (la que usa la app) | + p04 | 0.997 | **PENDIENTE** | **67% / 59% / 11%** |
+| v1 | públicos | 0.997 | **0.893 / 1.000** (TAO en el cuaderno, celda 26: 0.915 / 1.000) | 31% / 41% / 100% |
+| v2 | + p01, p02 | 0.997 | **0.887 / 1.000** | 64% / 52% / 0% |
+| v3 (la que usa la app) | + p04 | 0.997 | **0.857 / 1.000** | **67% / 59% / 11%** |
 
 Cómo se calcula:
-- **mAP / mAP50** (COCO): precisión promedio por clase sobre IoU 0.50:0.95 / IoU 0.50, calculada por TAO
-  (`tao model dino evaluate`) sobre el conjunto de prueba.
+- **mAP / mAP50** (COCO): precisión promedio por clase sobre IoU 0.50:0.95 / IoU 0.50 en el test público
+  (106 imágenes), calculada con pycocotools por `training/detector/evaluar_test_publico.py`
+  (`logs/eval_test_publico_v{1,2,3}.json`). El test se regeneró con `preparar_datos.py` (80/10/10, semilla 1234,
+  dedup SHA-1) y coincide con `training/vision/logs/distribucion_datos_v2.json`.
+
+#### Test público con TensorRT (umbral 0.01, sin `otro_producto`)
+
+| Versión | mAP@[.5:.95] | mAP@.5 | chokis | coca_cola | doritos | gansito | panditas | sabritas | skittles | Latencia media (ms) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| v1 | **0.893** | **1.000** | — | 0.731 | 0.978 | 0.847 | 0.944 | 0.956 | 0.902 | 76.9 |
+| v2 | **0.887** | **1.000** | — | 0.695 | 0.958 | 0.877 | 0.931 | 0.963 | 0.899 | 77.9 |
+| v3 | **0.857** | **1.000** | — | 0.708 | 0.918 | 0.840 | 0.905 | 0.917 | 0.851 | 79.0 |
+
+"—": chokis no tiene objetos en el test, así que no entra al promedio (criterio COCO).
+
+> **Nota:** esta evaluación se hizo con los engines TensorRT 11.5 en la RTX 2060 de la laptop, **no con
+> `tao model dino evaluate`**. Por eso la cifra anterior de v1 (TAO en el servidor DLI: mAP 0.915) puede variar un
+> poco respecto a la de aquí (0.893): cambian el motor de inferencia, el preproceso y el redimensionado.
 - **Fotos propias p03** (`training/vision/evaluar.py`, `evaluacion/v*_p03/resultados.json`): por foto,
   *conteo exacto* = el conteo detectado es idéntico al etiquetado; *detecta* = aparece cada producto
   esperado; *falsos positivos* = fotos solo con distractores (Golden Nuts, agua, barritas) donde se detectó algo.

@@ -67,7 +67,7 @@ Detalle y verificación: `docs/decisiones_hci.md`.
 ## Resultados principales
 
 - **Detector v3:** en 36 fotos propias reservadas, conteo exacto 31% (v1) → **67%**; falsos positivos 100% → **11%**.
-  Test público (v1): mAP50 1.00, mAP 0.915.
+  Test público (106 imágenes, TensorRT en RTX 2060): mAP50 1.00 en v1–v3; mAP 0.893 (v1), 0.887 (v2), 0.857 (v3).
 - **Asistente LoRA vs base (74 casos):** coincidencia exacta 1.4% → **86.5%**; JSON válido 45.9% → **100%**; reservados 0/14 → **13/14**.
 - **App:** 9 casos del recorrido contra los servicios reales (8 como se esperaba, 1 error del detector corregible en la revisión); 43 pruebas automáticas de la app.
 - **Pruebas de uso:** _[resumen de las 2 pruebas]_

@@ -1,0 +1,87 @@
+{
+  "version": "v3",
+  "engine": "/home/bebecho/caja-clara/detector/dino_v3_rtx2060.engine",
+  "sha256_engine": "e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed",
+  "gpu": "NVIDIA GeForce RTX 2060",
+  "tensorrt": "11.5.0.63",
+  "evaluado_con": "TensorRT + pycocotools (no tao evaluate)",
+  "umbral": 0.01,
+  "max_det": 100,
+  "imagenes": 106,
+  "clases_engine": [
+    "chokis",
+    "coca_cola",
+    "doritos",
+    "gansito",
+    "panditas",
+    "sabritas",
+    "skittles",
+    "otro_producto"
+  ],
+  "clase_ignorada": "otro_producto",
+  "mAP_50_95": 0.8565,
+  "mAP_50": 1.0,
+  "mAP_75": 0.9646,
+  "AR_100": 0.8861,
+  "ap_por_clase": {
+    "chokis": {
+      "objetos_test": 0,
+      "AP": null,
+      "AP50": null
+    },
+    "coca_cola": {
+      "objetos_test": 47,
+      "AP": 0.7079,
+      "AP50": 1.0
+    },
+    "doritos": {
+      "objetos_test": 18,
+      "AP": 0.9184,
+      "AP50": 1.0
+    },
+    "gansito": {
+      "objetos_test": 15,
+      "AP": 0.8401,
+      "AP50": 1.0
+    },
+    "panditas": {
+      "objetos_test": 11,
+      "AP": 0.9052,
+      "AP50": 1.0
+    },
+    "sabritas": {
+      "objetos_test": 6,
+      "AP": 0.9168,
+      "AP50": 1.0
+    },
+    "skittles": {
+      "objetos_test": 9,
+      "AP": 0.8506,
+      "AP50": 1.0
+    }
+  },
+  "nota_ap": "Clases sin objetos en el test (chokis) quedan en null y no entran al promedio (criterio COCO).",
+  "latencia_ms": {
+    "media": 79.0,
+    "mediana": 80.0,
+    "min": 75.8,
+    "max": 82.6,
+    "incluye": "preproceso + inferencia TensorRT + postproceso, 1 imagen por llamada",
+    "calentamiento": 10
+  },
+  "resumen_cocoeval": [
+    "Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.856",
+    " Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 1.000",
+    " Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.965",
+    " Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = -1.000",
+    " Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.626",
+    " Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.862",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.886",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.886",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.886",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = -1.000",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.675",
+    " Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.889"
+  ],
+  "fecha": "2026-11-20 09:46:34"
+}
