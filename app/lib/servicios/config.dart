@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Valores por defecto. La caja sigue en Gundani.
 /// Servidor de IA fijo. La caja sigue en Gundani.
-const apiBase = 'https://ordered-herein-avatar-incorporate.trycloudflare.com';
+const apiBase = 'https://precious-components-terrorism-constructed.trycloudflare.com';
 const gundaniBase = 'http://80.241.220.188:8000';
 
 /// URL del servidor de IA guardada en Perfil (shared_preferences). Si existe, gana sobre

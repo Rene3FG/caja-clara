@@ -56,7 +56,7 @@ void main() {
   });
 
   test('la IA va al túnel y la caja a Gundani', () {
-    expect(apiBase, 'https://ordered-herein-avatar-incorporate.trycloudflare.com');
+    expect(apiBase, 'https://precious-components-terrorism-constructed.trycloudflare.com');
     expect(gundaniBase, 'http://80.241.220.188:8000');
   });
 
