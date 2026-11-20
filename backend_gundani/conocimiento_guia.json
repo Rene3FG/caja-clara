@@ -1,0 +1,74 @@
+[
+  {
+    "tema": "cuenta",
+    "titulo": "Cuenta bancaria básica sin comisiones",
+    "tags": ["cuenta", "basica", "comision", "comisiones", "saldo", "minimo", "cuota", "cobran", "gratis", "ley"],
+    "texto": "En México, la cuenta bancaria básica de débito está protegida por ley: los bancos no pueden cobrar comisión por apertura, manejo de cuenta ni exigir un saldo mínimo guardado."
+  },
+  {
+    "tema": "cuenta",
+    "titulo": "Requisitos y apertura desde celular",
+    "tags": ["requisitos", "ine", "curp", "abrir", "celular", "sucursal", "banco", "documentos", "credencial"],
+    "texto": "Para abrir una cuenta básica digital normalmente solo necesitas INE vigente o CURP, tu número de celular y un correo o verificación por foto. Muchas cuentas básicas se abren directo desde el celular sin ir a sucursal."
+  },
+  {
+    "tema": "cuenta",
+    "titulo": "Límites y protección del ahorro en cuentas digitales",
+    "tags": ["limite", "deposito", "tope", "seguro", "pierde", "proteccion", "ipab", "debito", "ahorro"],
+    "texto": "El dinero guardado en bancos regulados en México está protegido por el IPAB. Las cuentas básicas digitales (Nivel 2) suelen tener un tope mensual de depósitos medido en UDIS; si tu negocio supera ese tope puedes subir de nivel en el banco."
+  },
+  {
+    "tema": "cuenta",
+    "titulo": "Uso de tarjeta de débito y retiros",
+    "tags": ["tarjeta", "debito", "cajero", "retirar", "efectivo", "nip", "huella", "deuda", "credito"],
+    "texto": "La tarjeta de débito usa únicamente el dinero que ya tienes guardado, no es un préstamo ni genera deudas. Retirar en cajeros de tu mismo banco suele ser sin costo; en cajeros de otros bancos sí pueden cobrar comisión por retiro."
+  },
+  {
+    "tema": "transferencia",
+    "titulo": "Qué es la CLABE y si es segura",
+    "tags": ["clabe", "18", "digitos", "peligroso", "seguro", "compartir", "dar", "robar", "sacar"],
+    "texto": "La CLABE es un número único de 18 dígitos que identifica tu cuenta bancaria. Compartir tu CLABE o tu celular vinculado solo permite que te depositen dinero; nadie puede retirar dinero ni entrar a tu cuenta con esos datos."
+  },
+  {
+    "tema": "transferencia",
+    "titulo": "SPEI, DiMo y pagos con QR",
+    "tags": ["spei", "dimo", "codi", "qr", "transferencia", "comision", "costo", "celular", "inmediato"],
+    "texto": "Las transferencias por SPEI entre bancos en México llegan normalmente en segundos y sin comisión en cuentas personales. También existen opciones como DiMo (recibir usando tu celular vinculado) y cobros con QR o CoDi para cobrar sin efectivo ni cambio."
+  },
+  {
+    "tema": "transferencia",
+    "titulo": "Cómo confirmar que el pago sí entró y evitar fraudes",
+    "tags": ["captura", "comprobante", "falso", "estafa", "fraude", "entregar", "verificar", "llego", "entro", "cep"],
+    "texto": "Antes de entregar la mercancía, revisa siempre en tu propia app del banco que el dinero ya cayó en tu saldo. Nunca te confíes solo de una captura de pantalla del cliente porque puede ser editada o falsa."
+  },
+  {
+    "tema": "transferencia",
+    "titulo": "Datos secretos que nunca debes compartir",
+    "tags": ["nip", "contrasena", "clave", "sms", "codigo", "cvv", "llamada", "banco", "estafa", "secreto"],
+    "texto": "Jamás compartas tu NIP, contraseñas de la app, el código de seguridad de 3 dígitos (CVV) ni códigos que lleguen por mensaje SMS o WhatsApp, aunque alguien llame diciendo ser del banco."
+  },
+  {
+    "tema": "sat",
+    "titulo": "Qué es el SAT y el RFC",
+    "tags": ["sat", "rfc", "formalizar", "alta", "sirve", "beneficios", "credito", "apoyo", "negocio"],
+    "texto": "El SAT es la autoridad fiscal en México y el RFC es tu clave de identificación para registrar tu negocio. Formalizarte te ayuda a llevar cuentas en orden, emitir facturas cuando un cliente las pida y acceder a apoyos o créditos."
+  },
+  {
+    "tema": "sat",
+    "titulo": "Registro sencillo y regímenes para pequeños negocios",
+    "tags": ["regimen", "resico", "impuestos", "pagar", "pequeno", "tiendita", "cuanto", "empezar", "empiezo"],
+    "texto": "Si apenas empiezas, lo más útil es anotar todas tus ventas y gastos diariamente. En México existen esquemas sencillos para pequeños comercios (como RESICO), diseñados para simplificar trámites. Esta explicación es orientación informativa y no sustituye asesoría fiscal oficial."
+  },
+  {
+    "tema": "sat",
+    "titulo": "Cita, documentos y trámites en el SAT",
+    "tags": ["cita", "modulo", "sucursal", "ir", "efirma", "firma", "ine", "curp", "domicilio", "comprobante"],
+    "texto": "Para darte de alta por primera vez o tramitar tu e.firma se agenda cita en el portal oficial del SAT y se acude a un módulo con INE, CURP y comprobante de domicilio reciente. No necesitas ir al SAT para empezar a llevar el registro diario de tus ventas en esta app."
+  },
+  {
+    "tema": "sat",
+    "titulo": "Límite de orientación fiscal",
+    "tags": ["declaracion", "multa", "calculo", "porcentaje", "iva", "isr", "contador", "factura", "cfdi"],
+    "texto": "Esta app solo ofrece orientación informativa básica sobre economía digital y formalización; no realiza cálculos exactos de impuestos, declaraciones ni asesoría fiscal personalizada. Para montos, tasas exactas o trámites específicos consulta al SAT o a un contador."
+  }
+]
