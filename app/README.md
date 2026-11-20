@@ -1,46 +1,34 @@
-# App Caja Clara (Flutter)
+# App Caja Clara
 
-APK de Android como entrega principal; web/PWA como respaldo para la demo.
-
-> TODO: crear el proyecto con `flutter create --org mx.cajaclara --project-name caja_clara .`
-> dentro de esta carpeta (conservar este README).
-
-## Requisitos
-
-- Flutter SDK estable (TODO: anotar versión usada con `flutter --version`)
-- Android SDK para compilar el APK
-
-## Configuración
-
-La URL del backend se pasa al compilar (no se escribe en el código):
-
-```bash
-flutter run --dart-define=API_URL=http://<ip-del-backend>:8000
-```
+Cliente móvil de Abarrotes Doña Elena. Flutter, organización `mx.cajaclara`.
+La columna cabe en 390px. Los datos de la demo viven en el teléfono (`shared_preferences`).
 
 ## Correr
 
 ```bash
+cd app
 flutter pub get
-flutter run --dart-define=API_URL=http://<ip>:8000          # dispositivo / emulador
-flutter run -d chrome --dart-define=API_URL=http://<ip>:8000 # web
+flutter test
+flutter run -d chrome
 ```
 
-## Compilar
+Para apuntar al backend:
 
 ```bash
-flutter build apk --release --dart-define=API_URL=http://<ip>:8000
-# salida: build/app/outputs/flutter-apk/app-release.apk
-
-flutter build web --release --dart-define=API_URL=http://<ip>:8000
-# salida: build/web/  (PWA de respaldo)
+flutter run -d chrome --dart-define=API_URL=http://127.0.0.1:8000
 ```
 
-## Pantallas (TODO)
+Sin `API_URL`, la guía, la voz y la foto usan respuestas locales y la cola se marca enviada al volver la señal.
 
-1. **Foto** → `POST /detectar`; si la foto está oscura/borrosa, pedir otra.
-2. **Revisar** → lista de productos detectados, editar cantidad, quitar o agregar.
-3. **Cobro** → efectivo o transferencia (**SIMULADO**, mostrar la etiqueta siempre);
-   estados pendiente / pagado / falló con `GET /pagos/{id}`.
-4. **Guardar** → `POST /ventas`.
-5. **Asistente** → voz o texto → `POST /asistente`; mostrar la propuesta y pedir confirmación.
+APK y web:
+
+```bash
+flutter build apk --dart-define=API_URL=http://127.0.0.1:8000
+flutter build web --dart-define=API_URL=http://127.0.0.1:8000
+```
+
+## Demo de conexión
+
+En el encabezado, **Demo: automática** sigue la red del teléfono.
+Tócala para forzar **sin red** o **con red**.
+En Inicio, con señal solo está el botón de voz. Sin señal, los tres botones de venta, pago y QR.

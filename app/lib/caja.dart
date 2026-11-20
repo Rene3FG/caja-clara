@@ -1,0 +1,240 @@
+import 'dart:convert';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'cuentas.dart';
+import 'datos.dart';
+import 'modelos.dart';
+import 'servicios/sync.dart';
+
+const _clave = 'caja-clara-v1';
+
+class Caja extends ChangeNotifier {
+  var lista = false;
+  var productos = <Producto>[];
+  var ventas = <Venta>[];
+  var gastos = <Gasto>[];
+  var fiados = <Fiado>[];
+  var guiaHecha = false;
+  var modoRed = ModoRed.auto;
+  var redNavegador = true;
+  var periodo = const Periodo('hoy');
+  var borrador = <Linea>[];
+  var aviso = '';
+  var pila = <Ruta>[const Ruta('guia')];
+
+  Ruta get ruta => pila.last;
+  bool get conectado => modoRed == ModoRed.online || (modoRed == ModoRed.auto && redNavegador);
+  int get pendientes => ventas.where((v) => v.pendiente).length + gastos.where((g) => g.pendiente).length;
+
+  Future<void> iniciar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final crudo = prefs.getString(_clave);
+    if (crudo == null) {
+      _semilla();
+    } else {
+      try {
+        _leer(jsonDecode(crudo) as Map<String, dynamic>);
+      } catch (_) {
+        _semilla();
+      }
+    }
+    try {
+      final redes = await Connectivity().checkConnectivity();
+      redNavegador = redes.any((r) => r != ConnectivityResult.none);
+    } catch (_) {
+      redNavegador = true;
+    }
+    Connectivity().onConnectivityChanged.listen((redes) {
+      final online = redes.any((r) => r != ConnectivityResult.none);
+      if (online == redNavegador) return;
+      redNavegador = online;
+      notifyListeners();
+      if (conectado) sincronizar();
+    });
+    if (!guiaHecha) {
+      pila = [const Ruta('guia')];
+    } else {
+      pila = [const Ruta('inicio')];
+    }
+    lista = true;
+    notifyListeners();
+    if (conectado) sincronizar();
+  }
+
+  void _semilla() {
+    productos = productosBase();
+    ventas = ventasBase();
+    gastos = gastosBase();
+    fiados = fiadosBase();
+    guiaHecha = false;
+    modoRed = ModoRed.auto;
+    periodo = const Periodo('hoy');
+  }
+
+  void _leer(Map<String, dynamic> j) {
+    productos = (j['productos'] as List).map((e) => Producto.fromJson(e as Map<String, dynamic>)).toList();
+    ventas = (j['ventas'] as List).map((e) => Venta.fromJson(e as Map<String, dynamic>)).toList();
+    gastos = (j['gastos'] as List).map((e) => Gasto.fromJson(e as Map<String, dynamic>)).toList();
+    fiados = (j['fiados'] as List).map((e) => Fiado.fromJson(e as Map<String, dynamic>)).toList();
+    guiaHecha = j['guiaHecha'] == true;
+    modoRed = ModoRed.values.firstWhere((m) => m.name == j['modoRed'], orElse: () => ModoRed.auto);
+    final p = j['periodo'];
+    if (p is Map && p['tipo'] is String) {
+      periodo = Periodo(p['tipo'] as String, desde: p['desde'] as String?, hasta: p['hasta'] as String?);
+    }
+  }
+
+  Map<String, dynamic> _json() => {
+        'productos': productos.map((p) => p.toJson()).toList(),
+        'ventas': ventas.map((v) => v.toJson()).toList(),
+        'gastos': gastos.map((g) => g.toJson()).toList(),
+        'fiados': fiados.map((f) => f.toJson()).toList(),
+        'guiaHecha': guiaHecha,
+        'modoRed': modoRed.name,
+        'periodo': {'tipo': periodo.tipo, 'desde': periodo.desde, 'hasta': periodo.hasta},
+      };
+
+  Future<void> _persist() async {
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_clave, jsonEncode(_json()));
+  }
+
+  void ir(Ruta r) {
+    pila = [...pila, r];
+    notifyListeners();
+  }
+
+  void atras() {
+    if (pila.length < 2) return;
+    pila = pila.sublist(0, pila.length - 1);
+    notifyListeners();
+  }
+
+  void tab(String id) {
+    pila = [Ruta(id)];
+    notifyListeners();
+  }
+
+  void raiz(Ruta r) {
+    pila = [r];
+    notifyListeners();
+  }
+
+  void setBorrador(List<Linea> lineas) {
+    borrador = lineas;
+    notifyListeners();
+  }
+
+  void setAviso(String texto) {
+    aviso = texto;
+    notifyListeners();
+  }
+
+  void cicloDemo() {
+    modoRed = switch (modoRed) {
+      ModoRed.auto => ModoRed.offline,
+      ModoRed.offline => ModoRed.online,
+      ModoRed.online => ModoRed.auto,
+    };
+    _persist();
+    if (conectado) sincronizar();
+  }
+
+  void setPeriodo(Periodo valor) {
+    periodo = valor;
+    _persist();
+  }
+
+  void guardarProducto({String? id, required String nombre, String? detalle, required double precio}) {
+    if (id == null) {
+      productos = [
+        Producto(id: _id(), nombre: nombre, detalle: detalle ?? '', precio: precio),
+        ...productos,
+      ];
+    } else {
+      productos = [
+        for (final p in productos)
+          if (p.id == id) p.copy(nombre: nombre, detalle: detalle, precio: precio) else p,
+      ];
+    }
+    _persist();
+  }
+
+  void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total}) {
+    ventas = [
+      Venta(
+        id: _id(),
+        en: DateTime.now(),
+        metodo: metodo,
+        lineas: lineas,
+        total: total,
+        pendiente: !conectado,
+      ),
+      ...ventas,
+    ];
+    _persist();
+    if (conectado) sincronizar();
+  }
+
+  void agregarGasto({required String concepto, required double monto, required Metodo metodo}) {
+    gastos = [
+      Gasto(id: _id(), en: DateTime.now(), concepto: concepto, monto: monto, metodo: metodo, pendiente: !conectado),
+      ...gastos,
+    ];
+    _persist();
+    if (conectado) sincronizar();
+  }
+
+  void marcarFiado(String id) {
+    fiados = [for (final f in fiados) if (f.id == id) f.copy(pagado: !f.pagado) else f];
+    _persist();
+  }
+
+  void completarGuia() {
+    guiaHecha = true;
+    _persist();
+  }
+
+  void reabrirGuia() {
+    guiaHecha = false;
+    _persist();
+  }
+
+  Future<void> sincronizar() async {
+    final pv = ventas.where((v) => v.pendiente).toList();
+    final pg = gastos.where((g) => g.pendiente).toList();
+    if (pv.isEmpty && pg.isEmpty) return;
+    try {
+      await enviarPendientes(pv, pg);
+      ventas = [for (final v in ventas) if (v.pendiente) v.copy(pendiente: false, limpiarError: true) else v];
+      gastos = [for (final g in gastos) if (g.pendiente) g.copy(pendiente: false, limpiarError: true) else g];
+    } catch (_) {
+      ventas = [for (final v in ventas) if (v.pendiente) v.copy(error: 'Sigue guardado en el teléfono.') else v];
+      gastos = [for (final g in gastos) if (g.pendiente) g.copy(error: 'Sigue guardado en el teléfono.') else g];
+    }
+    _persist();
+  }
+
+  static String _id() => DateTime.now().microsecondsSinceEpoch.toString();
+
+  static Caja of(BuildContext context) => CajaScope.of(context);
+}
+
+class CajaScope extends InheritedWidget {
+  const CajaScope({required this.caja, required super.child, super.key});
+
+  final Caja caja;
+
+  static Caja of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<CajaScope>();
+    assert(scope != null, 'CajaScope no está en el árbol');
+    return scope!.caja;
+  }
+
+  @override
+  bool updateShouldNotify(CajaScope oldWidget) => true;
+}

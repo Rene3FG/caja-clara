@@ -19,7 +19,7 @@ Hackathon NVIDIA Oaxaca 2026 — Economía Digital.
 ```
 ┌──────────────┐   HTTP/JSON   ┌──────────────────────────┐
 │ App Flutter  │ ────────────► │ Backend FastAPI + SQLite │
-│ (APK / PWA)  │ ◄──────────── │  /salud /detectar        │
+│ (APK / web)  │ ◄──────────── │  /salud /detectar        │
 └──────────────┘               │  /asistente /ventas      │
                                │  /pagos (simulado)       │
                                └──────┬─────────┬─────────┘
@@ -69,7 +69,7 @@ Documentación interactiva: `http://localhost:8000/docs`
 
 ### App
 
-Ver [`app/README.md`](app/README.md).
+App Flutter en `app/`. Ver [`app/README.md`](app/README.md).
 
 ### Chequeo de salud
 
