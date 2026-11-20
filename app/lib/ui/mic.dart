@@ -8,9 +8,10 @@ import '../tema.dart';
 import 'widgets.dart';
 
 class MicGundani extends StatefulWidget {
-  const MicGundani({this.expandir = false, super.key});
+  const MicGundani({this.expandir = false, this.solo = false, super.key});
 
   final bool expandir;
+  final bool solo;
 
   @override
   State<MicGundani> createState() => _MicGundaniState();
@@ -97,6 +98,7 @@ class _MicGundaniState extends State<MicGundani> {
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
     if (widget.expandir) return _inicio(caja);
+    if (widget.solo) return _hablar();
     const analizando = Center(
       child: Text('Gundani está analizando...', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
     );
@@ -153,6 +155,41 @@ class _MicGundaniState extends State<MicGundani> {
         const SizedBox(height: 12),
         Boton(texto: 'Enviar', onPressed: _cargando ? null : _enviar),
       ],
+    );
+  }
+
+  Widget _hablar() {
+    final escuchando = _sesion != null;
+    final fondo = escuchando ? grana : cempasuchil;
+    return Material(
+      color: fondo,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: _cargando ? null : _mic,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: _cargando
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: cempasuchil))
+                    : Icon(escuchando ? Icons.close : Icons.mic, color: escuchando ? grana : ink),
+              ),
+              const SizedBox(height: 10),
+              Text(escuchando ? 'X' : 'Hablar', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(
+                _error ?? (_cargando ? 'Gundani está analizando...' : '“Dos quesadillas y un café”'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12, height: 1.2),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

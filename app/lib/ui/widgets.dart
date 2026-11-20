@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import '../tema.dart';
 
 class Barra extends StatelessWidget implements PreferredSizeWidget {
-  const Barra({required this.titulo, required this.onBack, super.key});
+  const Barra({required this.titulo, required this.onBack, this.accion, super.key});
 
   final String titulo;
   final VoidCallback onBack;
+  final Widget? accion;
 
   @override
   Size get preferredSize => const Size.fromHeight(64);
@@ -17,7 +18,9 @@ class Barra extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       leading: IconButton(tooltip: 'Volver', onPressed: onBack, icon: const Icon(Icons.arrow_back, size: 28)),
-      title: Text(titulo),
+      title: Text(titulo, textAlign: TextAlign.center),
+      centerTitle: true,
+      actions: accion == null ? null : [accion!, const SizedBox(width: 4)],
     );
   }
 }
@@ -29,6 +32,7 @@ class Boton extends StatelessWidget {
     this.fondo = grana,
     this.tinta = Colors.white,
     this.borde,
+    this.icono,
     super.key,
   });
 
@@ -37,6 +41,7 @@ class Boton extends StatelessWidget {
   final Color fondo;
   final Color tinta;
   final Color? borde;
+  final IconData? icono;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +61,13 @@ class Boton extends StatelessWidget {
           ),
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
-        child: Text(texto, textAlign: TextAlign.center),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icono != null) ...[Icon(icono, size: 20), const SizedBox(width: 8)],
+            Flexible(child: Text(texto, textAlign: TextAlign.center)),
+          ],
+        ),
       ),
     );
   }
@@ -109,11 +120,11 @@ class Pastilla extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = conectado ? const Color(0xFF14532D) : const Color(0xFF7F1D1D);
+    final color = conectado ? const Color(0xFF14532D) : const Color(0xFF9A3412);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: conectado ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+        color: conectado ? const Color(0xFFDCFCE7) : const Color(0xFFFFF1E6),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(

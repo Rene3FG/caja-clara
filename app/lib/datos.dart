@@ -12,48 +12,56 @@ const notaSeguridad = 'Solo comparte estos datos para recibir pagos; nunca des c
 
 const bienvenidaSaludo = '¡Hola! Soy Cempasúchil';
 const bienvenidaTexto =
-    'Te acompaño paso a paso a cuidar tu negocio y tus cuentas con total tranquilidad. Aquí veremos cómo abrir una cuenta de banco, recibir transferencias y formalizarte con el SAT, sin prisas ni palabras difíciles.';
+    'Te acompaño paso a paso a cuidar tu negocio y tus cuentas con total tranquilidad. Aquí aprenderemos juntos cosas como cómo abrir una cuenta de banco, hacer transferencias y cobrar con QR, sin prisas ni palabras difíciles.';
 
 const pasos = <PasoGuia>[
   PasoGuia(
     id: TemaGuia.cuenta,
-    titulo: 'Cuenta bancaria básica',
+    titulo: 'Cuenta de banco básica',
     etiqueta: 'Subpaso 1 de 3',
     mensaje:
         'Una cuenta básica de débito te sirve para guardar el dinero de tus ventas con total seguridad. Nadie te cobra comisiones ni cuotas por tenerla. Solo necesitas tu credencial (INE) y tu celular para abrirla.',
     detalleTitulo: 'Cómo funciona tu cuenta básica',
     detalle:
-        'Una cuenta básica es un lugar seguro para guardar el dinero de tus ventas diarias. Por ley en México está protegida: no te cobran comisiones por mantenerla abierta ni te exigen un saldo mínimo.',
+        'Una cuenta básica es un lugar seguro para guardar el dinero de tus ventas diarias sin miedo a perderlo. Por ley en México, está protegida y no te cobran comisiones por mantenerla abierta ni te exigen un saldo mínimo guardado.',
+    nota: 'Identificarte es muy fácil con tu CURP Digital o tu credencial de elector desde el teléfono, sin trámites complicados.',
     pasos: [
-      'Ten a la mano tu credencial (INE o CURP) y tu número de celular.',
-      'Elige una cuenta básica de débito, sin comisiones por saldo ni por apertura.',
-      'Define tu clave secreta (NIP) o tu huella para proteger el acceso.',
+      'Tener a la mano tu credencial (INE o CURP Digital) y tu número de celular activo.',
+      'Elegir una cuenta básica de débito sin comisiones por saldo mínimo ni apertura.',
+      'Definir tu clave secreta (NIP) o huella digital para proteger tu acceso.',
     ],
-    acude: 'No necesariamente. Muchas cuentas básicas se abren desde el celular. Ir a una sucursal es opcional.',
+    tituloAcude: '¿Necesita acudir a una sucursal?',
+    acude: 'No necesariamente: muchas cuentas básicas se abren directamente desde el celular; acudir a una sucursal es totalmente opcional.',
+    proteccion: 'Protegido por las normas oficiales para cuentas básicas.',
     pregunta: '¿Me van a cobrar por tener poco dinero guardado?',
     respuesta:
-        'No te preocupes. Las cuentas básicas están protegidas por ley en México. No te cobran por tener poco saldo ni te piden una cantidad mínima. Tu dinero está seguro, peso por peso.',
+        '¡No te preocupes! Las cuentas de banco básicas están protegidas por ley en México. No te cobran comisiones por tener poco saldo ni te exigen una cantidad mínima de dinero guardado. Tu dinero está seguro y completo, peso por peso.',
   ),
   PasoGuia(
     id: TemaGuia.transferencia,
-    titulo: 'Recibir transferencias',
+    titulo: 'Datos para una transferencia',
     etiqueta: 'Subpaso 2 de 3',
     mensaje:
-        'Para que un cliente te pague por transferencia, solo compartes datos de recepción: tu CLABE de 18 números o tu número vinculado, sin comisión en los rieles bancarios. Jamás compartas contraseñas, NIP ni códigos que te lleguen por mensaje.',
-    detalleTitulo: 'Qué datos compartir y cuáles no',
+        'Para que un cliente te pague por transferencia bancaria (como SPEI sin ningún costo), solo necesitas compartirle datos de recepción: tu cuenta CLABE de 18 números o tu número de celular registrado. Jamás debes compartir tus contraseñas, NIP ni códigos que te lleguen por mensaje.',
+    chip: 'Cero comisiones · 100% seguro',
+    conDescarga: true,
+    detalleTitulo: 'Qué datos compartir y cuáles NO',
     detalle:
-        'Para recibir tu dinero solo compartes datos de recepción. La CLABE o el número vinculado sirven para que te depositen, sin comisión en los rieles bancarios. Tu NIP, tus contraseñas y los códigos del mensaje son secretos: solo tuyos.',
-    comparteSi: 'CLABE de 18 números, número de tarjeta o celular vinculado a tu cuenta.',
-    comparteNo: 'NIP, contraseñas del banco ni códigos que lleguen por mensaje.',
+        'Para recibir tu dinero de forma segura, solo compartes tus datos de recepción: tu CLABE de 18 números, tu número de tarjeta o tu celular vinculado a tu cuenta. Nunca compartas tu NIP, tus contraseñas del banco ni códigos que te lleguen por SMS: esos son secretos y solo tuyos.',
+    comparteSi: 'CLABE o número de celular',
+    comparteNo: 'NIP ni contraseñas del banco',
+    lead: '¡No, para nada!',
+    cajaRosa: 'Solo recuerda: nunca compartas tu NIP ni los códigos que recibas por mensaje.',
+    cajaVerde: 'Tu cuenta está blindada. Los datos de recepción solo sirven para recibir pagos.',
     pasos: [
-      'Localiza tu CLABE de 18 números o vincula tu celular en la app de tu banco.',
-      'Tenla a la mano para mostrarla o dictarla cuando te compren.',
-      'Revisa en tu propia app que el dinero entró antes de entregar la mercancía.',
+      'Localizar tu CLABE de 18 números o vincular tu celular en la app de tu banco.',
+      'Anotarla o tenerla a la mano para dictársela o mostrársela a tus clientes cuando compren.',
+      'Revisar en tu propia app del banco que el dinero haya entrado antes de entregar la mercancía.',
     ],
-    acude: 'No. Puedes ver tu CLABE o vincular tu número desde la aplicación de tu banco o en tu contrato, sin filas ni sucursal.',
+    acude: 'No: puedes consultar tu CLABE o vincular tu número de teléfono directamente desde la aplicación de tu banco o en tu contrato, sin filas ni sucursales.',
     pregunta: '¿Es peligroso darle mi número de celular o CLABE a quien me va a pagar?',
     respuesta:
-        'No. Con tu CLABE o tu celular vinculado la persona solo puede depositarte. No puede sacarte dinero ni entrar a tu cuenta. Nunca compartas tu NIP ni los códigos que recibas por mensaje.',
+        'Compartir tu CLABE de 18 números o tu celular vinculado es totalmente seguro. Con esos datos la persona únicamente puede depositarte dinero a tu favor, jamás podrá sacarte dinero ni entrar a tu cuenta.',
   ),
   PasoGuia(
     id: TemaGuia.sat,

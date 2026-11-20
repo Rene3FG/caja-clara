@@ -4,7 +4,9 @@ import '../caja.dart';
 import '../datos.dart';
 import '../modelos.dart';
 import '../servicios/asistente.dart';
+import '../servicios/voz.dart';
 import '../tema.dart';
+import 'marco.dart';
 import 'widgets.dart';
 
 class Guia extends StatefulWidget {
@@ -17,13 +19,16 @@ class Guia extends StatefulWidget {
 class _GuiaState extends State<Guia> {
   var _paso = -1;
   var _vista = 1;
+  var _desdeCero = true;
   final _texto = TextEditingController();
   String? _pregunta;
   var _respuesta = '';
   var _cargando = false;
+  SesionVoz? _sesion;
 
   @override
   void dispose() {
+    _sesion?.detener();
     _texto.dispose();
     super.dispose();
   }
@@ -32,6 +37,14 @@ class _GuiaState extends State<Guia> {
     final caja = Caja.of(context);
     caja.completarGuia();
     caja.raiz(const Ruta('inicio'));
+  }
+
+  void _continuarBienvenida() {
+    if (_desdeCero) {
+      setState(() => _paso = 0);
+    } else {
+      _salir();
+    }
   }
 
   void _siguiente() {
@@ -60,10 +73,6 @@ class _GuiaState extends State<Guia> {
   }
 
   void _volver() {
-    if (_paso < 0) {
-      _salir();
-      return;
-    }
     setState(() {
       if (_vista > 1) {
         _vista -= 1;
@@ -78,7 +87,7 @@ class _GuiaState extends State<Guia> {
 
   Future<void> _enviar() async {
     final q = _texto.text.trim();
-    if (q.isEmpty || _paso < 0) return;
+    if (q.isEmpty || _paso < 0 || _cargando) return;
     final tema = pasos[_paso].id;
     setState(() {
       _pregunta = q;
@@ -94,156 +103,409 @@ class _GuiaState extends State<Guia> {
     });
   }
 
+  Future<void> _mic() async {
+    if (_sesion != null) {
+      final oido = await _sesion!.detener();
+      if (!mounted) return;
+      if (oido.isNotEmpty) _texto.text = oido;
+      setState(() => _sesion = null);
+      return;
+    }
+    final sesion = await escuchar();
+    if (!mounted || sesion == null) return;
+    setState(() => _sesion = sesion);
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_paso < 0) {
-      return Scaffold(
-        appBar: Barra(titulo: 'Cempasúchil', onBack: _salir),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            Text(bienvenidaSaludo, style: epilogo(32)),
-            const SizedBox(height: 12),
-            const Text(bienvenidaTexto, style: TextStyle(fontSize: 18, height: 1.4)),
-            const SizedBox(height: 16),
-            _opcion('Empiezo desde cero', 'Vamos despacito, paso a pasito y con explicaciones claras.', () => setState(() => _paso = 0)),
-            const SizedBox(height: 12),
-            _opcion('Ya tengo mis bases claras', 'Quiero pasar directo a mi panel y libreta.', _salir),
-          ],
-        ),
-      );
-    }
-
+    if (_paso < 0) return _bienvenida();
     final actual = pasos[_paso];
     return Scaffold(
-      appBar: Barra(titulo: actual.titulo, onBack: _volver),
+      appBar: Barra(titulo: actual.titulo, onBack: _volver, accion: const PerfilBoton()),
       body: Column(
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               children: [
-                Text(actual.etiqueta, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: granaDeep)),
-                const SizedBox(height: 8),
-                Text('Cempasúchil', style: epilogo(20, peso: FontWeight.w700, color: cempasuchil)),
-                const Text('Tu asistente de confianza', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: stone)),
+                Center(child: _pastilla(actual.etiqueta)),
                 const SizedBox(height: 12),
-                if (_vista == 1) ...[
-                  Text(actual.mensaje, style: const TextStyle(fontSize: 18, height: 1.4)),
-                  const SizedBox(height: 16),
-                  Boton(texto: 'Ver explicación más detallada', fondo: Colors.white, tinta: ink, borde: ink, onPressed: () => setState(() => _vista = 2)),
-                ],
-                if (_vista == 2) ...[
-                  Text(actual.detalleTitulo, style: epilogo(22, peso: FontWeight.w700)),
-                  const SizedBox(height: 8),
-                  Text(actual.detalle, style: const TextStyle(fontSize: 18, height: 1.4)),
-                  if (actual.comparteSi != null) ...[
-                    const SizedBox(height: 12),
-                    _aviso(const Color(0xFFDCFCE7), 'Sí se comparte. ${actual.comparteSi}'),
-                    const SizedBox(height: 8),
-                    _aviso(const Color(0xFFFEE2E2), 'Nunca se comparte. ${actual.comparteNo}'),
-                  ],
-                  const SizedBox(height: 16),
-                  Text('Qué se necesita hacer', style: epilogo(22, peso: FontWeight.w700)),
-                  const SizedBox(height: 8),
-                  for (var i = 0; i < actual.pasos.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(backgroundColor: const Color(0xFFFFDAD5), child: Text('${i + 1}', style: const TextStyle(color: granaDeep, fontWeight: FontWeight.w700))),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(actual.pasos[i], style: const TextStyle(fontSize: 18, height: 1.35))),
-                        ],
-                      ),
-                    ),
-                  Text('¿Necesita acudir a una institución?', style: epilogo(22, peso: FontWeight.w700)),
-                  const SizedBox(height: 8),
-                  Text(actual.acude, style: const TextStyle(fontSize: 18, height: 1.4)),
-                ],
-                if (_vista == 3) ...[
-                  _burbuja('Tú', _pregunta ?? '', Colors.white),
-                  const SizedBox(height: 12),
-                  _burbuja('Cempasúchil', _cargando ? 'Un momento…' : _respuesta, const Color(0xFFFFF1E4)),
-                ],
+                _asistente(),
+                const SizedBox(height: 12),
+                if (_vista == 1) ..._mensaje(actual),
+                if (_vista == 2) ..._detalle(actual),
+                if (_vista == 3) ..._duda(actual),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _texto,
-                        decoration: InputDecoration(
-                          hintText: 'Escribe tu duda aquí...',
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: line, width: 2)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: line, width: 2)),
-                        ),
-                        onSubmitted: (_) => _enviar(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(height: 56, child: FilledButton(onPressed: _enviar, child: const Text('Enviar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)))),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Boton(texto: 'Siguiente paso', onPressed: _siguiente),
-              ],
-            ),
-          ),
+          _compositor(),
         ],
       ),
     );
   }
 
-  Widget _opcion(String titulo, String detalle, VoidCallback onTap) {
+  Widget _bienvenida() {
+    return Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        children: [
+          Row(
+            children: [
+              _pastilla('PASO 1 DE 4'),
+              const Spacer(),
+              for (var i = 0; i < 4; i++)
+                Container(
+                  width: i == 0 ? 22 : 8,
+                  height: 8,
+                  margin: const EdgeInsets.only(left: 6),
+                  decoration: BoxDecoration(
+                    color: i == 0 ? cempasuchil : const Color(0xFFE7E2DA),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          const Icon(Icons.local_florist, size: 72, color: cempasuchil),
+          const SizedBox(height: 16),
+          Text(bienvenidaSaludo, textAlign: TextAlign.center, style: epilogo(28, peso: FontWeight.w800)),
+          const SizedBox(height: 12),
+          const Text.rich(
+            TextSpan(
+              style: TextStyle(fontSize: 16, height: 1.4, color: ink),
+              children: [
+                TextSpan(text: 'Te acompaño paso a paso a cuidar tu negocio y tus cuentas con total tranquilidad. Aquí aprenderemos juntos cosas como '),
+                TextSpan(text: 'cómo abrir una cuenta de banco', style: TextStyle(fontWeight: FontWeight.w800)),
+                TextSpan(text: ', '),
+                TextSpan(text: 'hacer transferencias', style: TextStyle(fontWeight: FontWeight.w800)),
+                TextSpan(text: ' y '),
+                TextSpan(text: 'cobrar con QR', style: TextStyle(fontWeight: FontWeight.w800)),
+                TextSpan(text: ', sin prisas ni palabras difíciles.'),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          _eleccion(true, 'Empiezo desde cero', 'Vamos despacito, paso a pasito y con explicaciones claras.', recomendado: true),
+          const SizedBox(height: 12),
+          _eleccion(false, 'Ya tengo mis bases claras', 'Quiero pasar directo a mi panel y libreta.'),
+          const SizedBox(height: 20),
+          Boton(texto: 'Continuar  →', onPressed: _continuarBienvenida),
+        ],
+      ),
+    );
+  }
+
+  Widget _eleccion(bool cero, String titulo, String detalle, {bool recomendado = false}) {
+    final activa = _desdeCero == cero;
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        onTap: () => setState(() => _desdeCero = cero),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: ink, width: 2)),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 4),
-            Text(detalle, style: const TextStyle(fontSize: 16)),
-          ]),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: activa ? const Color(0xFFE7E2DA) : const Color(0xFFF3EBE6)),
+            color: activa ? Colors.white : const Color(0xFFFFF6F2),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: activa ? grana : const Color(0xFFE7E2DA), shape: BoxShape.circle),
+                child: activa ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                    if (recomendado) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(color: const Color(0xFFFFE8D6), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('Recomendado', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF9A3412))),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    Text(detalle, style: const TextStyle(fontSize: 15, height: 1.3, color: stone)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _aviso(Color fondo, String texto) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(12)),
-      child: Text(texto, style: const TextStyle(fontSize: 18, height: 1.35)),
+  List<Widget> _mensaje(PasoGuia actual) {
+    return [
+      _tarjeta(child: Text(actual.mensaje, style: const TextStyle(fontSize: 16, height: 1.4))),
+      if (actual.chip != null) ...[
+        const SizedBox(height: 10),
+        _pastilla(actual.chip!, fondo: const Color(0xFFDCFCE7), tinta: maguey, icono: Icons.verified_user_outlined),
+      ],
+      const SizedBox(height: 10),
+      _filaDetalle(actual),
+    ];
+  }
+
+  List<Widget> _detalle(PasoGuia actual) {
+    return [
+      Row(children: [
+        Icon(actual.comparteSi == null ? Icons.account_balance_outlined : Icons.shield_outlined, size: 18, color: grana),
+        const SizedBox(width: 8),
+        Expanded(child: Text(actual.detalleTitulo, style: epilogo(22, peso: FontWeight.w800))),
+      ]),
+      const SizedBox(height: 8),
+      Text(actual.detalle, style: const TextStyle(fontSize: 16, height: 1.4)),
+      if (actual.nota != null) ...[
+        const SizedBox(height: 12),
+        _aviso(const Color(0xFFDCFCE7), actual.nota!, icono: Icons.check_circle, tinta: maguey),
+      ],
+      if (actual.comparteSi != null) ...[
+        const SizedBox(height: 12),
+        _aviso(const Color(0xFFDCFCE7), 'Para dar\n${actual.comparteSi}', icono: Icons.check_circle, tinta: maguey),
+        const SizedBox(height: 8),
+        _aviso(const Color(0xFFFEE2E2), 'Nunca dar\n${actual.comparteNo}', icono: Icons.cancel, tinta: grana),
+      ],
+      const SizedBox(height: 16),
+      Text('Qué se necesita hacer', style: epilogo(20, peso: FontWeight.w800)),
+      const SizedBox(height: 8),
+      for (var i = 0; i < actual.pasos.length; i++) ...[
+        _tarjeta(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(radius: 14, backgroundColor: grana, child: Text('${i + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
+              const SizedBox(width: 12),
+              Expanded(child: Text(actual.pasos[i], style: const TextStyle(fontSize: 16, height: 1.35))),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+      _tarjeta(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Icon(Icons.event_note_outlined, size: 18, color: stone),
+              const SizedBox(width: 8),
+              Expanded(child: Text(actual.tituloAcude, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
+            ]),
+            const SizedBox(height: 6),
+            Text(actual.acude, style: const TextStyle(fontSize: 15, height: 1.35)),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _duda(PasoGuia actual) {
+    return [
+      Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 320),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: const Color(0xFFFFF1E6), borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(_pregunta ?? '', style: const TextStyle(fontSize: 16, height: 1.35, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              const Text('Tú · Hace un momento', style: TextStyle(fontSize: 12, color: stone)),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (actual.lead != null)
+        Row(children: [
+          const Icon(Icons.spa, size: 16, color: cempasuchil),
+          const SizedBox(width: 6),
+          const Text('Respuesta de Cempasúchil', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: stone)),
+        ]),
+      if (actual.lead != null) const SizedBox(height: 8),
+      _tarjeta(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (actual.lead != null) Text(actual.lead!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: grana)),
+            Text(_cargando ? 'Un momento…' : _respuesta, style: const TextStyle(fontSize: 16, height: 1.4)),
+            if (actual.proteccion != null && !_cargando) ...[
+              const SizedBox(height: 10),
+              _aviso(const Color(0xFFF3EBE6), actual.proteccion!, icono: Icons.check_circle, tinta: maguey),
+            ],
+          ],
+        ),
+      ),
+      if (actual.cajaRosa != null && !_cargando) ...[
+        const SizedBox(height: 8),
+        _aviso(const Color(0xFFFEE2E2), actual.cajaRosa!, icono: Icons.lock_outline, tinta: grana),
+      ],
+      if (actual.cajaVerde != null && !_cargando) ...[
+        const SizedBox(height: 8),
+        _aviso(const Color(0xFFDCFCE7), actual.cajaVerde!, icono: Icons.check_circle, tinta: maguey),
+      ],
+    ];
+  }
+
+  Widget _compositor() {
+    final oyendo = _sesion != null;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _texto,
+                  decoration: InputDecoration(
+                    hintText: 'Escribe tu duda aquí...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: line)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: line)),
+                  ),
+                  onSubmitted: (_) => _enviar(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _cuadrado(oyendo ? Icons.close : Icons.mic, oyendo ? grana : cempasuchil, oyendo ? Colors.white : ink, _mic),
+              const SizedBox(width: 8),
+              _cuadrado(Icons.arrow_upward, grana, Colors.white, _enviar),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Boton(texto: 'Siguiente paso  →', onPressed: _siguiente),
+        ],
+      ),
     );
   }
 
-  Widget _burbuja(String quien, String texto, Color fondo) {
+  Widget _asistente() {
+    return _tarjeta(
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: cempasuchil, shape: BoxShape.circle),
+            child: const Icon(Icons.local_florist, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Text('Cempasúchil', style: epilogo(18, peso: FontWeight.w800)),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.check_circle, size: 16, color: maguey),
+                ]),
+                const Text('Tu asistente de confianza', style: TextStyle(fontSize: 13, color: stone)),
+              ],
+            ),
+          ),
+          Container(width: 8, height: 8, decoration: const BoxDecoration(color: maguey, shape: BoxShape.circle)),
+        ],
+      ),
+    );
+  }
+
+  Widget _filaDetalle(PasoGuia actual) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () => setState(() => _vista = 2),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7E2DA))),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: const Color(0xFFFFF1E6), borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.menu_book_outlined, size: 18, color: Color(0xFF9A3412)),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(child: Text('Ver explicación más detallada', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800))),
+              Icon(actual.conDescarga ? Icons.download_outlined : Icons.chevron_right, color: stone),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pastilla(String texto, {Color fondo = const Color(0xFFFFF1E6), Color tinta = const Color(0xFF9A3412), IconData? icono}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(999)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icono != null) ...[Icon(icono, size: 14, color: tinta), const SizedBox(width: 4)],
+          if (icono == null) Container(width: 8, height: 8, margin: const EdgeInsets.only(right: 6), decoration: BoxDecoration(color: tinta, shape: BoxShape.circle)),
+          Text(texto, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: tinta)),
+        ],
+      ),
+    );
+  }
+
+  Widget _tarjeta({required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(16), border: Border.all(color: line, width: 2)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(quien, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: stone)),
-        const SizedBox(height: 6),
-        Text(texto, style: const TextStyle(fontSize: 18, height: 1.4)),
-      ]),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7E2DA))),
+      child: child,
+    );
+  }
+
+  Widget _aviso(Color fondo, String texto, {required IconData icono, required Color tinta}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(14)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icono, size: 18, color: tinta),
+          const SizedBox(width: 8),
+          Expanded(child: Text(texto, style: const TextStyle(fontSize: 15, height: 1.35, fontWeight: FontWeight.w600))),
+        ],
+      ),
+    );
+  }
+
+  Widget _cuadrado(IconData icono, Color fondo, Color tinta, VoidCallback onTap) {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: FilledButton(
+        onPressed: onTap,
+        style: FilledButton.styleFrom(backgroundColor: fondo, foregroundColor: tinta, padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+        child: Icon(icono),
+      ),
     );
   }
 }

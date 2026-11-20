@@ -200,6 +200,14 @@ class PasoGuia {
     required this.respuesta,
     this.comparteSi,
     this.comparteNo,
+    this.chip,
+    this.nota,
+    this.tituloAcude = '¿Necesita acudir a una institución?',
+    this.proteccion,
+    this.lead,
+    this.cajaRosa,
+    this.cajaVerde,
+    this.conDescarga = false,
   });
 
   final TemaGuia id;
@@ -214,6 +222,14 @@ class PasoGuia {
   final String respuesta;
   final String? comparteSi;
   final String? comparteNo;
+  final String? chip;
+  final String? nota;
+  final String tituloAcude;
+  final String? proteccion;
+  final String? lead;
+  final String? cajaRosa;
+  final String? cajaVerde;
+  final bool conDescarga;
 }
 
 class Ruta {

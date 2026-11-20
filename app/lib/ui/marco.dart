@@ -44,17 +44,7 @@ class Marco extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Perfil',
-                    onPressed: () => _perfil(context),
-                    icon: Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(color: Color(0xFFF3EBE6), shape: BoxShape.circle),
-                      child: const Icon(Icons.person_outline, color: ink),
-                    ),
-                  ),
+                  const PerfilBoton(),
                 ],
               ),
               const SizedBox(height: 10),
@@ -105,10 +95,30 @@ class Marco extends StatelessWidget {
     if (n <= 0) return Icon(activo ? Icons.wifi_off : Icons.wifi_off_outlined);
     return CircleAvatar(radius: 12, backgroundColor: grana, child: Text('$n', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)));
   }
+}
 
-  void _perfil(BuildContext context) {
-    final caja = Caja.of(context);
-    showModalBottomSheet<void>(
+class PerfilBoton extends StatelessWidget {
+  const PerfilBoton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'Perfil',
+      onPressed: () => mostrarPerfil(context),
+      icon: Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(color: Color(0xFFF3EBE6), shape: BoxShape.circle),
+        child: const Icon(Icons.person_outline, color: ink),
+      ),
+    );
+  }
+}
+
+void mostrarPerfil(BuildContext context) {
+  final caja = Caja.of(context);
+  showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
@@ -147,5 +157,4 @@ class Marco extends StatelessWidget {
         ),
       ),
     );
-  }
 }
