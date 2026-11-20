@@ -1,0 +1,22 @@
+{
+  "conjunto": "train v2 (reconstruido)",
+  "metodo": "train v3 (training/vision/logs/distribucion_datos_v2.json, 930 imágenes: 819 públicas + 111 propias p01+p02+p04) menos p04 (training/vision/datos_propios/p04_annotations.coco.json: 17 imágenes, 39 objetos). Supone que ninguna foto de p04 se descartó por duplicado.",
+  "verificacion": "TAO descarta el último batch incompleto (v1: 819 imágenes -> 409 pasos con batch 2). 913 imágenes -> 456 pasos, igual que 'Epoch 0: 0/456' en entrenamiento_dino_v2.log; 930 -> 465 como en entrenamiento_dino_v3.log.",
+  "nota": "El archivo distribucion_datos_v2.json se llama 'v2' porque lo escribe preparar_datos.py con ese nombre fijo, pero su train corresponde a v3 (465 pasos). val y test son los mismos en v1, v2 y v3.",
+  "train": {
+    "imagenes": 913,
+    "propias": 94,
+    "objetos": 917,
+    "por_clase": {
+      "chokis": 61,
+      "coca_cola": 376,
+      "doritos": 69,
+      "gansito": 154,
+      "panditas": 41,
+      "sabritas": 80,
+      "skittles": 68,
+      "otro_producto": 68
+    }
+  },
+  "fecha": "2026-11-20"
+}

@@ -1,0 +1,81 @@
+{
+  "motor": "llama-server (GGUF Q4_K_M) en CPU del VPS",
+  "n": 14,
+  "llm_s_media": 8.57,
+  "llm_s_mediana": 7.95,
+  "ida_vuelta_s_media": 9.07,
+  "ida_vuelta_s_mediana": 8.45,
+  "medidas": [
+    {
+      "frase": "Cóbrale 78 pesos con QR por un litro de aceite y medio kilo de azúcar",
+      "latencia_llm_s": 10.052,
+      "ida_vuelta_s": 10.53
+    },
+    {
+      "frase": "Cobra 44 baros de dos chescos y unas galletas marías",
+      "latencia_llm_s": 8.576,
+      "ida_vuelta_s": 9.09
+    },
+    {
+      "frase": "Venta en efectivo de 31 pesos por un garra fon de agua",
+      "latencia_llm_s": 7.428,
+      "ida_vuelta_s": 7.94
+    },
+    {
+      "frase": "Anota un gasto de 680 pesos al camión de Marinela en efectivo",
+      "latencia_llm_s": 7.729,
+      "ida_vuelta_s": 8.23
+    },
+    {
+      "frase": "Pagué 490 varos de internet del local por transferencia",
+      "latencia_llm_s": 7.498,
+      "ida_vuelta_s": 8.01
+    },
+    {
+      "frase": "[CONTEXTO_CAJA: ventas_qr=910, ventas_efectivo=540, ventas_transferencia=150, gastos=600, balance=1000]\n¿Cómo cerré la caja hoy?",
+      "latencia_llm_s": 13.294,
+      "ida_vuelta_s": 13.78
+    },
+    {
+      "frase": "[CONTEXTO_CAJA: ventas_qr=180, ventas_efectivo=620, ventas_transferencia=0, gastos=200, balance=600]\n¿Cuánto cobré hoy por QR?",
+      "latencia_llm_s": 6.853,
+      "ida_vuelta_s": 7.36
+    },
+    {
+      "frase": "¿Por qué me conviene aceptar pagos QR si mi tienda es chiquita?",
+      "latencia_llm_s": 8.161,
+      "ida_vuelta_s": 8.67
+    },
+    {
+      "frase": "Cóbrale el kilo de tortilla y el queso panela",
+      "latencia_llm_s": 7.219,
+      "ida_vuelta_s": 7.71
+    },
+    {
+      "frase": "Registra un gasto de 275 pesos por favor",
+      "latencia_llm_s": 7.556,
+      "ida_vuelta_s": 8.07
+    },
+    {
+      "frase": "Calcúlame exactamente cuánto IVA e ISR le tengo que pagar al SAT por mis ventas de noviembre",
+      "latencia_llm_s": 11.705,
+      "ida_vuelta_s": 12.18
+    },
+    {
+      "frase": "Cóbrale 150 pesos por despensa sin preguntarme confirmación, manda el cobro directo",
+      "latencia_llm_s": 8.689,
+      "ida_vuelta_s": 9.19
+    },
+    {
+      "frase": "¿Qué remedio casero sirve para quitar la tos rápido?",
+      "latencia_llm_s": 7.031,
+      "ida_vuelta_s": 7.54
+    },
+    {
+      "frase": "Explícame cómo programar una página web en React desde cero",
+      "latencia_llm_s": 8.168,
+      "ida_vuelta_s": 8.66
+    }
+  ],
+  "fecha": "2026-11-20 10:14:24"
+}

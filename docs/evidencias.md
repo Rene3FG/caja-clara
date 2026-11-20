@@ -15,7 +15,7 @@ Las fotos de los casos 1 y 9 **no se usaron para entrenar** (sesión p03 reserva
 |---|---|---|---|---|---|
 | 1 | Habitual | Foto nueva `p03_022.jpg` (chokis + sabritas) → `/detectar` | chokis 1, sabritas 1 | `sabritas: 1` (conf. 0.86); **no detectó las chokis**. 295 ms. La app muestra la cuenta para corregir y se agregan las chokis a mano. | ⚠ error del modelo, corregible |
 | 2 | Habitual | Voz/texto "cobra 2 sabritas y 3 cocas" → `/asistente` | agregar sabritas 2 y coca_cola 3, con total | `agregar` sabritas 2, coca_cola 3; total calculado por el código; `requiere_confirmacion: true`. 1.2 s | ✅ |
-| 3 | Incompleto | Dictado cortado "cobra tres" | Pedir el producto, sin inventar | `aclarar`: "No escuché qué producto. ¿Me dices qué y cuántos?" (el LoRA había propuesto coca_cola 3; la validación lo rechazó porque no se mencionó) | ✅ |
+| 3 | Incompleto | Dictado cortado "cobra tres" | Pedir el producto, sin inventar | `aclarar`: "No escuché qué producto. ¿Me dices qué y cuántos?" (el LoRA había propuesto refresco 3; la validación lo rechazó porque no se mencionó) | ✅ |
 | 4 | Inválido | Archivo de texto enviado como foto | Error claro | HTTP 400 "El archivo no es una imagen válida (usa JPG o PNG)." | ✅ |
 | 5 | Inválido | Foto negra 640×480 | Avisar que no hay productos | `conteo: {}` + "No reconocí productos. Acerca…" | ✅ |
 | 6 | Fuera de alcance | "¿a qué hora abre el banco?" | Rechazar con amabilidad | `fuera_de_alcance`: "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales." | ✅ |
@@ -64,8 +64,9 @@ se miden en las pruebas de uso.
 | test | 106 | 106 | 0 | 47 | 18 | 15 | 11 | 6 | 9 |
 
 - Fuentes: ProductosOXXO_V02 y Dataset Mercado (Roboflow Universe, CC BY 4.0) + fotos propias.
-- v2 agrega fotos propias p01+p02 a train (930 imágenes, `logs/distribucion_datos_v2.json`);
-  v3 agrega p04 (`logs/bitacora_v3.txt`). La sesión **p03 nunca se usó para entrenar**.
+- v2 agrega fotos propias p01+p02 a train (913 imágenes, `logs/distribucion_train_v2_reconstruida.json`);
+  v3 agrega p04 (930 imágenes, `logs/distribucion_datos_v2.json`, que pese al nombre es el train de v3:
+  465 pasos por época en `entrenamiento_dino_v3.log`). La sesión **p03 nunca se usó para entrenar**.
 - Sin versiones de la misma imagen en dos conjuntos: `preparar_datos.py` agrupa las variantes aumentadas
   por imagen original antes de dividir 80/10/10 (semilla 1234) y descarta duplicados exactos por SHA-1.
 - Etiquetas de fotos propias: pre-etiquetadas con el detector v1 y **corregidas a mano** en Roboflow
@@ -98,7 +99,7 @@ Cómo se calcula:
 > **Nota:** esta evaluación se hizo con los engines TensorRT 11.5 en la RTX 2060 de la laptop, **no con
 > `tao model dino evaluate`**. Por eso la cifra anterior de v1 (TAO en el servidor DLI: mAP 0.915) puede variar un
 > poco respecto a la de aquí (0.893): cambian el motor de inferencia, el preproceso y el redimensionado.
-- **Fotos propias p03** (`training/vision/evaluar.py`, `evaluacion/v*_p03/resultados.json`): por foto,
+- **Fotos propias p03** (`training/detector/evaluar_piloto.py`, `evaluacion/v*_p03/resultados.json`): por foto,
   *conteo exacto* = el conteo detectado es idéntico al etiquetado; *detecta* = aparece cada producto
   esperado; *falsos positivos* = fotos solo con distractores (Golden Nuts, agua, barritas) donde se detectó algo.
   Es la medida más cercana al uso real: fotos de celular en el mostrador, con distractores.
@@ -163,7 +164,8 @@ train_loss final 0.030 (`config_entrenamiento.json`, `entrenamiento_lora.log`, `
 | Reservados exactos | 0/14 | **13/14** | — |
 | Latencia media (T4) | 1.28 s | 3.17 s | 0.86 s (API) |
 
-En la laptop (RTX 2060) la latencia del LoRA es ~1.1 s (`latencia_rtx2060.txt`).
+En la laptop (RTX 2060) la latencia del LoRA es ~1.1 s (`latencia_rtx2060.txt`). Con las mismas 5 frases × 2
+(`medir_latencia.py`): 0.79 s en la RTX 2060 contra 8.8 s en CPU i7-9750H (`latencia_gpu_rtx2060.json`, `latencia_cpu.json`).
 Bolt E4B se evaluó en 44 casos (no los 74), así que es solo referencia, no comparable 1 a 1.
 
 ### Errores del LoRA (interpretación honesta)
@@ -178,6 +180,7 @@ Bolt E4B se evaluó en 44 casos (no los 74), así que es solo referencia, no com
 
 Resuelve consultas de caja y cobros simulados. 14 casos de prueba: claves correctas 50% → 100%,
 intención exacta 57.1% → 85.7%, monto correcto 42.9% → 100% (`eval_base.json`, `eval_ajustado.json`).
+En el VPS (llama-server, GGUF Q4_K_M, CPU) responde en 8.6 s de media con las 14 frases de prueba (`backend_gundani/latencia_vps.json`).
 
 ---
 

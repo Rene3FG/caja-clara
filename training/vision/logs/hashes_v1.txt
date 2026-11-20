@@ -1,0 +1,5 @@
+5043152a30102431c62716a722021f9db70a742dfffb0024f3f4a37ba739cfe3  resultados/dino_v1/train/model_epoch_011.pth
+8e5348154401a1db4964c03b965599b27db98ae7001ead073a6ca4bef67bceac  resultados/dino_v1/export/dino_caja_clara.onnx
+# Calculados el 2026-11-20 en la laptop sobre las copias descargadas del servidor DLI
+# (C_checkpoint_ep11.pth y B_modelo.onnx). El engine a146d3bf... se construyó desde ese ONNX
+# (training/detector/dino_rtx2060_fp32.engine.json).

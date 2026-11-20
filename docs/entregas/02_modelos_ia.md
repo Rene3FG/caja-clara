@@ -10,12 +10,12 @@ Cada cifra lleva su archivo de origen en el repositorio. Lo que no está registr
 |---|---|---|---|---|---|---|---|
 | **Detector de productos** (app: v3) | Detectar y contar 7 productos + `otro_producto` en la foto del mostrador | DINO ResNet-50 preentrenado en COCO (NGC) | Ajuste fino completo, 12 épocas | Tesla T4, servidor DLI | TAO Toolkit 5.5 · TensorRT 11.5 | Fotos propias p03: conteo exacto **67 %**, falsos positivos 11 %. Test público: mAP **0.857**, mAP50 1.000 | **89.2 ms** mediana (RTX 2060) |
 | **Asistente** (texto/voz → acción) | Convertir lo dicho o escrito en una acción JSON | Qwen2.5-1.5B-Instruct | LoRA r=16 (PEFT) | Tesla T4, servidor DLI | Contenedor PyTorch de TAO 5.5 (entrenamiento) | Coincidencia exacta 1.4 % → **86.5 %** (74 casos); reservados 0/14 → **13/14** | **1.07 s** (RTX 2060) |
-| **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4 según su registro <span class="falta">[FALTA: confirmar con Daniel]</span> | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | 10.3 s en T4 · en el VPS: <span class="falta">[FALTA: medir]</span> |
+| **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4 según su log <span class="falta">[FALTA: confirmar con Daniel el servidor]</span> | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s** en el VPS (CPU, GGUF); 10.3 s en T4 |
 
 <p class="fuente">Fuentes: <code>training/vision/evaluacion/v3_p03/resultados.json</code>,
 <code>logs/eval_test_publico_v3.json</code>, <code>training/vision/specs/train_v3.yaml</code>,
 <code>training/asistente/resultados/{config_entrenamiento.json, eval_base_local.json, eval_lora_local.json, latencia_rtx2060.txt}</code>,
-<code>backend_gundani/{registro_entrenamiento.json, eval_base.json, eval_ajustado.json}</code>,
+<code>backend_gundani/{registro_entrenamiento.json, entrenamiento_asistente.log, eval_base.json, eval_ajustado.json, latencia_vps.json}</code>,
 <code>docs/DECLARACION_IA_Y_LICENCIAS.md</code> (lugar de entrenamiento). Además usamos un componente que no
 entrenamos: Nemotron 3.5 Super VL, por la API de NVIDIA, para transcribir la foto de la libreta (sección B.6).</p>
 
@@ -45,19 +45,24 @@ decide (`README.md`, recorrido principal).
   - los duplicados exactos se descartan por **SHA-1**;
   - las fotos propias se asignan por **sesión** completa.
 
-**Distribución** (`training/vision/logs/distribucion_datos_v2.json`):
+**Distribución** (`training/vision/logs/distribucion_datos_v2.json`; train v1 de la regeneración del 2026-11-20;
+train v2 en `training/vision/logs/distribucion_train_v2_reconstruida.json`):
 
 | Conjunto | Imágenes | Propias | Objetos | chokis | coca_cola | doritos | gansito | panditas | sabritas | skittles | otro_producto |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| train | 930 | 111 | 956 | 78 | 376 | 69 | 154 | 41 | 91 | 68 | 79 |
+| train v1 (solo públicas) | 819 | 0 | 819 | 51 | 376 | 69 | 154 | 41 | 60 | 68 | 0 |
+| train v2 (+ p01, p02) ¹ | 913 | 94 | 917 | 61 | 376 | 69 | 154 | 41 | 80 | 68 | 68 |
+| **train v3** (+ p04) | 930 | 111 | 956 | 78 | 376 | 69 | 154 | 41 | 91 | 68 | 79 |
 | val | 97 | 0 | 98 | 5 | 56 | 3 | 11 | 12 | 11 | 0 | 0 |
 | test (público) | 106 | 0 | 106 | 0 | 47 | 18 | 15 | 11 | 6 | 9 | 0 |
 
 El 2026-11-20 regeneramos el split desde Roboflow. El test salió **idéntico** (106 imágenes con los mismos
 objetos por clase) y train público = 819, igual que en v1 (`training/detector/evaluar_test_publico.py`).
-Los pasos por época de los logs (batch 2) son v1 = 409, v2 = 456 y v3 = 465. Las 930 imágenes del JSON dan
-465 pasos, así que el JSON corresponde al train de **v3** (819 públicas + 111 propias de p01, p02 y p04).
-El train de v2 se estima en ~912 imágenes. <span class="falta">[FALTA: la distribución exacta del train de v2 no quedó guardada]</span>
+El JSON se llama "v2" porque `preparar_datos.py` usa ese nombre fijo, pero su train es el de **v3**.
+¹ El train de v2 no quedó guardado; lo reconstruimos como train v3 menos p04 (17 imágenes, 39 objetos,
+`datos_propios/p04_annotations.coco.json`). Los logs lo confirman: TAO descarta el último batch incompleto
+(batch 2), así que 819 → 409, 913 → 456 y 930 → 465 pasos por época, que son exactamente los valores de
+`entrenamiento_dino_v{1,2,3}.log`.
 
 ### A.3 Modelo y entrenamiento
 
@@ -122,7 +127,7 @@ celular en el mostrador, con distractores (`training/vision/evaluacion/v{1,2,3}_
 ### A.6 Análisis de errores (v3, p03, umbral 0.5, `evaluacion/v3_p03/resultados.md`)
 
 <figure>
-<img src="../../training/vision/evaluacion/v3_p03/mosaico.jpg" style="width:44%">
+<img src="../../training/vision/evaluacion/v3_p03/mosaico.jpg" style="width:36%">
 <figcaption>Figura 2. Mosaico de las 36 fotos p03 con las cajas de v3 (<code>training/vision/evaluacion/v3_p03/mosaico.jpg</code>).</figcaption>
 </figure>
 
@@ -155,11 +160,11 @@ de TensorRT con que se construye).
 
 | Versión | Checkpoint (sha256) | ONNX (sha256) | Engine RTX 2060 (sha256) |
 |---|---|---|---|
-| v1 | <span class="falta">[FALTA: no registrado en el repo]</span> | <span class="falta">[FALTA: no registrado en el repo]</span> | `a146d3bf…c4c981a2` |
+| v1 | `5043152a…a739cfe3` | `8e534815…f67bceac` | `a146d3bf…c4c981a2` |
 | v2 | `01bab6c9…12938e5f` | `eb168115…06ec4c5a` | `c3be861c…a6aa6ed8` |
 | **v3 (app)** | `6abf1b0a…c77c41a2` | `1ecd0cc1…62de4eb4` | **`e58f31e3…f81a31ed`** |
 
-<p class="fuente">Fuentes: <code>training/vision/logs/hashes_v2.txt</code> y <code>hashes_v3.txt</code> (checkpoint y ONNX);
+<p class="fuente">Fuentes: <code>training/vision/logs/hashes_v{1,2,3}.txt</code> (checkpoint y ONNX; los de v1 se calcularon el 2026-11-20 sobre las copias descargadas del DLI);
 <code>logs/eval_test_publico_v{1,2,3}.json</code> (<code>sha256_engine</code> del engine cargado); <code>modelos/README.md</code>.
 Nota: el sha256 completo del engine v3 es <code>e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed</code>, el mismo que muestra la app en
 <i>Libro → Modelos de IA en uso</i>. <b>Latencia:</b> mediana de <b>89.2 ms</b> por foto en la RTX 2060, incluyendo
@@ -243,7 +248,10 @@ Comparamos los **mismos 74 casos** (60 de test + 14 reservados) con el mismo pro
   cantidad. El LoRA respondió `agregar` con una tlayuda. En la app no se registra solo: siempre se pide confirmar.
 - **Latencia:** **1.07 s** de media por frase en la RTX 2060, sobre 10 mediciones
   (`resultados/latencia_rtx2060.txt`). En la T4, durante la evaluación, fue de 3.17 s.
-  En CPU, ~18 s: <span class="falta">[FALTA: no hay log de la medición en CPU]</span>
+  Con el mismo método en GPU y en CPU (5 frases × 2 vueltas, `training/asistente/medir_latencia.py`):
+  **0.79 s en la RTX 2060** contra **8.8 s en CPU** (i7-9750H, 12 hilos), unas 11 veces más lento
+  (`resultados/latencia_gpu_rtx2060.json`, `latencia_cpu.json`). La cifra de ~18 s en CPU que se manejaba
+  no se confirma: lo medido es 8.8 s.
 
 ### B.6 Reglas de seguridad del servidor (`servir_asistente.py`, función `valida`)
 
@@ -270,12 +278,14 @@ resultado:     registrar_libreta tlayuda ×3 = $270;  pendiente: "1 quesadilla" 
 **LLM de Gundani (componente de apoyo).** Es un adaptador QLoRA (4 bits NF4, r=16, 5 épocas) sobre
 **Qwen2.5-3B-Instruct** (Apache 2.0), entrenado con 108 ejemplos propios y validado con 15. Se convirtió a GGUF
 `Q4_K_M` y en el VPS lo sirve `llama-server` en CPU (`backend_gundani/README.md`, `registro_entrenamiento.json`).
-Según su registro, se entrenó en una Tesla T4 el 2026-11-20 de 02:35 a 02:44 (8.9 min).
-<span class="falta">[FALTA: confirmar con Daniel dónde y cuándo se ajustó]</span>
+Su log (`backend_gundani/entrenamiento_asistente.log`) registra una Tesla T4 el 2026-11-20 de 02:35 a 02:44
+(8.9 min, 65 pasos, 29.9 M parámetros entrenables). En el VPS responde en **8.6 s** de media (14 frases de
+prueba; 9.1 s de ida y vuelta por el gateway; `backend_gundani/latencia_vps.json`).
+<span class="falta">[FALTA: confirmar con Daniel en qué servidor se ajustó; el log no lo dice]</span>
 
 ## C. Arquitectura
 
-![Figura 3. Componentes y puertos (fuente: `docs/entregas/img/arq.mmd`; código en `scripts/ia_gateway.py` y `scripts/demo_up.sh`).](img/arq.png){width=92%}
+![Figura 3. Componentes y puertos (fuente: `docs/entregas/img/arq.mmd`; código en `scripts/ia_gateway.py` y `scripts/demo_up.sh`).](img/arq.png){width=85%}
 
 | Servicio | Puerto | Hardware | Modelo | Herramienta NVIDIA |
 |---|---|---|---|---|
@@ -288,7 +298,7 @@ Según su registro, se entrenó en una Tesla T4 el 2026-11-20 de 02:35 a 02:44 (
 **Secuencia de una venta por foto.** Los tiempos vienen de `logs/pruebas_app_2026-11-20.json` (casos 1 y 7)
 y de `evaluacion/v3_p03/resultados.json`:
 
-![Figura 4. Venta por foto, de principio a fin (fuente: `docs/entregas/img/sec.mmd`).](img/sec.png){width=72%}
+![Figura 4. Venta por foto, de principio a fin (fuente: `docs/entregas/img/sec.mmd`).](img/sec.png){width=62%}
 
 En la prueba 1 la respuesta del detector a través del gateway tardó **295 ms** (221.8 ms dentro del servidor).
 El cobro QR simulado tardó **585 ms**. El tiempo que la persona tarda en revisar y confirmar todavía no se ha
@@ -338,6 +348,8 @@ python3 training/asistente/entrenar_lora.py --entrenar --evaluar
 python3 training/asistente/servir_asistente.py --adaptador resultados_asistente/lora_adaptador
 # Gundani
 python3 backend_gundani/entrenar_qlora.py && python3 backend_gundani/evaluar_modelo.py
+python3 backend_gundani/medir_latencia_vps.py --url <gateway>          # latencia en el VPS
+python3 training/asistente/medir_latencia.py --url http://127.0.0.1:8001 --salida resultados/latencia_gpu_rtx2060.json
 # Demo completa
 bash scripts/demo_up.sh        # imprime la URL y los hashes e58f31e3… / 72a3259e…
 ```

@@ -1,0 +1,65 @@
+{
+  "dispositivo": "cuda",
+  "sha256_adaptador": "72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d",
+  "cpu": "x86_64",
+  "n": 10,
+  "ms_media": 793,
+  "ms_mediana": 772,
+  "ms_min": 427,
+  "ms_max": 1238,
+  "medidas": [
+    {
+      "frase": "cobra 2 sabritas y 3 cocas",
+      "ms": 1166,
+      "accion": "agregar"
+    },
+    {
+      "frase": "dame tres memelas y un café de olla",
+      "ms": 1129,
+      "accion": "agregar"
+    },
+    {
+      "frase": "quita una coca",
+      "ms": 762,
+      "accion": "quitar"
+    },
+    {
+      "frase": "paga con transferencia",
+      "ms": 464,
+      "accion": "forma_pago"
+    },
+    {
+      "frase": "¿cómo voy de ventas hoy?",
+      "ms": 433,
+      "accion": "consulta"
+    },
+    {
+      "frase": "cobra 2 sabritas y 3 cocas",
+      "ms": 1238,
+      "accion": "agregar"
+    },
+    {
+      "frase": "dame tres memelas y un café de olla",
+      "ms": 1081,
+      "accion": "agregar"
+    },
+    {
+      "frase": "quita una coca",
+      "ms": 781,
+      "accion": "quitar"
+    },
+    {
+      "frase": "paga con transferencia",
+      "ms": 448,
+      "accion": "forma_pago"
+    },
+    {
+      "frase": "¿cómo voy de ventas hoy?",
+      "ms": 427,
+      "accion": "consulta"
+    }
+  ],
+  "fecha": "2026-11-20 10:11:58",
+  "gpu": "NVIDIA GeForce RTX 2060 (6 GB)",
+  "nota": "Medido contra el servidor de la demo (puerto 8001), con el detector cargado en la misma GPU"
+}

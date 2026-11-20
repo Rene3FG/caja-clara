@@ -1,0 +1,63 @@
+{
+  "dispositivo": "cpu",
+  "sha256_adaptador": "72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d",
+  "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz (12 hilos)",
+  "n": 10,
+  "ms_media": 8791,
+  "ms_mediana": 8518,
+  "ms_min": 5264,
+  "ms_max": 12368,
+  "medidas": [
+    {
+      "frase": "cobra 2 sabritas y 3 cocas",
+      "ms": 12368,
+      "accion": "agregar"
+    },
+    {
+      "frase": "dame tres memelas y un café de olla",
+      "ms": 11713,
+      "accion": "agregar"
+    },
+    {
+      "frase": "quita una coca",
+      "ms": 8559,
+      "accion": "quitar"
+    },
+    {
+      "frase": "paga con transferencia",
+      "ms": 6010,
+      "accion": "forma_pago"
+    },
+    {
+      "frase": "¿cómo voy de ventas hoy?",
+      "ms": 5584,
+      "accion": "consulta"
+    },
+    {
+      "frase": "cobra 2 sabritas y 3 cocas",
+      "ms": 12213,
+      "accion": "agregar"
+    },
+    {
+      "frase": "dame tres memelas y un café de olla",
+      "ms": 11971,
+      "accion": "agregar"
+    },
+    {
+      "frase": "quita una coca",
+      "ms": 8476,
+      "accion": "quitar"
+    },
+    {
+      "frase": "paga con transferencia",
+      "ms": 5753,
+      "accion": "forma_pago"
+    },
+    {
+      "frase": "¿cómo voy de ventas hoy?",
+      "ms": 5264,
+      "accion": "consulta"
+    }
+  ],
+  "fecha": "2026-11-20 10:04:59"
+}
