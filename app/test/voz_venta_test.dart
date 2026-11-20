@@ -5,6 +5,7 @@ import 'package:caja_clara/main.dart';
 import 'package:caja_clara/modelos.dart';
 import 'package:caja_clara/servicios/asistente.dart';
 import 'package:caja_clara/ui/mic.dart';
+import 'package:caja_clara/ui/voz_orb.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
 import 'package:flutter_localizations/flutter_localizations.dart' show GlobalWidgetsLocalizations;
 import 'package:flutter_test/flutter_test.dart';
@@ -100,6 +101,20 @@ void main() {
     expect(find.text('Harina'), findsOneWidget);
     expect(find.text('20'), findsOneWidget);
     expect(find.text('Revisar gasto'), findsNothing);
+  });
+
+  testWidgets('al pensar el orbe deja el micrófono y muestra carga', (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(body: VoiceSpeakingOrb(isListening: false, voiceLevel: 0, thinking: true, onTap: null)),
+    ));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byIcon(Icons.mic_rounded), findsNothing);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(body: VoiceSpeakingOrb(isListening: false, voiceLevel: 0, onTap: null)),
+    ));
+    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }
 

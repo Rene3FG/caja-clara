@@ -218,13 +218,17 @@ class _MicGundaniState extends State<MicGundani> {
       children: [
         const SizedBox(height: 8),
         Center(
-          child: _cargando
-              ? const SizedBox(width: 96, height: 96, child: CircularProgressIndicator(strokeWidth: 3, color: cempasuchil))
-              : VoiceSpeakingOrb(isListening: escuchando, voiceLevel: _nivel, onTap: _mic, coreSize: 96),
+          child: VoiceSpeakingOrb(
+            isListening: escuchando,
+            voiceLevel: _nivel,
+            thinking: _cargando,
+            onTap: _mic,
+            coreSize: 96,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
-          _cargando ? 'Gundani está analizando...' : 'Hablar con Cempasúchil\npara registrar venta',
+          'Hablar con Cempasúchil\npara registrar venta',
           textAlign: TextAlign.center,
           style: epilogo(22, peso: FontWeight.w700),
         ),

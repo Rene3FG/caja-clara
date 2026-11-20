@@ -14,6 +14,7 @@ import 'ui/perfil.dart';
 import 'ui/productos.dart';
 import 'ui/revisar.dart';
 import 'ui/sin_red.dart';
+import 'ui/splash.dart';
 
 const _conMarco = {'inicio', 'sin-red', 'libro', 'productos'};
 const _conTransicion = {'pago', 'pago-creado', 'pago-error', 'pago-confirmado'};
@@ -45,6 +46,7 @@ class CajaClaraApp extends StatefulWidget {
 
 class _CajaClaraAppState extends State<CajaClaraApp> {
   final _caja = Caja();
+  var _enSplash = true;
 
   @override
   void initState() {
@@ -74,7 +76,12 @@ class _CajaClaraAppState extends State<CajaClaraApp> {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: const _Casa(),
+        home: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 420),
+          child: _enSplash
+              ? SplashTierra(onListo: () => setState(() => _enSplash = false))
+              : const _Casa(),
+        ),
       ),
     );
   }
@@ -86,8 +93,9 @@ class _Casa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
+    final fondo = caja.ruta.id == 'pago-confirmado' ? verdePago : paper;
     return ColoredBox(
-      color: const Color(0xFFE3D8D3),
+      color: fondo,
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
