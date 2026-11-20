@@ -25,7 +25,9 @@ pandoc docs/ficha_proyecto.md -s --metadata pagetitle="Caja Clara — Ficha" -c 
 google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/pdf/ficha_proyecto.pdf /tmp/ficha.html
 google-chrome --headless --no-pdf-header-footer --allow-file-access-from-files \
   --print-to-pdf=docs/pdf/presentacion.pdf docs/presentacion/presentacion.html
-# Documento 02 (modelos de IA); figuras: img/*.mmd → mermaid-cli, curvas desde los logs de entrenamiento
+# Documento 02 (modelos de IA). Requiere las fuentes de la app (Work Sans y Epilogue, OFL) en ~/.local/share/fonts.
+# Figuras: python3 docs/entregas/img/extraer_curvas.py training/vision/logs curvas.json && python3 docs/entregas/img/graficar_curvas.py curvas.json docs/entregas/img
+#          npx @mermaid-js/mermaid-cli@11.4.2 -i docs/entregas/img/arq.mmd -c docs/entregas/img/arq.config.json -o docs/entregas/img/arq.png -s 2
 pandoc -f markdown+autolink_bare_uris docs/entregas/02_modelos_ia.md -s --resource-path=docs/entregas:. --metadata pagetitle="Caja Clara — Modelos de IA" \
   -c docs/pdf/ficha.css -c docs/entregas/entregas.css --self-contained -o /tmp/02.html
 google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/entregas/02_modelos_ia.pdf /tmp/02.html

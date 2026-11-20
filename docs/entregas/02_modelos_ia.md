@@ -28,8 +28,8 @@ decide (`README.md`, recorrido principal).
 ### A.2 Datos
 
 - **Fuentes públicas (CC BY 4.0, con atribución):** *ProductosOXXO_V02* v3, autor Ipsum
-  (universe.roboflow.com/ipsum/productosoxxo_v02), y *Dataset Mercado* v1, autor FundamentosIA
-  (universe.roboflow.com/fundamentosia/dataset-mercado). Fuente: `docs/DECLARACION_IA_Y_LICENCIAS.md`.
+  (https://universe.roboflow.com/ipsum/productosoxxo_v02), y *Dataset Mercado* v1, autor FundamentosIA
+  (https://universe.roboflow.com/fundamentosia/dataset-mercado). Fuente: `docs/DECLARACION_IA_Y_LICENCIAS.md`.
 - **Fotos propias por sesión:** p01, p02 y p04 se usaron para **entrenar**. **p03 (36 fotos) quedó reservada
   solo para la prueba** y nunca entró al entrenamiento (`evaluacion/v3_p03/resultados.json`, `fotos: 36`).
   Las fotos con caras se excluyeron y el conjunto no contiene datos personales
@@ -59,7 +59,8 @@ descartado, 819/913/930 imágenes dan 409/456/465 pasos por época, como en `ent
 ### A.3 Modelo y entrenamiento
 
 - **Base:** DINO (*DETR with Improved deNoising anchOr boxes*) con backbone ResNet-50, preentrenado en COCO.
-  Viene de NGC: `nvidia/tao/pretrained_dino_coco:dino_resnet_50_trainable_v1.0`, archivo
+  Viene de NGC (https://catalog.ngc.nvidia.com/orgs/nvidia/teams/tao/models/pretrained_dino_coco):
+  `nvidia/tao/pretrained_dino_coco:dino_resnet_50_trainable_v1.0`, archivo
   `dino_resnet50_ep12.pth`, sha256 `7a391fb84a18714b60258becdb512594ec54faff5dccbf17ca53c5d902137512`
   (cuaderno `02_caja_clara_detector_dino.ipynb`, celda 17).
 - **Entrenamiento:** TAO Toolkit 5.5 en una **Tesla T4** de los servidores DLI (`logs/bitacora_v2.txt`, `bitacora_v3.txt`).
@@ -74,7 +75,7 @@ descartado, 819/913/930 imágenes dan 409/456/465 pasos por época, como en `ent
 <p class="fuente">Fuente: <code>training/vision/specs/train.yaml</code>, <code>train_v2.yaml</code>, <code>train_v3.yaml</code>. Duración en la T4: v1 ≈ 50 min
 (<code>logs/status.json</code>), v2 65 min y v3 44 min (primer `FIN` de la bitácora) (<code>bitacora_v2.txt</code>, <code>bitacora_v3.txt</code>).</p>
 
-![Figura 1. Curvas de entrenamiento extraídas de `training/vision/logs/entrenamiento_dino_v{1,2,3}.log`. Las tres versiones convergen igual. La caída en la época 10 corresponde a `lr_steps: [9]`. El mAP@[.5:.95] de validación termina en 0.911 (v1), 0.904 (v2) y 0.903 (v3); el mAP50 de validación queda en 0.997 en las tres.](img/curvas_dino.png)
+![Figura 1. Curvas de entrenamiento extraídas de `training/vision/logs/entrenamiento_dino_v{1,2,3}.log`. Las tres versiones convergen igual. La caída en la época 10 corresponde a `lr_steps: [9]`. El mAP@[.5:.95] de validación termina en 0.911 (v1), 0.904 (v2) y 0.903 (v3); el mAP50 de validación queda en 0.997 en las tres.](img/curvas_dino.png){width=92%}
 
 ### A.4 Iteraciones v1 → v2 → v3
 
@@ -195,7 +196,7 @@ servidor valida la acción y calcula precios y totales (`training/asistente/serv
 {"accion": "fuera_de_alcance", "respuesta": "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."}
 ```
 
-### B.2 Modelo base: Qwen2.5-1.5B-Instruct
+### B.2 Modelo base: Qwen2.5-1.5B-Instruct (https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
 
 **Por qué:** su **tamaño** (1.5 mil millones de parámetros, ~3 GB, `API_ASISTENTE.md`) cabe en fp16 en la
 RTX 2060 de 6 GB y responde en ~1 s, así que corre en una **GPU de consumo**. Funciona en **español**: el dataset y
@@ -238,7 +239,7 @@ Tres ejemplos reales de `data/train.jsonl`:
 <b>Código y configuración:</b> <code>training/asistente/entrenar_lora.py</code> y <code>config_lora.yaml</code>; cuadernos <code>03_caja_clara_asistente_lora.ipynb</code>
 y <code>04_log_evaluacion_lora.ipynb</code>. <b>Modelo ajustado, adaptadores o mecanismo reproducible de acceso:</b> el adaptador (74 MB, carpeta <code>adaptador_lora/</code>,
 <code>adapter_model.safetensors</code> sha256 <code>72a3259e…aef42fa0d</code>) está en <b>https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es</b> junto con <code>SHA256SUMS.txt</code>. Se carga sobre el
-modelo base de Hugging Face con <code>servir_asistente.py --adaptador adaptador_lora</code>, y <code>GET /salud</code> devuelve su sha256.</p>
+modelo base de Hugging Face con <code>python3 training/asistente/servir_asistente.py --adaptador adaptador_lora --catalogo training/asistente/data/catalogo.json</code>.</p>
 
 ### B.5 Evaluación: base contra adaptado
 
@@ -304,6 +305,8 @@ Tesla T4, el 2026-11-20 de 02:35 a 02:44 (`backend_gundani/sesion_entrenamiento_
 
 ## C. Arquitectura
 
+![Figura 3. Arquitectura general (fuente: `docs/entregas/img/arq.mmd`).](img/arq.png){width=70%}
+
 ### C.1 Integración de los modelos y responsabilidad de cada uno
 
 Ningún modelo guarda nada por sí solo: **los modelos proponen, el código valida y la persona confirma**.
@@ -321,9 +324,7 @@ Los dos modelos se combinan en la **misma cuenta**: la persona puede tomar la fo
 "agrega 2 cocas" o "quita una sabritas" (LLM) sobre esa misma venta. Ambos llegan a la app por el mismo
 gateway (`scripts/ia_gateway.py`).
 
-### C.2 Diagrama y servicios
-
-![Figura 3. Arquitectura general (fuente: `docs/entregas/img/arq.mmd`).](img/arq.png){width=75%}
+### C.2 Plataforma, servicios y despliegue
 
 **Plataforma:** app móvil Android (APK). **Frontend:** Flutter/Dart con `image_picker` (cámara),
 `speech_to_text` y `flutter_tts` (voz), `http`, `connectivity_plus` y `shared_preferences` como base de datos
@@ -376,13 +377,11 @@ podrían servirse con **NVIDIA NIM**, o el detector en un **Jetson** por tienda 
 
 ```
 python3 training/vision/preparar_datos.py --publicos <oxxo> <mercado> --propias <p> --train-sesiones p01 p02 p04
-tao model dino train -e training/vision/specs/train_v3.yaml   # y tao model dino export (cuaderno 02)
+tao model dino train -e training/vision/specs/train_v3.yaml
 python3 training/detector/construir_engine.py dino_v3.onnx dino_v3_rtx2060.engine
-python3 training/asistente/generar_dataset.py --n 1400 --seed 1234   # luego entrenar_lora.py --entrenar --evaluar
-bash scripts/demo_up.sh     # detector + asistente + gateway + túnel; imprime URL y hashes
+python3 training/asistente/entrenar_lora.py --entrenar --evaluar
+bash scripts/demo_up.sh
 ```
 
-**Enlaces:** repositorio https://github.com/Rene3FG/caja-clara · ProductosOXXO_V02:
-https://universe.roboflow.com/ipsum/productosoxxo_v02 · Dataset Mercado: https://universe.roboflow.com/fundamentosia/dataset-mercado ·
-DINO base: NGC `nvidia/tao/pretrained_dino_coco` · Qwen2.5-1.5B-Instruct: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct ·
-Nemotron 3.5 Super VL: https://build.nvidia.com · **Pesos** (ONNX, engine, adaptador LoRA y `SHA256SUMS.txt`): https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es
+**Enlaces:** repositorio https://github.com/Rene3FG/caja-clara · pesos y `SHA256SUMS.txt`:
+https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es

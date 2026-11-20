@@ -1,11 +1,32 @@
-/* Se usa junto con docs/pdf/ficha.css */
-.falta { color: #d9480f; font-weight: bold; }
+/* Documento 02 — se usa junto con docs/pdf/ficha.css y la sobrescribe.
+   Paleta y tipografía de la app (app/lib/tema.dart): grana, granaDeep, cempasuchil, maguey, ink, stone, line, marco;
+   Epilogue para títulos y Work Sans para texto. */
+@page { size: Letter; margin: 12mm 14mm; }
+:root {
+  --grana: #C0392B; --grana-deep: #9E2016; --cempasuchil: #D97706; --maguey: #087A38;
+  --ink: #201B18; --stone: #59413D; --line: #E1BFB9; --marco: #E3D8D3; --crema: #F3EBE6; --paper: #FFF8F5; --ls: -0.15px;
+}
+body { font-family: "Work Sans", "DejaVu Sans", Arial, sans-serif; font-size: 8.6pt; color: var(--ink); background: #fff; line-height: 1.27; }
+h1, h2, h3 { font-family: "Epilogue", "Work Sans", sans-serif; }
+h1 { color: var(--grana-deep); font-weight: 800; letter-spacing: -0.2px; border-bottom: 2px solid var(--grana); padding-bottom: 3px; }
+h2 { color: var(--grana-deep); font-weight: 700; border-bottom: 1px solid var(--line); }
+h3 { font-size: 10.2pt; color: var(--stone); font-weight: 700; margin: 9px 0 3px; }
+strong, b { color: var(--ink); }
+a { color: var(--grana-deep); text-decoration: none; border-bottom: 1px solid var(--line); }
+table { font-size: 8.1pt; }
+th, td { border: 1px solid var(--marco); }
+th { background: var(--crema); color: var(--ink); font-weight: 600; }
+code { color: var(--stone); }
+pre { font-size: 7.8pt; background: var(--paper); padding: 4px 6px; border: 1px solid var(--marco);
+      border-left: 3px solid var(--cempasuchil); white-space: pre-wrap; margin: 4px 0; }
+pre code { color: var(--ink); }
 figure { margin: 6px 0 8px; text-align: center; page-break-inside: avoid; }
 figure img { max-width: 100%; }
-figcaption { font-size: 8.3pt; color: #5a554f; margin-top: 2px; }
-h3 { font-size: 10.2pt; color: #3d3833; margin: 9px 0 3px; }
-pre { font-size: 7.8pt; background: #faf6f1; padding: 4px 6px; border: 1px solid #eadfd2; white-space: pre-wrap; margin: 4px 0; }
+figcaption { font-size: 8.3pt; color: var(--stone); margin-top: 2px; }
+.fuente { font-size: 8pt; color: var(--stone); }
+.falta { color: #9A3412; font-weight: bold; }
 .salto { page-break-before: always; }
-.fuente { font-size: 8pt; color: #5a554f; }
-body { font-size: 9.2pt; }
-table { font-size: 8.5pt; }
+/* Work Sans es ancha: un poco menos de tracking y celdas más compactas para mantener 7 páginas */
+body, table { letter-spacing: var(--ls); }
+th, td { padding: 2px 4px; }
+pre { break-inside: auto; page-break-inside: auto; }

@@ -1,0 +1,15 @@
+{
+ "theme": "base",
+ "themeVariables": {
+  "fontFamily": "\"Work Sans\", sans-serif",
+  "primaryTextColor": "#201B18",
+  "lineColor": "#59413D",
+  "clusterBkg": "#FFF8F5",
+  "clusterBorder": "#E1BFB9",
+  "edgeLabelBackground": "#FFFFFF",
+  "titleColor": "#59413D"
+ },
+ "flowchart": {
+  "htmlLabels": true
+ }
+}

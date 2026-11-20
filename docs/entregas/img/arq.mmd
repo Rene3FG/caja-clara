@@ -15,7 +15,7 @@ flowchart LR
   G -- "/api/*" --> V["VPS · Gundani<br/>FastAPI<br/>BD SQLite<br/>Qwen2.5-3B QLoRA<br/>cobro SIMULADO"]
   A -. "directo" .-> V
   E["Entrenamiento<br/>NVIDIA DLI · T4<br/>TAO 5.5 · PEFT"] -. "pesos" .-> L
-  classDef nv fill:#eaf4dc,stroke:#76b900,color:#1f1b16;
-  classDef x fill:#f6ede3,stroke:#9a2a1e,color:#1f1b16;
-  classDef ext fill:#eef2f7,stroke:#5a6b85,color:#1f1b16;
+  classDef nv fill:#DCFCE7,stroke:#087A38,stroke-width:1.5px,color:#201B18;
+  classDef x fill:#FFF1E6,stroke:#C0392B,stroke-width:1.5px,color:#201B18;
+  classDef ext fill:#F3EBE6,stroke:#59413D,color:#201B18;
   class D,S nv; class A,G,V x; class T,N,E ext;
