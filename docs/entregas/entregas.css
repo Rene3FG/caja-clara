@@ -30,3 +30,9 @@ figcaption { font-size: 8.3pt; color: var(--stone); margin-top: 2px; }
 body, table { letter-spacing: var(--ls); }
 th, td { padding: 2px 4px; }
 pre { break-inside: auto; page-break-inside: auto; }
+/* espacios verticales un poco menores para mantener 7 páginas */
+p { margin: 3px 0; }
+body { line-height: 1.22; }
+pre { font-size: 7.4pt; }
+h3 { margin: 7px 0 2px; }
+h2 { margin: 10px 0 4px; }

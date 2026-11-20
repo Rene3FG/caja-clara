@@ -9,7 +9,7 @@ Cada cifra lleva su archivo de origen en el repositorio; lo que aún no se ha me
 |---|---|---|---|---|---|---|---|
 | **Detector de productos** (app: v3) | Detectar y contar 7 productos + `otro_producto` en la foto del mostrador | DINO ResNet-50 preentrenado en COCO (NGC) | Ajuste fino completo, 12 épocas | Tesla T4, servidor DLI | TAO Toolkit 5.5 · TensorRT 11.5 | Fotos propias p03: conteo exacto **67 %**, falsos positivos 11 %. Test público: mAP **0.857**, mAP50 1.000 | **89.2 ms** mediana (RTX 2060) |
 | **Asistente** (texto/voz → acción) | Convertir lo dicho o escrito en una acción JSON | Qwen2.5-1.5B-Instruct | LoRA r=16 (PEFT) | Tesla T4, servidor DLI | Contenedor PyTorch de TAO 5.5 (entrenamiento) | Coincidencia exacta 1.4 % → **86.5 %** (74 casos); reservados 0/14 → **13/14** | **1.07 s** (RTX 2060) |
-| **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4, contenedor DLI | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s** en el VPS (CPU, GGUF); 10.3 s en T4 |
+| **Gundani** (caja y cobros simulados) | Consultas de caja, cobro QR simulado y guía financiera (RAG) | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4, contenedor DLI | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s caja · 9–10 s guía · 0 s pregunta repetida (VPS, CPU)** |
 
 <p class="fuente">Fuentes: cada cifra se detalla en su sección (A.3–A.7, B.4–B.6, C.2). Además usamos un componente que no
 entrenamos: Nemotron 3.5 Super VL, por la API de NVIDIA, para transcribir la foto de la libreta (sección B.6).</p>
@@ -219,7 +219,7 @@ distintas de las de train** (`data/resumen.json`, campo `nota`).
 Tres ejemplos reales de `data/train.jsonl`:
 
 ```
-"ya no quiere 2 tubos"      -> {"accion": "quitar", "productos": [{"producto": "tubo_pvc", "cantidad": 2}]}
+"borra dos koka-cola"       -> {"accion": "quitar", "productos": [{"producto": "coca_cola", "cantidad": 2}]}
 "borra la cuenta completa"  -> {"accion": "confirmar", "pregunta": "¿Seguro que quieres borrar toda la venta? Responde sí o no."}
 "¿quién ganó el partido?"   -> {"accion": "fuera_de_alcance", "respuesta": "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."}
 ```
@@ -303,6 +303,8 @@ resultado:     registrar_libreta tlayuda ×3 = $270;  pendiente: "1 quesadilla" 
 `registro_entrenamiento.json`, `latencia_vps.json`). Se ajustó en un contenedor del **NVIDIA DLI** (`/dli/task/gundani_asistente`) con una
 Tesla T4, el 2026-11-20 de 02:35 a 02:44 (`backend_gundani/sesion_entrenamiento_dli.txt`, `entrenamiento_asistente.log`).
 
+**Guía financiera (RAG).** Sobre el mismo `llama-server`, `backend_gundani/guia_rag.py` (`POST /api/guia/preguntar`) responde dudas del tutorial; está disponible en el backend. Combina el texto de la pantalla actual con las 2 fichas más relevantes de una base verificada de 12 (cuenta, transferencia y SAT; `conocimiento_guia.json`). Usa temperatura 0, máximo 2 oraciones y la instrucción de responder solo con esa información. Si no la tiene, responde "No tengo información verificada sobre eso" y remite al banco, al SAT o a un contador. Las preguntas repetidas se responden desde caché. Validación funcional con 4 casos: 2 dudas válidas respondidas y 2 preguntas trampa (tasa de un préstamo BBVA y remedio para la gripa) rechazadas sin inventar datos. La evaluación amplia está pendiente.
+
 ## C. Arquitectura
 
 ![Figura 3. Arquitectura general (fuente: `docs/entregas/img/arq.mmd`).](img/arq.png){width=70%}
@@ -319,6 +321,7 @@ Ningún modelo guarda nada por sí solo: **los modelos proponen, el código vali
 | Validación y cálculo | Código de los servidores (`servir_asistente.py`, `servir_detector.py`) | Revisa catálogo y productos mencionados, suma repetidos, calcula precios y total, deja pendientes | — |
 | Revisión y guardado | App y persona | Muestra la cuenta para corregir (+/−), pide confirmación y guarda en el teléfono | — |
 | Caja y cobro | Gundani (VPS) | Resumen de caja, movimientos y cobro QR **simulado** | No mueve dinero real |
+| Duda en la guía → respuesta | Gundani + RAG (VPS, `guia_rag.py`) | Responde con la pantalla actual y fichas verificadas; cachea preguntas repetidas | No inventa tasas ni impuestos; no sustituye la asesoría fiscal |
 
 Los dos modelos se combinan en la **misma cuenta**: la persona puede tomar la foto (visión) y después dictar
 "agrega 2 cocas" o "quita una sabritas" (LLM) sobre esa misma venta. Ambos llegan a la app por el mismo
@@ -339,7 +342,7 @@ y VPS; entrenamiento en NVIDIA DLI (Tesla T4).
 | Gateway (`scripts/ia_gateway.py`) | 8000 | Laptop | — (solo reenvía) |
 | Detector (`training/detector/servir_detector.py`) | 8002 | RTX 2060 6 GB | DINO v3 · TAO 5.5 → TensorRT 11.5 |
 | Asistente y libreta (`training/asistente/servir_asistente.py`) | 8001 | RTX 2060 (fp16) | Qwen2.5-1.5B + LoRA (T4 DLI) · Nemotron VL (API NVIDIA) |
-| Gundani + BD SQLite (`backend_gundani/api_gundani.py`) | VPS `/api` | CPU 8 hilos | Qwen2.5-3B QLoRA, GGUF (T4) |
+| Gundani + BD SQLite (`backend_gundani/api_gundani.py`, `guia_rag.py`) | VPS `/api` | CPU 8 hilos | Qwen2.5-3B QLoRA, GGUF (T4) · llama-server con 2 slots |
 | Túnel `cloudflared` | HTTPS | Laptop | — |
 
 **Secuencia de una venta por foto** (tiempos de `logs/pruebas_app_2026-11-20.json`, casos 1 y 7):
@@ -356,7 +359,7 @@ y VPS; entrenamiento en NVIDIA DLI (Tesla T4).
 pruebas de uso (`docs/pruebas_uso.md`).
 
 **Implementado:** venta por foto, voz y texto; revisión y corrección; libreta por dictado y por foto; guardado
-en el teléfono y envío diferido sin red; hashes de los modelos en uso. **Simulado:** el cobro QR o transferencia
+en el teléfono y envío diferido sin red; hashes de los modelos en uso; guía financiera con chat RAG (disponible en el backend). **Simulado:** el cobro QR o transferencia
 (DiMo/CoDi), con estados aprobado, QR expirado y saldo insuficiente; no hay conexión con bancos y la app lo marca
 como simulación (`docs/funciones.md`).
 
@@ -377,10 +380,8 @@ podrían servirse con **NVIDIA NIM**, o el detector en un **Jetson** por tienda 
 
 ```
 python3 training/vision/preparar_datos.py --publicos <oxxo> <mercado> --propias <p> --train-sesiones p01 p02 p04
-tao model dino train -e training/vision/specs/train_v3.yaml
-python3 training/detector/construir_engine.py dino_v3.onnx dino_v3_rtx2060.engine
-python3 training/asistente/entrenar_lora.py --entrenar --evaluar
-bash scripts/demo_up.sh
+tao model dino train -e training/vision/specs/train_v3.yaml && python3 training/detector/construir_engine.py dino_v3.onnx dino_v3_rtx2060.engine
+python3 training/asistente/entrenar_lora.py --entrenar --evaluar && bash scripts/demo_up.sh
 ```
 
 **Enlaces:** repositorio https://github.com/Rene3FG/caja-clara · pesos y `SHA256SUMS.txt`:
