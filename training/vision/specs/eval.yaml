@@ -1,0 +1,51 @@
+# Caja Clara - DINO (TAO 5.5) - ajustado a Tesla T4 16GB
+# Basado en la config por defecto de nvidia_tao_pytorch.cv.dino (TAO 5.5.0)
+results_dir: /workspace/caja-clara/resultados/dino_v1
+wandb:
+  enable: false
+model:
+  backbone: resnet_50
+  train_backbone: true
+  num_feature_levels: 4
+  num_queries: 300
+  num_select: 100
+  dec_layers: 6
+  enc_layers: 6
+  dropout_ratio: 0.0
+dataset:
+  train_data_sources:
+    - image_dir: /workspace/caja-clara/datos/final/train/images
+      json_file: /workspace/caja-clara/datos/final/train/annotations.json
+  val_data_sources:
+    - image_dir: /workspace/caja-clara/datos/final/val/images
+      json_file: /workspace/caja-clara/datos/final/val/annotations.json
+  test_data_sources:
+    image_dir: /workspace/caja-clara/datos/final/test/images
+    json_file: /workspace/caja-clara/datos/final/test/annotations.json
+  infer_data_sources:
+    image_dir: /workspace/caja-clara/datos/final/test/images
+    classmap: /workspace/caja-clara/specs/clases.txt
+  num_classes: 8
+  batch_size: 2
+  workers: 0
+  augmentation:
+    scales: [480, 512, 544, 576, 608, 640]
+    train_random_resize: [400, 500, 600]
+    train_random_crop_min: 384
+    train_random_crop_max: 600
+    random_resize_max_size: 800
+    test_random_resize: 640
+    horizontal_flip_prob: 0.5
+    fixed_padding: true
+train:
+  num_gpus: 1
+  num_epochs: 12
+  checkpoint_interval: 1
+  validation_interval: 1
+  pretrained_model_path: /workspace/caja-clara/modelos_base/pretrained_dino_coco_vdino_resnet_50_trainable_v1.0/dino_resnet50_ep12.pth
+  precision: fp16
+  activation_checkpoint: true
+  optim:
+    lr: 0.0002
+    lr_backbone: 2.0e-05
+    lr_steps: [9]

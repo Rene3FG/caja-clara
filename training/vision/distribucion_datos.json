@@ -1,0 +1,53 @@
+{
+  "clases": [
+    "chokis",
+    "coca_cola",
+    "doritos",
+    "gansito",
+    "panditas",
+    "sabritas",
+    "skittles"
+  ],
+  "num_classes_para_spec": 8,
+  "conjuntos": {
+    "train": {
+      "imagenes": 819,
+      "objetos": 819,
+      "por_clase": {
+        "chokis": 51,
+        "coca_cola": 376,
+        "doritos": 69,
+        "gansito": 154,
+        "panditas": 41,
+        "sabritas": 60,
+        "skittles": 68
+      }
+    },
+    "val": {
+      "imagenes": 97,
+      "objetos": 98,
+      "por_clase": {
+        "chokis": 5,
+        "coca_cola": 56,
+        "doritos": 3,
+        "gansito": 11,
+        "panditas": 12,
+        "sabritas": 11,
+        "skittles": 0
+      }
+    },
+    "test": {
+      "imagenes": 106,
+      "objetos": 106,
+      "por_clase": {
+        "chokis": 0,
+        "coca_cola": 47,
+        "doritos": 18,
+        "gansito": 15,
+        "panditas": 11,
+        "sabritas": 6,
+        "skittles": 9
+      }
+    }
+  }
+}

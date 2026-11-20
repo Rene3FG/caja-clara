@@ -1,0 +1,28 @@
+{"date": "11/19/2026", "time": "23:38:34", "status": "STARTED", "verbosity": "INFO", "message": "Starting DINO train."}
+{"date": "11/19/2026", "time": "23:38:37", "status": "FAILURE", "verbosity": "INFO", "message": "DataLoader worker (pid(s) 168) exited unexpectedly"}
+{"date": "11/19/2026", "time": "23:42:38", "status": "STARTED", "verbosity": "INFO", "message": "Starting DINO train."}
+{"date": "11/19/2026", "time": "23:46:50", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8454465843364058", "val_mAP50": "0.9972548315627346", "val_loss": 4.910633563995361}}
+{"date": "11/19/2026", "time": "23:46:50", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 14.738462448120117}}
+{"date": "11/19/2026", "time": "23:50:54", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8294684404293468", "val_mAP50": "0.9966996699669967", "val_loss": 4.600738048553467}}
+{"date": "11/19/2026", "time": "23:50:55", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 8.003482818603516}}
+{"date": "11/19/2026", "time": "23:55:1", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8711260774998123", "val_mAP50": "0.9944089483900038", "val_loss": 4.1018290519714355}}
+{"date": "11/19/2026", "time": "23:55:2", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 7.306416034698486}}
+{"date": "11/19/2026", "time": "23:59:33", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8456217411426035", "val_mAP50": "0.9966996699669967", "val_loss": 4.187283515930176}}
+{"date": "11/19/2026", "time": "23:59:33", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 7.19020938873291}}
+{"date": "11/20/2026", "time": "0:3:46", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.857029029456499", "val_mAP50": "0.9933993399339934", "val_loss": 4.276000499725342}}
+{"date": "11/20/2026", "time": "0:3:46", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 6.910337924957275}}
+{"date": "11/20/2026", "time": "0:7:48", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8503692330416022", "val_mAP50": "0.996522866656678", "val_loss": 4.113949298858643}}
+{"date": "11/20/2026", "time": "0:7:48", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 7.182215690612793}}
+{"date": "11/20/2026", "time": "0:11:55", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.883500957656452", "val_mAP50": "0.9966996699669967", "val_loss": 3.523348808288574}}
+{"date": "11/20/2026", "time": "0:11:56", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 6.994369983673096}}
+{"date": "11/20/2026", "time": "0:16:20", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8897328825058913", "val_mAP50": "0.9966996699669967", "val_loss": 3.5555663108825684}}
+{"date": "11/20/2026", "time": "0:16:20", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 6.55039644241333}}
+{"date": "11/20/2026", "time": "0:20:24", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.8756513837749513", "val_mAP50": "0.9966996699669967", "val_loss": 3.5541486740112305}}
+{"date": "11/20/2026", "time": "0:20:25", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 6.706990718841553}}
+{"date": "11/20/2026", "time": "0:24:27", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.9032305594853344", "val_mAP50": "0.9966996699669967", "val_loss": 2.982050657272339}}
+{"date": "11/20/2026", "time": "0:24:27", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 5.213055610656738}}
+{"date": "11/20/2026", "time": "0:28:30", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.9018525839368305", "val_mAP50": "0.9966996699669967", "val_loss": 2.883164882659912}}
+{"date": "11/20/2026", "time": "0:28:30", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 4.889249801635742}}
+{"date": "11/20/2026", "time": "0:32:32", "status": "RUNNING", "verbosity": "INFO", "message": "Eval metrics generated.", "kpi": {"val_mAP": "0.9114595631696899", "val_mAP50": "0.9966996699669967", "val_loss": 2.879192352294922}}
+{"date": "11/20/2026", "time": "0:32:32", "status": "RUNNING", "verbosity": "INFO", "message": "Train metrics generated.", "kpi": {"train_loss": 4.8294291496276855}}
+{"date": "11/20/2026", "time": "0:32:34", "status": "RUNNING", "verbosity": "INFO", "message": "Train finished successfully.", "kpi": {"train_loss": 4.8294291496276855}}
