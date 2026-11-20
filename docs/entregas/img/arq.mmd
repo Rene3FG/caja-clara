@@ -1,12 +1,21 @@
 flowchart LR
-  A["📱 App Flutter<br/>(Galaxy S24)<br/>Perfil → Servidor IA"] -- "HTTPS" --> T["Túnel Cloudflare<br/>(trycloudflare.com)"]
-  T --> G["Gateway FastAPI :8000<br/>scripts/ia_gateway.py"]
-  subgraph L["Laptop · RTX 2060 6 GB"]
-    G -- "/detectar" --> D["Detector :8002<br/>DINO ResNet-50 v3<br/>TensorRT 11.5"]
-    G -- "/asistente, /libreta" --> S["Asistente :8001<br/>Qwen2.5-1.5B + LoRA<br/>(PyTorch, GPU)"]
+  subgraph M["Móvil · Android (APK)"]
+    A["<b>App Flutter/Dart</b><br/>image_picker<br/>speech_to_text<br/>flutter_tts · http<br/>connectivity_plus<br/>BD local:<br/>shared_preferences"]
   end
-  S -- "foto de libreta" --> N["API NVIDIA<br/>Nemotron 3.5 Super VL"]
-  G -- "/api/*" --> V["VPS del equipo<br/>Gundani: FastAPI + SQLite<br/>Qwen2.5-3B QLoRA (GGUF, CPU)"]
+  A -- "HTTPS · REST<br/>JSON / multipart" --> T["Cloudflare<br/>Tunnel<br/>(externo)"]
+  subgraph L["Laptop · RTX 2060 6 GB"]
+    G["Gateway<br/>FastAPI :8000"]
+    D["<b>MODELO DE VISIÓN</b><br/>Detector :8002<br/>DINO R50 v3<br/>TensorRT 11.5"]
+    S["<b>LLM AJUSTADO</b><br/>Asistente :8001<br/>Qwen2.5-1.5B<br/>+ LoRA · validación"]
+    G -- "/detectar" --> D
+    G -- "/asistente<br/>/libreta" --> S
+  end
+  T --> G
+  S -- "libreta" --> N["API NVIDIA<br/>(externo)<br/>Nemotron VL"]
+  G -- "/api/*" --> V["VPS · Gundani<br/>FastAPI<br/>BD SQLite<br/>Qwen2.5-3B QLoRA<br/>cobro SIMULADO"]
+  A -. "directo" .-> V
+  E["Entrenamiento<br/>NVIDIA DLI · T4<br/>TAO 5.5 · PEFT"] -. "pesos" .-> L
   classDef nv fill:#eaf4dc,stroke:#76b900,color:#1f1b16;
   classDef x fill:#f6ede3,stroke:#9a2a1e,color:#1f1b16;
-  class D,S,N nv; class A,T,G,V x;
+  classDef ext fill:#eef2f7,stroke:#5a6b85,color:#1f1b16;
+  class D,S nv; class A,G,V x; class T,N,E ext;

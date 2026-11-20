@@ -12,11 +12,7 @@ Cada cifra lleva su archivo de origen en el repositorio. Lo que no está registr
 | **Asistente** (texto/voz → acción) | Convertir lo dicho o escrito en una acción JSON | Qwen2.5-1.5B-Instruct | LoRA r=16 (PEFT) | Tesla T4, servidor DLI | Contenedor PyTorch de TAO 5.5 (entrenamiento) | Coincidencia exacta 1.4 % → **86.5 %** (74 casos); reservados 0/14 → **13/14** | **1.07 s** (RTX 2060) |
 | **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4 según su log <span class="falta">[FALTA: confirmar con Daniel el servidor]</span> | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s** en el VPS (CPU, GGUF); 10.3 s en T4 |
 
-<p class="fuente">Fuentes: <code>training/vision/evaluacion/v3_p03/resultados.json</code>,
-<code>logs/eval_test_publico_v3.json</code>, <code>training/vision/specs/train_v3.yaml</code>,
-<code>training/asistente/resultados/{config_entrenamiento.json, eval_base_local.json, eval_lora_local.json, latencia_rtx2060.txt}</code>,
-<code>backend_gundani/{registro_entrenamiento.json, entrenamiento_asistente.log, eval_base.json, eval_ajustado.json, latencia_vps.json}</code>,
-<code>docs/DECLARACION_IA_Y_LICENCIAS.md</code> (lugar de entrenamiento). Además usamos un componente que no
+<p class="fuente">Fuentes: cada cifra se detalla en su sección (A.3–A.7, B.4–B.6, C.2). Además usamos un componente que no
 entrenamos: Nemotron 3.5 Super VL, por la API de NVIDIA, para transcribir la foto de la libreta (sección B.6).</p>
 
 ## A. Modelo de visión: detector de productos
@@ -56,13 +52,10 @@ train v2 en `training/vision/logs/distribucion_train_v2_reconstruida.json`):
 | val | 97 | 0 | 98 | 5 | 56 | 3 | 11 | 12 | 11 | 0 | 0 |
 | test (público) | 106 | 0 | 106 | 0 | 47 | 18 | 15 | 11 | 6 | 9 | 0 |
 
-El 2026-11-20 regeneramos el split desde Roboflow. El test salió **idéntico** (106 imágenes con los mismos
-objetos por clase) y train público = 819, igual que en v1 (`training/detector/evaluar_test_publico.py`).
-El JSON se llama "v2" porque `preparar_datos.py` usa ese nombre fijo, pero su train es el de **v3**.
-¹ El train de v2 no quedó guardado; lo reconstruimos como train v3 menos p04 (17 imágenes, 39 objetos,
-`datos_propios/p04_annotations.coco.json`). Los logs lo confirman: TAO descarta el último batch incompleto
-(batch 2), así que 819 → 409, 913 → 456 y 930 → 465 pasos por época, que son exactamente los valores de
-`entrenamiento_dino_v{1,2,3}.log`.
+Al regenerar el split desde Roboflow (2026-11-20) el test salió **idéntico** y el train público dio 819. El JSON
+se llama "v2" por un nombre fijo en `preparar_datos.py`, pero su train es el de **v3**. ¹ Train v2 = train v3 − p04
+(`datos_propios/p04_annotations.coco.json`). Lo confirman los logs: con batch 2 y el último batch incompleto
+descartado, 819/913/930 imágenes dan 409/456/465 pasos por época, como en `entrenamiento_dino_v{1,2,3}.log`.
 
 ### A.3 Modelo y entrenamiento
 
@@ -88,9 +81,9 @@ El JSON se llama "v2" porque `preparar_datos.py` usa ese nombre fijo, pero su tr
 
 | Versión | Qué cambió | Por qué |
 |---|---|---|
-| v1 | Solo datos públicos, 7 clases | Línea base. En fotos propias detectaba algo en el **100 %** de las fotos que solo tenían distractores (Golden Nuts, agua, lata azul) |
-| v2 | + fotos propias p01 y p02 en train; **nueva clase `otro_producto`** para los distractores; **7 correcciones manuales** de etiquetas (`datos_propios/correcciones_manuales.txt`: dos `otro_producto → chokis`, cuatro `+ sabritas`, un `+ otro_producto`) | Que el modelo aprenda a decir "esto no es del catálogo" en lugar de forzar una de las 7 clases. Las etiquetas propias se pre-generaron con v1 y se corrigieron a mano |
-| v3 (la de la app) | + sesión **p04** (17 imágenes, 39 objetos, `datos_propios/p04_annotations.coco.json`) | Más mezclas reales de productos. La app usa v3 (`modelos/README.md`) |
+| v1 | Solo datos públicos, 7 clases | Línea base. En fotos propias detectaba algo en el **100 %** de las fotos que solo tenían distractores |
+| v2 | + p01 y p02; **clase `otro_producto`**; **7 correcciones** de etiquetas (`datos_propios/correcciones_manuales.txt`) | Decir "no es del catálogo" en vez de forzar una clase; etiquetas pre-generadas con v1 y corregidas a mano |
+| v3 (app) | + **p04** (17 imágenes, 39 objetos, `p04_annotations.coco.json`) | Más mezclas reales de productos |
 
 ### A.5 Evaluación
 
@@ -127,7 +120,7 @@ celular en el mostrador, con distractores (`training/vision/evaluacion/v{1,2,3}_
 ### A.6 Análisis de errores (v3, p03, umbral 0.5, `evaluacion/v3_p03/resultados.md`)
 
 <figure>
-<img src="../../training/vision/evaluacion/v3_p03/mosaico.jpg" style="width:36%">
+<img src="../../training/vision/evaluacion/v3_p03/mosaico.jpg" style="width:30%">
 <figcaption>Figura 2. Mosaico de las 36 fotos p03 con las cajas de v3 (<code>training/vision/evaluacion/v3_p03/mosaico.jpg</code>).</figcaption>
 </figure>
 
@@ -136,13 +129,21 @@ celular en el mostrador, con distractores (`training/vision/evaluacion/v{1,2,3}_
 - **Barritas Marinela leídas como doritos** (p03_002): es un distractor que nunca apareció en entrenamiento.
 - **Foto muy movida** (p03_027, chokis sola): no detectó nada.
 
-**Qué haríamos para corregirlo:**
+**Qué haríamos para corregirlo:** más fotos propias de **mezclas chokis + sabritas** (hoy el train tiene
+78 chokis contra 376 coca_cola); etiquetar como `otro_producto` los empaques rojo con amarillo parecidos a
+doritos; probar un umbral por clase elegido con **validación**, nunca con p03 ni con el test; y avisar en la
+app cuando la foto esté movida.
 
-- Agregar más fotos propias de **mezclas chokis + sabritas**, con distintos ángulos y oclusiones; hoy el
-  train tiene 78 chokis contra 376 coca_cola.
-- Etiquetar como `otro_producto` empaques parecidos a doritos (rojo y amarillo), como las barritas.
-- Evaluar un umbral por clase con **datos de validación**, nunca con p03 ni con el test.
-- En la app, avisar cuando la foto esté movida.
+**Ejemplo de inferencia real** con una foto de prueba no usada en entrenamiento, `p03_022.jpg` (chokis +
+sabritas), por el gateway (`logs/pruebas_app_2026-11-20.json`, caso 1):
+
+```
+POST /detectar  ->  {"detecciones": [{"producto": "sabritas", "confianza": 0.856, "caja": [30.2, 319.3, 1470.4, 1426.3]}],
+                     "conteo": {"sabritas": 1}, "ms": 221.8, "requiere_revision": true, "sha256_engine": "e58f31e3…"}
+```
+
+No detectó las chokis (el error descrito arriba). La app muestra la cuenta y la persona agrega las chokis a
+mano antes de cobrar.
 
 ### A.7 Despliegue en la laptop
 
@@ -170,6 +171,16 @@ Nota: el sha256 completo del engine v3 es <code>e58f31e320305dfd1652907b0501d8fb
 <i>Libro → Modelos de IA en uso</i>. <b>Latencia:</b> mediana de <b>89.2 ms</b> por foto en la RTX 2060, incluyendo
 preproceso y postproceso (<code>evaluacion/v3_p03/resultados.json</code>, <code>ms_mediana</code>).</p>
 
+**Código y pesos.**
+
+- **Entrenamiento:** cuaderno `training/vision/02_caja_clara_detector_dino.ipynb` con los specs
+  `training/vision/specs/train*.yaml`; los datos se preparan con `training/vision/preparar_datos.py`.
+- **Engine e inferencia:** `training/detector/construir_engine.py` construye el engine y
+  `servir_detector.py` (`API_DETECTOR.md`) lo sirve.
+- **Pesos:** `.pth`, `.onnx` y `.engine` pesan más de 100 MB y no caben en GitHub. Se entregan en el paquete
+  de entrenamiento (`modelos/README.md`). Cualquiera puede verificar el engine cargado con `GET /salud`, que
+  devuelve su sha256.
+
 ## B. Modelo de lenguaje: asistente
 
 ### B.1 Tarea y esquema
@@ -187,12 +198,10 @@ servidor valida la acción y calcula precios y totales (`training/asistente/serv
 
 ### B.2 Modelo base: Qwen2.5-1.5B-Instruct
 
-- **Tamaño:** 1.5 mil millones de parámetros, unos 3 GB de descarga (`API_ASISTENTE.md`). Cabe en fp16 en la
-  RTX 2060 de 6 GB (`servir_asistente.py`).
-- **Español:** todo el dataset y los 74 casos de evaluación están en español, así que la evaluación de B.5
-  mide directamente esa capacidad.
-- **Licencia:** Apache 2.0 (`DECLARACION_IA_Y_LICENCIAS.md`, marcada para confirmar en la página oficial).
-- **GPU de consumo:** corre en la laptop de la demo con 1.07 s por frase.
+**Por qué:** su **tamaño** (1.5 mil millones de parámetros, ~3 GB, `API_ASISTENTE.md`) cabe en fp16 en la
+RTX 2060 de 6 GB y responde en ~1 s, así que corre en una **GPU de consumo**. Funciona en **español**: el dataset y
+los 74 casos de evaluación están en español y B.5 mide esa capacidad. Su **licencia** es Apache 2.0
+(`DECLARACION_IA_Y_LICENCIAS.md`).
 
 ### B.3 Dataset
 
@@ -226,7 +235,10 @@ Tres ejemplos reales de `data/train.jsonl`:
 
 <p class="fuente">Fuentes: <code>resultados/adapter_config.json</code>, <code>config_entrenamiento.json</code>, <code>bitacora.txt</code>,
 <code>entrenar_lora.py</code> (docstring), <code>docs/DECLARACION_IA_Y_LICENCIAS.md</code> (DLI), <code>modelos/README.md</code> (sha256 completo
-<code>72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d</code>), <code>entrenamiento_lora.log</code> (18,464,768 parámetros entrenables).</p>
+<code>72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d</code>), <code>entrenamiento_lora.log</code> (18,464,768 parámetros entrenables).
+<b>Código y configuración:</b> <code>training/asistente/entrenar_lora.py</code> y <code>config_lora.yaml</code>; cuadernos <code>03_caja_clara_asistente_lora.ipynb</code>
+y <code>04_log_evaluacion_lora.ipynb</code>. <b>Acceso:</b> el adaptador (74 MB, <code>lora_adaptador/</code>) se carga sobre el modelo base que
+se descarga de Hugging Face con <code>servir_asistente.py --adaptador …</code>. <code>GET /salud</code> devuelve su sha256.</p>
 
 ### B.5 Evaluación: base contra adaptado
 
@@ -253,6 +265,15 @@ Comparamos los **mismos 74 casos** (60 de test + 14 reservados) con el mismo pro
   (`resultados/latencia_gpu_rtx2060.json`, `latencia_cpu.json`). La cifra de ~18 s en CPU que se manejaba
   no se confirma: lo medido es 8.8 s.
 
+**Ejemplos de interacción** con el servidor real a través del gateway (`logs/pruebas_app_2026-11-20.json`,
+casos 2, 3 y 6):
+
+```
+"cobra 2 sabritas y 3 cocas"  -> agregar sabritas×2 ($40) + coca_cola×3 ($66); total_propuesto 106.0; requiere_confirmacion  (1.2 s)
+"cobra tres"                  -> aclarar: "No escuché qué producto. ¿Me dices qué y cuántos?"  (el LoRA propuso refresco×3; rechazado)
+"¿a qué hora abre el banco?"  -> fuera_de_alcance: "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."
+```
+
 ### B.6 Reglas de seguridad del servidor (`servir_asistente.py`, función `valida`)
 
 1. **Catálogo:** se rechaza cualquier acción o producto fuera del catálogo, y también cualquier producto que
@@ -275,34 +296,63 @@ transcripción: "2 tlayuda / 1 quesadilla / 1 tlayuda"   (visión: 8.0 s)
 resultado:     registrar_libreta tlayuda ×3 = $270;  pendiente: "1 quesadilla" (no está en el catálogo)   (total: 9.7 s)
 ```
 
-**LLM de Gundani (componente de apoyo).** Es un adaptador QLoRA (4 bits NF4, r=16, 5 épocas) sobre
-**Qwen2.5-3B-Instruct** (Apache 2.0), entrenado con 108 ejemplos propios y validado con 15. Se convirtió a GGUF
-`Q4_K_M` y en el VPS lo sirve `llama-server` en CPU (`backend_gundani/README.md`, `registro_entrenamiento.json`).
-Su log (`backend_gundani/entrenamiento_asistente.log`) registra una Tesla T4 el 2026-11-20 de 02:35 a 02:44
-(8.9 min, 65 pasos, 29.9 M parámetros entrenables). En el VPS responde en **8.6 s** de media (14 frases de
-prueba; 9.1 s de ida y vuelta por el gateway; `backend_gundani/latencia_vps.json`).
-<span class="falta">[FALTA: confirmar con Daniel en qué servidor se ajustó; el log no lo dice]</span>
+**LLM de Gundani (componente de apoyo).** Adaptador QLoRA (4 bits NF4, r=16, 5 épocas) sobre
+**Qwen2.5-3B-Instruct**, con 108 ejemplos de entrenamiento y 15 de validación. Convertido a GGUF `Q4_K_M`, lo sirve
+`llama-server` en CPU en el VPS y responde en **8.6 s** de media (`backend_gundani/README.md`,
+`registro_entrenamiento.json`, `latencia_vps.json`). Su log (`entrenamiento_asistente.log`) registra una Tesla T4
+el 2026-11-20, de 02:35 a 02:44. <span class="falta">[FALTA: confirmar con Daniel en qué servidor se ajustó]</span>
 
 ## C. Arquitectura
 
-![Figura 3. Componentes y puertos (fuente: `docs/entregas/img/arq.mmd`; código en `scripts/ia_gateway.py` y `scripts/demo_up.sh`).](img/arq.png){width=85%}
+### C.1 Integración de los modelos y responsabilidad de cada uno
 
-| Servicio | Puerto | Hardware | Modelo | Herramienta NVIDIA |
-|---|---|---|---|---|
-| Gateway (`scripts/ia_gateway.py`) | 8000 | Laptop | — (reenvía `/detectar`, `/asistente`, `/libreta`, `/salud` y `/api/*`) | — |
-| Detector (`training/detector/servir_detector.py`) | 8002 | RTX 2060, 6 GB | DINO ResNet-50 v3 | TAO 5.5 (entrenamiento) · TensorRT 11.5 (inferencia) |
-| Asistente y libreta (`training/asistente/servir_asistente.py`) | 8001 | RTX 2060 (fp16) | Qwen2.5-1.5B + LoRA · Nemotron 3.5 Super VL (API) | GPU T4 DLI (entrenamiento) · API build.nvidia.com |
-| Gundani (`backend_gundani/api_gundani.py`) | VPS, `/api` | CPU, 8 hilos, AVX2 (`api_gundani.py`) | Qwen2.5-3B QLoRA (GGUF) | GPU T4 (entrenamiento) |
-| Túnel (`cloudflared`) | HTTPS | Laptop | — | — |
+Ningún modelo guarda nada por sí solo: **los modelos proponen, el código valida y la persona confirma**.
 
-**Secuencia de una venta por foto.** Los tiempos vienen de `logs/pruebas_app_2026-11-20.json` (casos 1 y 7)
-y de `evaluacion/v3_p03/resultados.json`:
+| Paso del flujo | Responsable | Qué hace | Qué NO hace |
+|---|---|---|---|
+| Foto del mostrador → productos | **Modelo de visión** (DINO v3, TensorRT) | Localiza y cuenta los 7 productos; marca `otro_producto` como "no reconocido" | No calcula precios ni guarda la venta |
+| Voz o texto → acción | **LLM ajustado** (Qwen2.5-1.5B + LoRA) | Convierte la frase en una acción JSON (agregar, quitar, forma de pago, libreta, aclarar…) | No inventa precios, totales ni fechas |
+| Foto de la libreta → texto | Nemotron 3.5 Super VL (API NVIDIA, complemento) | Transcribe los renglones; después el LoRA los interpreta | No decide qué se registra |
+| Validación y cálculo | Código de los servidores (`servir_asistente.py`, `servir_detector.py`) | Revisa catálogo y productos mencionados, suma repetidos, calcula precios y total, deja pendientes | — |
+| Revisión y guardado | App y persona | Muestra la cuenta para corregir (+/−), pide confirmación y guarda en el teléfono | — |
+| Caja y cobro | Gundani (VPS) | Resumen de caja, movimientos y cobro QR **simulado** | No mueve dinero real |
 
-![Figura 4. Venta por foto, de principio a fin (fuente: `docs/entregas/img/sec.mmd`).](img/sec.png){width=62%}
+Los dos modelos se combinan en la **misma cuenta**: la persona puede tomar la foto (visión) y después dictar
+"agrega 2 cocas" o "quita una sabritas" (LLM) sobre esa misma venta. Ambos llegan a la app por el mismo
+gateway (`scripts/ia_gateway.py`).
 
-En la prueba 1 la respuesta del detector a través del gateway tardó **295 ms** (221.8 ms dentro del servidor).
-El cobro QR simulado tardó **585 ms**. El tiempo que la persona tarda en revisar y confirmar todavía no se ha
-medido. <span class="falta">[FALTA: tiempo total por venta, pendiente de las pruebas de uso, `docs/pruebas_uso.md`]</span>
+### C.2 Diagrama y servicios
+
+![Figura 3. Arquitectura general (fuente: `docs/entregas/img/arq.mmd`).](img/arq.png){width=75%}
+
+**Plataforma:** app móvil Android (APK). **Frontend:** Flutter/Dart con `image_picker` (cámara),
+`speech_to_text` y `flutter_tts` (voz), `http`, `connectivity_plus` y `shared_preferences` como base de datos
+local de ventas (`app/pubspec.yaml`). **Backend:** servicios FastAPI (gateway, detector y asistente en la laptop;
+Gundani con **SQLite** en el VPS). **Comunicación:** API REST sobre HTTPS (JSON, y multipart para las fotos).
+**Servicios externos:** Cloudflare Tunnel y API de NVIDIA (build.nvidia.com). **Despliegue:** laptop con RTX 2060
+y VPS; entrenamiento en NVIDIA DLI (Tesla T4).
+
+| Servicio (código) | Puerto | Hardware | Modelo · herramienta NVIDIA |
+|---|---|---|---|
+| App Android (`app/`, Flutter/Dart) | — | Galaxy S24 | — (voz: STT de Android) |
+| Gateway (`scripts/ia_gateway.py`) | 8000 | Laptop | — (solo reenvía) |
+| Detector (`training/detector/servir_detector.py`) | 8002 | RTX 2060 6 GB | DINO v3 · TAO 5.5 → TensorRT 11.5 |
+| Asistente y libreta (`training/asistente/servir_asistente.py`) | 8001 | RTX 2060 (fp16) | Qwen2.5-1.5B + LoRA (T4 DLI) · Nemotron VL (API NVIDIA) |
+| Gundani + BD SQLite (`backend_gundani/api_gundani.py`) | VPS `/api` | CPU 8 hilos | Qwen2.5-3B QLoRA, GGUF (T4) |
+| Túnel `cloudflared` | HTTPS | Laptop | — |
+
+**Secuencia de una venta por foto** (tiempos de `logs/pruebas_app_2026-11-20.json`, casos 1 y 7):
+
+1. La persona toma la foto del mostrador en la app.
+2. La app la envía con `POST /detectar`; el gateway la reenvía al detector. La respuesta llega en **295 ms**
+   de ida y vuelta, de los cuales 221.8 ms son dentro del servidor.
+3. La app muestra la cuenta. La persona corrige con +/− (o dicta, con el asistente) y confirma.
+4. El total se calcula en código y la venta se guarda en el teléfono.
+5. Para el cobro QR **simulado**, la app llama a `POST /api/qr/cobrar` en Gundani: responde aprobado o
+   `qr_expirado` en **585 ms**.
+
+El tiempo que la persona tarda en revisar y confirmar todavía no se ha medido.
+<span class="falta">[FALTA: tiempo total por venta, pendiente de las pruebas de uso, `docs/pruebas_uso.md`]</span>
 
 **Implementado y simulado** (`docs/funciones.md`):
 
@@ -311,47 +361,29 @@ medido. <span class="falta">[FALTA: tiempo total por venta, pendiente de las pru
 - **Simulado:** el cobro QR o transferencia (DiMo/CoDi) es **SIMULADO** con tres estados: aprobado, QR
   expirado y saldo insuficiente. No hay conexión con bancos y la app lo marca como simulación.
 
-**Manejo de fallas:**
-
-- Si un servicio no responde, el gateway devuelve 503 o 504 con el mensaje "Puedes capturar a mano" y la
-  persona **captura la venta a mano**.
-- La URL del servidor se cambia en la app, en **Perfil → Servidor IA**, sin recompilar. **Probar conexión**
-  llama a `/salud` (`docs/DEMO.md`).
+**Manejo de fallas:** si un servicio no responde, el gateway devuelve 503 o 504 con el mensaje "Puedes
+capturar a mano" y la persona **captura la venta a mano**. Sin red, la venta queda en el teléfono y se envía
+cuando vuelve la conexión. La URL del servidor se cambia en **Perfil → Servidor IA**, sin recompilar, y
+**Probar conexión** llama a `/salud` (`docs/DEMO.md`, `docs/funciones.md`).
 
 **Seguridad:** las llaves (`NVIDIA_API_KEY`, `ROBOFLOW_API_KEY`) viven en `~/caja-clara/.env`, fuera de git
 (`.gitignore`), y nunca en el repositorio. Las llaves de desarrollo se revocan al cerrar (`docs/ENTREGA.md`).
 
-**Limitaciones y escalamiento** (no medido; es un plan):
-
-- Hoy todo depende de una laptop y de un túnel cuya URL cambia en cada reinicio.
-- Los modelos podrían servirse con **NVIDIA NIM**, o el detector en un **Jetson** por tienda para no
-  depender de la red.
-- Con **cuantización** (engine FP16 o INT8 para el detector; asistente en 4 bits) cabrían en GPUs más pequeñas.
-- La libreta por foto necesita internet porque usa la API de NVIDIA.
+**Limitaciones y escalamiento** (no medido; es un plan): hoy todo depende de una laptop y de un túnel cuya URL
+cambia en cada reinicio, y la libreta por foto necesita internet porque usa la API de NVIDIA. Los modelos
+podrían servirse con **NVIDIA NIM**, o el detector en un **Jetson** por tienda para no depender de la red. Con
+**cuantización** (engine FP16 o INT8 para el detector, asistente en 4 bits) cabrían en GPUs más pequeñas.
 
 ## Anexo: reproducción y enlaces
 
 ```
-# Detector (servidor DLI, Tesla T4): datos, entrenamiento, export
-python3 training/vision/preparar_datos.py --publicos datos/roboflow/oxxo datos/roboflow/mercado \
-        --propias <export_propias> --train-sesiones p01 p02 p04          # 80/10/10, seed 1234
-tao model dino train  -e training/vision/specs/train_v3.yaml          # cuaderno 02_caja_clara_detector_dino.ipynb
-tao model dino export -e training/vision/specs/train_v3.yaml export.checkpoint=<model_epoch_011.pth> \
-        export.onnx_file=dino_v3.onnx export.input_width=640 export.input_height=640 export.batch_size=1
-# Detector (laptop RTX 2060): engine, evaluación y servicio
+python3 training/vision/preparar_datos.py --publicos <oxxo> <mercado> --propias <p> --train-sesiones p01 p02 p04
+tao model dino train -e training/vision/specs/train_v3.yaml   # y tao model dino export (cuaderno 02)
 python3 training/detector/construir_engine.py dino_v3.onnx dino_v3_rtx2060.engine
-python3 training/detector/evaluar_piloto.py --fotos ~/caja-clara/fotos_propias/p03 --engine dino_v3_rtx2060.engine  # → evaluacion/v3_p03/
 python3 training/detector/evaluar_test_publico.py --test datos/final/test --engine v3=dino_v3_rtx2060.engine
-# Asistente (servidor DLI, Tesla T4) y servicio en la laptop
-python3 training/asistente/generar_dataset.py --n 1400 --seed 1234
-python3 training/asistente/entrenar_lora.py --entrenar --evaluar
-python3 training/asistente/servir_asistente.py --adaptador resultados_asistente/lora_adaptador
-# Gundani
+python3 training/asistente/generar_dataset.py --n 1400 --seed 1234   # luego entrenar_lora.py --entrenar --evaluar
 python3 backend_gundani/entrenar_qlora.py && python3 backend_gundani/evaluar_modelo.py
-python3 backend_gundani/medir_latencia_vps.py --url <gateway>          # latencia en el VPS
-python3 training/asistente/medir_latencia.py --url http://127.0.0.1:8001 --salida resultados/latencia_gpu_rtx2060.json
-# Demo completa
-bash scripts/demo_up.sh        # imprime la URL y los hashes e58f31e3… / 72a3259e…
+bash scripts/demo_up.sh     # levanta detector, asistente, gateway y túnel; imprime URL y hashes e58f31e3… / 72a3259e…
 ```
 
 **Enlaces:** repositorio github.com/Rene3FG/caja-clara · ProductosOXXO_V02:
