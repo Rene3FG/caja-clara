@@ -11,6 +11,7 @@ import 'ui/libro.dart';
 import 'ui/marco.dart';
 import 'ui/operacion.dart';
 import 'ui/productos.dart';
+import 'ui/revisar.dart';
 import 'ui/sin_red.dart';
 
 const _conMarco = {'inicio', 'sin-red', 'libro', 'fiados', 'productos'};
@@ -124,6 +125,8 @@ class _Cuerpo extends StatelessWidget {
         return const ElegirMetodo();
       case 'gasto':
         return const RegistrarGasto();
+      case 'revisar':
+        return const RevisarMovimiento();
       case 'qr':
         return const QrPago();
       case 'desglose-ventas':

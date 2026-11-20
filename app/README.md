@@ -12,6 +12,10 @@ flutter test
 flutter run -d chrome
 ```
 
+El asistente Gundani usa `http://80.241.220.188:8000`.
+Otro servidor: `--dart-define=GUNDANI_URL=http://127.0.0.1:8000`.
+`API_URL` es solo el detector de fotos.
+
 Para apuntar al backend:
 
 ```bash

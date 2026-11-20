@@ -13,9 +13,10 @@ class Libro extends StatelessWidget {
     final caja = Caja.of(context);
     final ahora = DateTime.now();
     final rango = rangoDe(caja.periodo, ahora);
+    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final vs = caja.ventas.where((v) => enRango(v.en, rango)).toList();
     final gs = caja.gastos.where((g) => enRango(g.en, rango)).toList();
-    final corte = ganancia([for (final v in vs) v.total], [for (final g in gs) g.monto]);
+    final corte = servidor == null ? ganancia([for (final v in vs) v.total], [for (final g in gs) g.monto]) : Corte(servidor.ventas, servidor.gastos, servidor.balance);
     final estado = caja.conectado && caja.pendientes == 0
         ? 'Todas tus cuentas están respaldadas y al día.'
         : 'Guardado en este teléfono. Se envía cuando haya señal.';
@@ -110,9 +111,11 @@ class DesgloseVentas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
+    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final rango = rangoDe(caja.periodo, DateTime.now());
     final lista = caja.ventas.where((v) => enRango(v.en, rango)).toList();
-    final total = lista.fold<double>(0, (s, v) => s + v.total);
+    final delServidor = servidor?.movimientos.where((m) => m.tipo == 'venta').toList();
+    final total = delServidor == null ? lista.fold<double>(0, (s, v) => s + v.total) : delServidor.fold<double>(0, (s, m) => s + m.monto);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -124,12 +127,15 @@ class DesgloseVentas extends StatelessWidget {
         children: [
           Text('${tituloPeriodo(caja.periodo, DateTime.now())}  ·  ${pesos(total)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
-          for (final v in lista)
-            _tarjeta(
-              '${horaCorta(v.en)}  ${listaLineas([for (final l in v.lineas) (nombre: l.nombre, cantidad: l.cantidad)])}',
-              pesos(v.total),
-              _metodo(v.metodo),
-            ),
+          if (delServidor != null)
+            for (final m in delServidor) _tarjeta('${horaCorta(m.en)}  ${m.concepto}', pesos(m.monto), _metodoApi(m.metodo))
+          else
+            for (final v in lista)
+              _tarjeta(
+                '${horaCorta(v.en)}  ${listaLineas([for (final l in v.lineas) (nombre: l.nombre, cantidad: l.cantidad)])}',
+                pesos(v.total),
+                _metodo(v.metodo),
+              ),
         ],
       ),
     );
@@ -142,9 +148,11 @@ class DesglosePagos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
+    final servidor = caja.periodo.tipo == 'hoy' ? caja.resumen : null;
     final rango = rangoDe(caja.periodo, DateTime.now());
     final lista = caja.gastos.where((g) => enRango(g.en, rango)).toList();
-    final total = lista.fold<double>(0, (s, g) => s + g.monto);
+    final delServidor = servidor?.movimientos.where((m) => m.tipo == 'gasto').toList();
+    final total = delServidor == null ? lista.fold<double>(0, (s, g) => s + g.monto) : delServidor.fold<double>(0, (s, m) => s + m.monto);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -156,7 +164,10 @@ class DesglosePagos extends StatelessWidget {
         children: [
           Text('${tituloPeriodo(caja.periodo, DateTime.now())}  ·  ${pesos(total)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
-          for (final g in lista) _tarjeta('${horaCorta(g.en)}  ${g.concepto}', pesos(g.monto), _metodo(g.metodo)),
+          if (delServidor != null)
+            for (final m in delServidor) _tarjeta('${horaCorta(m.en)}  ${m.concepto}', pesos(m.monto), _metodoApi(m.metodo))
+          else
+            for (final g in lista) _tarjeta('${horaCorta(g.en)}  ${g.concepto}', pesos(g.monto), _metodo(g.metodo)),
         ],
       ),
     );
@@ -164,6 +175,12 @@ class DesglosePagos extends StatelessWidget {
 }
 
 String _eti(String? iso) => iso == null || iso.isEmpty ? '' : etiquetaDia(parseDia(iso));
+
+String _metodoApi(String metodo) => switch (metodo) {
+      'qr' => 'QR',
+      'transferencia' => 'Transferencia',
+      _ => 'Efectivo',
+    };
 
 String _metodo(Metodo m) => switch (m) {
       Metodo.efectivo => 'Efectivo',

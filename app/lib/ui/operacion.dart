@@ -9,6 +9,7 @@ import '../servicios/asistente.dart';
 import '../servicios/vision.dart';
 import '../servicios/voz.dart';
 import '../tema.dart';
+import 'mic.dart';
 import 'widgets.dart';
 
 class RegistrarVenta extends StatefulWidget {
@@ -19,7 +20,6 @@ class RegistrarVenta extends StatefulWidget {
 }
 
 class _RegistrarVentaState extends State<RegistrarVenta> {
-  SesionVoz? _sesion;
   var _todos = false;
   var _foto = false;
 
@@ -40,21 +40,6 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
     caja.setBorrador(lineas);
   }
 
-  void _hablar() {
-    setState(() {
-      _sesion = escuchar(
-        fraseDemo: 'Dos quesadillas y un café de olla',
-        alTexto: (texto) {
-          if (!mounted) return;
-          final caja = Caja.of(context);
-          caja.setAviso(texto);
-          caja.setBorrador(proponerVenta(texto, caja.productos));
-          setState(() => _sesion = null);
-        },
-      );
-    });
-  }
-
   Future<void> _fotoTap() async {
     final caja = Caja.of(context);
     final halls = await identificar(null, null, caja.productos);
@@ -72,30 +57,12 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
     final caja = Caja.of(context);
     final total = caja.borrador.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
     final atajos = _todos ? caja.productos : caja.productos.take(4).toList();
-    final escuchando = _sesion != null;
     return Scaffold(
       appBar: Barra(titulo: 'Registrar venta', onBack: caja.atras),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          SizedBox(
-            height: 160,
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: escuchando ? () => _sesion?.detener() : _hablar,
-              style: FilledButton.styleFrom(
-                backgroundColor: escuchando ? grana : cempasuchil,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              ),
-              child: escuchando
-                  ? Text('X', style: epilogo(72, color: Colors.white))
-                  : Text('Hablar', style: epilogo(28, peso: FontWeight.w700, color: const Color(0xFF1F1A17))),
-            ),
-          ),
-          if (caja.aviso.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text('Escuché: ${caja.aviso}', style: const TextStyle(fontSize: 16)),
-          ],
+          const MicGundani(),
           const SizedBox(height: 12),
           Boton(texto: _foto ? 'Foto tomada' : 'Foto', fondo: Colors.white, tinta: ink, borde: ink, onPressed: _fotoTap),
           const SizedBox(height: 16),
@@ -111,7 +78,22 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
           const SizedBox(height: 8),
           Text(pesos(total), textAlign: TextAlign.center, style: epilogo(48, peso: FontWeight.w700)),
           const SizedBox(height: 12),
-          Boton(texto: 'Confirmar venta', onPressed: total > 0 ? () => caja.ir(const Ruta('pago')) : null),
+          Boton(
+            texto: 'Confirmar venta',
+            onPressed: total > 0
+                ? () {
+                    caja.ponerCobro(Cobro(
+                      tipo: 'venta',
+                      concepto: listaLineas([for (final l in caja.borrador) (nombre: l.nombre, cantidad: l.cantidad)]),
+                      cantidad: 1,
+                      monto: total,
+                      metodo: 'efectivo',
+                      origen: _foto ? 'vision' : 'manual',
+                    ));
+                    caja.ir(const Ruta('pago'));
+                  }
+                : null,
+          ),
         ],
       ),
     );
@@ -134,24 +116,60 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
   }
 }
 
-class ElegirMetodo extends StatelessWidget {
+class ElegirMetodo extends StatefulWidget {
   const ElegirMetodo({super.key});
+
+  @override
+  State<ElegirMetodo> createState() => _ElegirMetodoState();
+}
+
+class _ElegirMetodoState extends State<ElegirMetodo> {
+  var _guardando = false;
+  String? _error;
+
+  Future<void> _cobrar(String metodo) async {
+    final caja = Caja.of(context);
+    final base = caja.cobro;
+    final total = base?.monto ?? caja.borrador.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
+    final cobro = (base ??
+            Cobro(
+              tipo: 'venta',
+              concepto: 'Venta',
+              cantidad: 1,
+              monto: total,
+              metodo: metodo,
+              origen: 'manual',
+            ))
+        .copy(metodo: metodo, monto: total);
+    caja.ponerCobro(cobro);
+    if (metodo == 'qr') {
+      caja.ir(Ruta('qr', monto: total, metodo: Metodo.qr, cerrarVenta: true));
+      return;
+    }
+    setState(() {
+      _guardando = true;
+      _error = null;
+    });
+    try {
+      await confirmarMovimiento(cobro);
+      if (!mounted) return;
+      caja.guardarCobro(cobro);
+      caja.refrescarCaja();
+      caja.raiz(const Ruta('inicio'));
+    } on ErrorGundani catch (e) {
+      if (mounted) {
+        setState(() {
+          _guardando = false;
+          _error = e.mensaje;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
-    final total = caja.borrador.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
-    void cobrar(Metodo metodo) {
-      if (metodo == Metodo.efectivo) {
-        caja.agregarVenta(metodo: metodo, lineas: caja.borrador, total: total);
-        caja.setBorrador([]);
-        caja.setAviso('');
-        caja.raiz(const Ruta('inicio'));
-        return;
-      }
-      caja.ir(Ruta('qr', monto: total, metodo: metodo, cerrarVenta: true));
-    }
-
+    final total = caja.cobro?.monto ?? caja.borrador.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
     return Scaffold(
       appBar: Barra(titulo: 'Cómo te pagan', onBack: caja.atras),
       body: Padding(
@@ -160,12 +178,24 @@ class ElegirMetodo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(pesos(total), textAlign: TextAlign.center, style: epilogo(48, peso: FontWeight.w700)),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            ],
             const SizedBox(height: 20),
-            Boton(texto: 'QR', onPressed: () => cobrar(Metodo.qr)),
+            Boton(texto: _guardando ? 'Gundani está guardando...' : 'QR', onPressed: _guardando ? null : () => _cobrar('qr')),
             const SizedBox(height: 12),
-            Boton(texto: 'Datos transferencia', fondo: maguey, onPressed: () => cobrar(Metodo.transferencia)),
+            Boton(
+              texto: 'Datos transferencia',
+              fondo: maguey,
+              onPressed: _guardando ? null : () => _cobrar('transferencia'),
+            ),
             const SizedBox(height: 12),
-            Boton(texto: 'Efectivo', fondo: const Color(0xFF904D00), onPressed: () => cobrar(Metodo.efectivo)),
+            Boton(
+              texto: 'Efectivo',
+              fondo: const Color(0xFF904D00),
+              onPressed: _guardando ? null : () => _cobrar('efectivo'),
+            ),
           ],
         ),
       ),
@@ -184,6 +214,9 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
   final _monto = TextEditingController();
   final _concepto = TextEditingController();
   SesionVoz? _sesion;
+  var _origen = 'manual';
+  var _guardando = false;
+  String? _error;
 
   @override
   void initState() {
@@ -194,6 +227,7 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
 
   @override
   void dispose() {
+    _sesion?.detener();
     _monto.dispose();
     _concepto.dispose();
     super.dispose();
@@ -217,21 +251,24 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
             fondo: _sesion == null ? Colors.white : grana,
             tinta: _sesion == null ? ink : Colors.white,
             borde: _sesion == null ? ink : null,
-            onPressed: () {
+            onPressed: () async {
               if (_sesion != null) {
-                _sesion!.detener();
+                final oido = await _sesion!.detener();
+                if (!mounted) return;
+                if (oido.isNotEmpty) {
+                  _concepto.text = oido;
+                  _origen = 'voz';
+                }
+                setState(() => _sesion = null);
                 return;
               }
-              setState(() {
-                _sesion = escuchar(
-                  fraseDemo: 'Hielo y bolsas',
-                  alTexto: (t) {
-                    if (!mounted) return;
-                    _concepto.text = t;
-                    setState(() => _sesion = null);
-                  },
-                );
-              });
+              final sesion = await escuchar();
+              if (!mounted) return;
+              if (sesion == null) {
+                setState(() => _error = 'El micrófono no está disponible. Escríbelo aquí.');
+                return;
+              }
+              setState(() => _sesion = sesion);
             },
           ),
           const SizedBox(height: 12),
@@ -242,19 +279,44 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
             borde: ink,
             onPressed: () {
               if (_concepto.text.trim().isEmpty) _concepto.text = 'Ticket de compra';
+              _origen = 'vision';
             },
           ),
+          if (_error != null) ...[
+            const SizedBox(height: 12),
+            Text(_error!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          ],
           const SizedBox(height: 24),
           Boton(
-            texto: 'Guardar gasto',
-            onPressed: n > 0
-                ? () {
-                    caja.agregarGasto(
+            texto: _guardando ? 'Gundani está guardando...' : 'Guardar gasto',
+            onPressed: n > 0 && !_guardando
+                ? () async {
+                    final cobro = Cobro(
+                      tipo: 'gasto',
                       concepto: _concepto.text.trim().isEmpty ? 'Gasto' : _concepto.text.trim(),
+                      cantidad: 1,
                       monto: n,
-                      metodo: Metodo.efectivo,
+                      metodo: 'efectivo',
+                      origen: _origen,
                     );
-                    caja.raiz(const Ruta('inicio'));
+                    setState(() {
+                      _guardando = true;
+                      _error = null;
+                    });
+                    try {
+                      await confirmarMovimiento(cobro);
+                      if (!mounted) return;
+                      caja.guardarCobro(cobro);
+                      caja.refrescarCaja();
+                      caja.raiz(const Ruta('inicio'));
+                    } on ErrorGundani catch (e) {
+                      if (mounted) {
+                        setState(() {
+                          _guardando = false;
+                          _error = e.mensaje;
+                        });
+                      }
+                    }
                   }
                 : null,
           ),
@@ -273,19 +335,60 @@ class QrPago extends StatefulWidget {
 
 class _QrPagoState extends State<QrPago> {
   var _copiado = false;
+  var _expirado = false;
+  var _cobrando = false;
+  String? _mensaje;
+  String? _concepto;
+  var _aprobado = false;
+
+  Future<void> _cobrar() async {
+    final caja = Caja.of(context);
+    final cobro = caja.cobro;
+    final monto = cobro?.monto ?? caja.ruta.monto ?? 0;
+    final concepto = cobro?.concepto ?? 'Venta';
+    setState(() {
+      _cobrando = true;
+      _mensaje = null;
+    });
+    try {
+      final r = await cobrarQr(concepto: concepto, monto: monto, qrExpirado: _expirado);
+      if (!mounted) return;
+      decir(r.mensajeVoz);
+      setState(() {
+        _cobrando = false;
+        _mensaje = r.mensajeVoz;
+        _concepto = concepto;
+        _aprobado = r.ok;
+      });
+      if (r.ok) {
+        caja.guardarCobro((cobro ??
+                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'voz'))
+            .copy(metodo: 'qr', monto: monto, concepto: concepto));
+        caja.refrescarCaja();
+      }
+    } on ErrorGundani catch (e) {
+      if (mounted) {
+        setState(() {
+          _cobrando = false;
+          _mensaje = e.mensaje;
+          _aprobado = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
-    final monto = caja.ruta.monto;
-    final metodo = caja.ruta.metodo ?? Metodo.qr;
-    final lineas = [
-      'CLABE $clabe',
-      'Titular $titular',
-      if (monto != null) 'monto ${pesos(monto)}',
-    ];
+    final monto = caja.cobro?.monto ?? caja.ruta.monto;
+    final concepto = _concepto ?? caja.cobro?.concepto ?? 'Venta';
+    final cobrar = caja.ruta.cerrarVenta;
+    final datos = cobrar
+        ? 'GUNDANI\n$concepto\n${pesos(monto ?? 0)}\ncliente_demo'
+        : 'CLABE $clabe\nTitular $titular${monto == null ? '' : '\nmonto ${pesos(monto)}'}';
+    final saldo = caja.resumen?.saldoCliente;
     return Scaffold(
-      appBar: Barra(titulo: 'Cobro', onBack: caja.atras),
+      appBar: Barra(titulo: 'Cobro', onBack: _aprobado ? () => caja.raiz(const Ruta('inicio')) : caja.atras),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
@@ -293,40 +396,53 @@ class _QrPagoState extends State<QrPago> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: line, width: 2)),
-              child: QrImageView(data: lineas.join('\n'), size: 220, backgroundColor: Colors.white),
+              child: QrImageView(data: datos, size: 220, backgroundColor: Colors.white),
             ),
           ),
           if (monto != null) ...[
             const SizedBox(height: 12),
             Text(pesos(monto), textAlign: TextAlign.center, style: epilogo(36, peso: FontWeight.w700)),
           ],
-          const SizedBox(height: 16),
-          _dato('Titular', titular),
-          _dato('Banco', banco),
-          _dato('CLABE', clabeVisible),
-          const SizedBox(height: 8),
-          Boton(
-            texto: _copiado ? 'Copiado' : 'Copiar',
-            fondo: Colors.white,
-            tinta: ink,
-            borde: ink,
-            onPressed: () async {
-              await copiarTexto(clabe);
-              if (mounted) setState(() => _copiado = true);
-            },
-          ),
-          const SizedBox(height: 16),
-          const Text(notaSeguridad, style: TextStyle(fontSize: 16, height: 1.4)),
-          if (caja.ruta.cerrarVenta) ...[
-            const SizedBox(height: 20),
+          if (cobrar) ...[
+            const SizedBox(height: 8),
+            Text(concepto, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 12),
+            const Text('Entorno de prueba simulado (sin dinero real)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            if (saldo != null) Text('Saldo de prueba del cliente: ${pesos(saldo)}', style: const TextStyle(fontSize: 16)),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Simular QR expirado', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              value: _expirado,
+              onChanged: _cobrando || _aprobado ? null : (v) => setState(() => _expirado = v),
+            ),
+          ] else ...[
+            const SizedBox(height: 16),
+            _dato('Titular', titular),
+            _dato('Banco', banco),
+            _dato('CLABE', clabeVisible),
+            const SizedBox(height: 8),
             Boton(
-              texto: 'Ya me pagaron',
-              onPressed: () {
-                caja.agregarVenta(metodo: metodo, lineas: caja.borrador, total: monto ?? 0);
-                caja.setBorrador([]);
-                caja.setAviso('');
-                caja.raiz(const Ruta('inicio'));
+              texto: _copiado ? 'Copiado' : 'Copiar',
+              fondo: Colors.white,
+              tinta: ink,
+              borde: ink,
+              onPressed: () async {
+                await copiarTexto(clabe);
+                if (mounted) setState(() => _copiado = true);
               },
+            ),
+            const SizedBox(height: 16),
+            const Text(notaSeguridad, style: TextStyle(fontSize: 16, height: 1.4)),
+          ],
+          if (_mensaje != null) ...[
+            const SizedBox(height: 12),
+            Text(_mensaje!, style: const TextStyle(fontSize: 18, height: 1.35)),
+          ],
+          if (cobrar) ...[
+            const SizedBox(height: 12),
+            Boton(
+              texto: _aprobado ? 'Volver al inicio' : (_cobrando ? 'Gundani está cobrando...' : 'Ya me pagaron'),
+              onPressed: _cobrando ? null : (_aprobado ? () => caja.raiz(const Ruta('inicio')) : _cobrar),
             ),
           ],
         ],

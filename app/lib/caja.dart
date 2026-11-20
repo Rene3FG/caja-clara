@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'cuentas.dart';
 import 'datos.dart';
 import 'modelos.dart';
+import 'servicios/asistente.dart';
 import 'servicios/sync.dart';
 
 const _clave = 'caja-clara-v1';
@@ -23,6 +24,8 @@ class Caja extends ChangeNotifier {
   var periodo = const Periodo('hoy');
   var borrador = <Linea>[];
   var aviso = '';
+  Cobro? cobro;
+  ResumenHoy? resumen;
   var pila = <Ruta>[const Ruta('guia')];
 
   Ruta get ruta => pila.last;
@@ -52,7 +55,10 @@ class Caja extends ChangeNotifier {
       if (online == redNavegador) return;
       redNavegador = online;
       notifyListeners();
-      if (conectado) sincronizar();
+      if (conectado) {
+        sincronizar();
+        refrescarCaja();
+      }
     });
     if (!guiaHecha) {
       pila = [const Ruta('guia')];
@@ -61,7 +67,10 @@ class Caja extends ChangeNotifier {
     }
     lista = true;
     notifyListeners();
-    if (conectado) sincronizar();
+    if (conectado) {
+      sincronizar();
+      refrescarCaja();
+    }
   }
 
   void _semilla() {
@@ -134,6 +143,35 @@ class Caja extends ChangeNotifier {
     notifyListeners();
   }
 
+  void ponerCobro(Cobro? valor) {
+    cobro = valor;
+    notifyListeners();
+  }
+
+  void guardarCobro(Cobro valor) {
+    if (valor.tipo == 'gasto') {
+      agregarGasto(concepto: valor.concepto, monto: valor.monto, metodo: _metodo(valor.metodo));
+    } else {
+      final lineas = borrador.isEmpty
+          ? [Linea(productoId: '', nombre: valor.concepto, precio: valor.monto, cantidad: 1)]
+          : borrador;
+      agregarVenta(metodo: _metodo(valor.metodo), lineas: lineas, total: valor.monto);
+    }
+    borrador = [];
+    cobro = null;
+    aviso = '';
+    notifyListeners();
+  }
+
+  Future<void> refrescarCaja() async {
+    try {
+      resumen = await traerResumen();
+      notifyListeners();
+    } on ErrorGundani {
+      // La libreta del teléfono sigue visible.
+    }
+  }
+
   void cicloDemo() {
     modoRed = switch (modoRed) {
       ModoRed.auto => ModoRed.offline,
@@ -141,7 +179,10 @@ class Caja extends ChangeNotifier {
       ModoRed.online => ModoRed.auto,
     };
     _persist();
-    if (conectado) sincronizar();
+    if (conectado) {
+      sincronizar();
+      refrescarCaja();
+    }
   }
 
   void setPeriodo(Periodo valor) {
@@ -220,6 +261,12 @@ class Caja extends ChangeNotifier {
   }
 
   static String _id() => DateTime.now().microsecondsSinceEpoch.toString();
+
+  static Metodo _metodo(String valor) => switch (metodoApi(valor)) {
+        'qr' => Metodo.qr,
+        'transferencia' => Metodo.transferencia,
+        _ => Metodo.efectivo,
+      };
 
   static Caja of(BuildContext context) => CajaScope.of(context);
 }
