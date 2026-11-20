@@ -1,0 +1,160 @@
+# Extracto de la consola de Luis Daniel (TextoDeConsola.txt, líneas 804-989): sesión en el contenedor del
+# NVIDIA DLI (/dli/task/gundani_asistente, Tesla T4), 2026-11-20. Se quitaron barras de progreso y advertencias.
+root@da47b0042353:/dli/task/gundani_asistente# python3 crear_dataset.py
+Dataset generado sin duplicados:
+  - Train: 108 ejemplos -> data/train.jsonl
+  - Val:   15 ejemplos -> data/val.jsonl
+  - Test:  14 ejemplos -> data/test.jsonl
+root@da47b0042353:/dli/task/gundani_asistente# cd /dli/task/gundani_asistente
+python3 evaluar_modelo.py --modo base
+=== Evaluación modo: BASE ===
+Modelo base: Qwen/Qwen2.5-3B-Instruct
+GPU: Tesla T4
+tokenizer_config.json: 7.30kB [00:00, 6.77MB/s]
+vocab.json: 2.78MB [00:00, 106MB/s]
+merges.txt: 1.67MB [00:00, 112MB/s]
+tokenizer.json: 7.03MB [00:00, 140MB/s]
+config.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 661/661 [00:00<00:00, 7.02MB/s]
+model.safetensors.index.json: 35.6kB [00:00, 137MB/s]
+model-00001-of-00002.safetensors: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 3.97G/3.97G [00:26<00:00, 152MB/s]
+model-00002-of-00002.safetensors: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 2.20G/2.20G [00:16<00:00, 133MB/s]
+Sliding Window Attention is enabled but not implemented for `sdpa`; unexpected results may be encountered.
+generation_config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 1.99MB/s]
+[01/14] (habitual_cobro) JSON:True | Int:True | Conf:True | 4.01s
+[02/14] (habitual_cobro_modismo) JSON:True | Int:True | Conf:True | 4.76s
+[03/14] (habitual_error_stt) JSON:True | Int:True | Conf:True | 3.34s
+[04/14] (habitual_gasto) JSON:True | Int:True | Conf:True | 3.26s
+[05/14] (habitual_gasto) JSON:True | Int:True | Conf:True | 3.09s
+[06/14] (habitual_consulta_rag) JSON:True | Int:True | Conf:True | 5.62s
+[07/14] (habitual_consulta_rag) JSON:True | Int:False | Conf:True | 3.13s
+[08/14] (habitual_orientacion) JSON:True | Int:True | Conf:True | 4.64s
+[09/14] (incompleta) JSON:True | Int:False | Conf:False | 3.29s
+[10/14] (incompleta) JSON:True | Int:False | Conf:False | 4.15s
+[11/14] (limite_fiscal) JSON:True | Int:False | Conf:True | 4.32s
+[12/14] (limite_confirmacion) JSON:True | Int:True | Conf:False | 3.27s
+[13/14] (fuera_de_alcance) JSON:True | Int:False | Conf:True | 4.94s
+[14/14] (fuera_de_alcance) JSON:True | Int:False | Conf:True | 10.05s
+=== RESUMEN FINAL ===
+  fecha: 2026-11-20T02:31:08
+  modo: base
+  modelo_base: Qwen/Qwen2.5-3B-Instruct
+  adapter_dir: None
+  gpu: Tesla T4
+  total_casos: 14
+  json_estricto_valido: 14/14 (100.0%)
+  claves_correctas: 7/14 (50.0%)
+  intencion_exacta: 8/14 (57.1%)
+  confirmacion_correcta: 11/14 (78.6%)
+  monto_correcto: 3/7 (42.9%)
+  latencia_promedio_seg: 4.42
+Guardado en: eval_base.json
+root@da47b0042353:/dli/task/gundani_asistente# cd /dli/task/gundani_asistente
+python3 entrenar_qlora.py 2>&1 | tee entrenamiento_asistente.log
+Sliding Window Attention is enabled but not implemented for `sdpa`; unexpected results may be encountered.
+=== INICIANDO FINE-TUNING QLoRA (GUNDANI ASISTENTE) ===
+Fecha inicio: 2026-11-20T02:35:47 | GPU: Tesla T4
+Modelo base:  Qwen/Qwen2.5-3B-Instruct
+Ejemplos -> Train: 108 | Val: 15
+No label_names provided for model class `PeftModelForCausalLM`. Since `PeftModel` hides base models input arguments, if label_names is not given, label_names can't be set automatically within `Trainer`. Note that empty label_names list will be used instead.
+trainable params: 29,933,568 || all params: 3,115,872,256 || trainable%: 0.9607
+{'loss': 0.5076, 'grad_norm': 1.361222743988037, 'learning_rate': 0.00019868265225415265, 'epoch': 0.74}
+{'loss': 0.5019, 'grad_norm': inf, 'learning_rate': 0.00019476531711828027, 'epoch': 1.07}
+{'loss': 0.2998, 'grad_norm': 0.5797061920166016, 'learning_rate': 0.00018276889981568906, 'epoch': 1.44}
+{'loss': 0.2517, 'grad_norm': 1.366094708442688, 'learning_rate': 0.00016473862847818277, 'epoch': 1.81}
+{'loss': 0.2324, 'grad_norm': 0.40233469009399414, 'learning_rate': 0.00014198891015602646, 'epoch': 2.15}
+{'loss': 0.1457, 'grad_norm': 0.4918581545352936, 'learning_rate': 0.0001161781996552765, 'epoch': 2.52}
+{'loss': 0.2177, 'grad_norm': 0.5347729325294495, 'learning_rate': 8.918809815760585e-05, 'epoch': 2.89}
+{'loss': 0.1288, 'grad_norm': 0.5138881206512451, 'learning_rate': 6.298618446600856e-05, 'epoch': 3.22}
+{'loss': 0.1079, 'grad_norm': 0.47752657532691956, 'learning_rate': 3.948257848062351e-05, 'epoch': 3.59}
+{'loss': 0.115, 'grad_norm': 0.37222808599472046, 'learning_rate': 2.0390693429435627e-05, 'epoch': 3.96}
+{'loss': 0.0738, 'grad_norm': 0.4342387914657593, 'learning_rate': 7.102328018320858e-06, 'epoch': 4.3}
+{'loss': 0.058, 'grad_norm': 0.4110619127750397, 'learning_rate': 5.862042845640403e-07, 'epoch': 4.67}
+{'eval_loss': 0.22279652953147888, 'eval_runtime': 4.9556, 'eval_samples_per_second': 3.027, 'eval_steps_per_second': 1.614, 'epoch': 4.67}
+{'train_runtime': 519.7723, 'train_samples_per_second': 1.039, 'train_steps_per_second': 0.125, 'train_loss': 0.2713505662404574, 'epoch': 4.67}
+=== ENTRENAMIENTO COMPLETADO ===
+{
+  "proyecto": "Gundani - Asistente Conversacional para Abarrotes",
+  "modelo_base": "Qwen/Qwen2.5-3B-Instruct",
+  "licencia_modelo_base": "Apache-2.0",
+  "tecnica": "QLoRA (4-bit NF4 + LoRA FP16)",
+  "fecha_inicio": "2026-11-20T02:35:47",
+  "fecha_fin": "2026-11-20T02:44:41",
+  "duracion_segundos": 533.62,
+  "gpu": "Tesla T4",
+  "dataset": {
+    "train": 108,
+    "val": 15
+  },
+  "hiperparametros": {
+    "epochs": 5,
+    "learning_rate": 0.0002,
+    "batch_size_efectivo": 8,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "max_length": 512
+  },
+  "metricas_entrenamiento": {
+    "global_step": 65,
+    "train_loss": 0.2714,
+    "best_eval_loss": 0.2228
+  },
+  "artefacto_guardado": "modelo_gundani_lora"
+}
+root@da47b0042353:/dli/task/gundani_asistente# python3 evaluar_modelo.py --modo ajustado --adapter_dir modelo_gundani_lora
+=== Evaluación modo: AJUSTADO ===
+Modelo base: Qwen/Qwen2.5-3B-Instruct
+GPU: Tesla T4
+Sliding Window Attention is enabled but not implemented for `sdpa`; unexpected results may be encountered.
+Cargando adaptador LoRA desde: modelo_gundani_lora
+[01/14] (habitual_cobro) JSON:True | Int:True | Conf:True | 11.85s
+[02/14] (habitual_cobro_modismo) JSON:True | Int:True | Conf:True | 11.64s
+[03/14] (habitual_error_stt) JSON:True | Int:True | Conf:True | 11.30s
+[04/14] (habitual_gasto) JSON:True | Int:True | Conf:True | 11.28s
+[05/14] (habitual_gasto) JSON:True | Int:True | Conf:True | 10.81s
+[06/14] (habitual_consulta_rag) JSON:True | Int:True | Conf:True | 12.47s
+[07/14] (habitual_consulta_rag) JSON:True | Int:True | Conf:True | 8.49s
+[08/14] (habitual_orientacion) JSON:True | Int:True | Conf:True | 9.65s
+[09/14] (incompleta) JSON:True | Int:True | Conf:True | 9.42s
+[10/14] (incompleta) JSON:True | Int:False | Conf:False | 10.24s
+[11/14] (limite_fiscal) JSON:True | Int:False | Conf:True | 9.65s
+[12/14] (limite_confirmacion) JSON:True | Int:True | Conf:True | 10.06s
+[13/14] (fuera_de_alcance) JSON:True | Int:True | Conf:True | 8.30s
+[14/14] (fuera_de_alcance) JSON:True | Int:True | Conf:True | 8.97s
+=== RESUMEN FINAL ===
+  fecha: 2026-11-20T02:47:30
+  modo: ajustado
+  modelo_base: Qwen/Qwen2.5-3B-Instruct
+  adapter_dir: modelo_gundani_lora
+  gpu: Tesla T4
+  total_casos: 14
+  json_estricto_valido: 14/14 (100.0%)
+  claves_correctas: 14/14 (100.0%)
+  intencion_exacta: 12/14 (85.7%)
+  confirmacion_correcta: 13/14 (92.9%)
+  monto_correcto: 7/7 (100.0%)
+  latencia_promedio_seg: 10.295
+Guardado en: eval_ajustado.json
+root@da47b0042353:/dli/task/gundani_asistente# zip -r respaldo_gundani_asistente.zip data/ modelo_gundani_lora/ *.py *.json *.log
+  adding: data/ (stored 0%)
+  adding: data/train.jsonl (deflated 95%)
+  adding: data/test.jsonl (deflated 90%)
+  adding: data/val.jsonl (deflated 92%)
+  adding: modelo_gundani_lora/ (stored 0%)
+  adding: modelo_gundani_lora/tokenizer.json (deflated 81%)
+  adding: modelo_gundani_lora/special_tokens_map.json (deflated 69%)
+  adding: modelo_gundani_lora/README.md (deflated 66%)
+  adding: modelo_gundani_lora/vocab.json (deflated 61%)
+  adding: modelo_gundani_lora/tokenizer_config.json (deflated 83%)
+  adding: modelo_gundani_lora/merges.txt (deflated 57%)
+  adding: modelo_gundani_lora/added_tokens.json (deflated 67%)
+  adding: modelo_gundani_lora/adapter_model.safetensors (deflated 8%)
+  adding: modelo_gundani_lora/adapter_config.json (deflated 55%)
+  adding: crear_dataset.py (deflated 71%)
+  adding: entrenar_qlora.py (deflated 64%)
+  adding: evaluar_modelo.py (deflated 65%)
+  adding: eval_ajustado.json (deflated 86%)
+  adding: eval_base.json (deflated 83%)
+  adding: registro_entrenamiento.json (deflated 43%)
+  adding: entrenamiento_asistente.log (deflated 78%)
+root@da47b0042353:/dli/task/gundani_asistente# 

@@ -10,7 +10,7 @@ Cada cifra lleva su archivo de origen en el repositorio. Lo que no está registr
 |---|---|---|---|---|---|---|---|
 | **Detector de productos** (app: v3) | Detectar y contar 7 productos + `otro_producto` en la foto del mostrador | DINO ResNet-50 preentrenado en COCO (NGC) | Ajuste fino completo, 12 épocas | Tesla T4, servidor DLI | TAO Toolkit 5.5 · TensorRT 11.5 | Fotos propias p03: conteo exacto **67 %**, falsos positivos 11 %. Test público: mAP **0.857**, mAP50 1.000 | **89.2 ms** mediana (RTX 2060) |
 | **Asistente** (texto/voz → acción) | Convertir lo dicho o escrito en una acción JSON | Qwen2.5-1.5B-Instruct | LoRA r=16 (PEFT) | Tesla T4, servidor DLI | Contenedor PyTorch de TAO 5.5 (entrenamiento) | Coincidencia exacta 1.4 % → **86.5 %** (74 casos); reservados 0/14 → **13/14** | **1.07 s** (RTX 2060) |
-| **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4 según su log <span class="falta">[FALTA: confirmar con Daniel el servidor]</span> | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s** en el VPS (CPU, GGUF); 10.3 s en T4 |
+| **Gundani** (caja y cobros simulados) | Consultas de caja y cobro QR simulado | Qwen2.5-3B-Instruct | QLoRA 4 bits | Tesla T4, contenedor DLI | GPU T4 del DLI | Intención exacta 57.1 % → **85.7 %**; monto correcto 42.9 % → **100 %** (14 casos) | **8.6 s** en el VPS (CPU, GGUF); 10.3 s en T4 |
 
 <p class="fuente">Fuentes: cada cifra se detalla en su sección (A.3–A.7, B.4–B.6, C.2). Además usamos un componente que no
 entrenamos: Nemotron 3.5 Super VL, por la API de NVIDIA, para transcribir la foto de la libreta (sección B.6).</p>
@@ -299,8 +299,8 @@ resultado:     registrar_libreta tlayuda ×3 = $270;  pendiente: "1 quesadilla" 
 **LLM de Gundani (componente de apoyo).** Adaptador QLoRA (4 bits NF4, r=16, 5 épocas) sobre
 **Qwen2.5-3B-Instruct**, con 108 ejemplos de entrenamiento y 15 de validación. Convertido a GGUF `Q4_K_M`, lo sirve
 `llama-server` en CPU en el VPS y responde en **8.6 s** de media (`backend_gundani/README.md`,
-`registro_entrenamiento.json`, `latencia_vps.json`). Su log (`entrenamiento_asistente.log`) registra una Tesla T4
-el 2026-11-20, de 02:35 a 02:44. <span class="falta">[FALTA: confirmar con Daniel en qué servidor se ajustó]</span>
+`registro_entrenamiento.json`, `latencia_vps.json`). Se ajustó en un contenedor del **NVIDIA DLI** (`/dli/task/gundani_asistente`) con una
+Tesla T4, el 2026-11-20 de 02:35 a 02:44 (`backend_gundani/sesion_entrenamiento_dli.txt`, `entrenamiento_asistente.log`).
 
 ## C. Arquitectura
 
