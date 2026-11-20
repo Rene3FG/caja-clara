@@ -13,9 +13,9 @@ import 'widgets.dart';
 
 /// Un renglón de la libreta sin cantidad (o sin producto). La IA no adivina: la persona lo completa.
 class _Pendiente {
-  _Pendiente({required this.renglon, this.producto, String? nombre, double? precio})
+  _Pendiente({required this.renglon, this.producto, String? nombre, double? precio, double? cantidad})
       : nombre = TextEditingController(text: nombre ?? renglon),
-        cantidad = TextEditingController(),
+        cantidad = TextEditingController(text: cantidad == null || cantidad <= 0 ? '' : _num(cantidad)),
         precio = TextEditingController(text: precio == null || precio == 0 ? '' : _num(precio));
 
   final String renglon;
@@ -85,8 +85,9 @@ class _PasarLibretaState extends State<PasarLibreta> {
         pend.add(_Pendiente(
           renglon: '${x['renglon'] ?? x['nombre'] ?? 'renglón'}',
           producto: pid,
-          nombre: prod?.nombre ?? (pid == null ? null : nombreBonito('${x['nombre'] ?? pid}')),
+          nombre: prod?.nombre ?? nombreBonito('${x['nombre'] ?? pid ?? x['renglon'] ?? ''}'),
           precio: prod?.precio ?? (pid == null ? null : preciosRespaldo[pid]),
+          cantidad: (x['cantidad'] as num?)?.toDouble(),
         ));
       }
     }
@@ -372,7 +373,7 @@ class _PasarLibretaState extends State<PasarLibreta> {
           const Icon(Icons.help_outline, size: 18, color: Color(0xFF9A3412)),
           const SizedBox(width: 6),
           Expanded(
-            child: Text('Renglón sin cantidad: "${p.renglon}"',
+            child: Text('${p.producto == null ? 'No está en tu catálogo' : 'Renglón sin cantidad'}: "${p.renglon}"',
                 style: TextStyle(fontWeight: FontWeight.w800, decoration: p.descartado ? TextDecoration.lineThrough : null)),
           ),
           TextButton(

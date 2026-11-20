@@ -196,17 +196,20 @@ def main():
             raise HTTPException(400, "El archivo no es una imagen válida (usa JPG o PNG).")
         try:
             transcripcion = transcribe(datos_img)
-            # Hoja fotografiada de lado (WhatsApp/galería quitan la orientación EXIF): si no salió
-            # ningún producto del catálogo, se lee girada a cada lado y gana la que reconozca más.
-            if not mencionados(transcripcion):
-                for giro in (90, 270):
-                    otra = transcribe(datos_img, giro)
-                    if len(mencionados(otra)) > len(mencionados(transcripcion)):
+            # Hoja fotografiada de lado: el lector inventa palabras ("2 taquitos" por "2 tlayudas").
+            # Si algún renglón no se reconoce, se lee girada a cada lado (en paralelo) y gana la
+            # lectura con más renglones reconocidos; en empate se queda la original.
+            if reconocidos(transcripcion) < len(renglones_de(transcripcion)):
+                from concurrent.futures import ThreadPoolExecutor
+                with ThreadPoolExecutor(2) as ex:
+                    otras = list(ex.map(lambda g: transcribe(datos_img, g), (90, 270)))
+                for otra in otras:
+                    if reconocidos(otra) > reconocidos(transcripcion):
                         transcripcion = otra
         except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
             return {"ok": False, "error": "No pude leer la foto ahora (sin conexión o servicio no disponible).", "detalle": str(e)[:200]}
         ms_vl = int((time.time() - t0) * 1000)
-        renglones = [l.strip(" -•\t") for l in transcripcion.splitlines() if l.strip(" -•\t?")]
+        renglones = renglones_de(transcripcion)
         if not renglones:
             return {"ok": False, "error": "No pude leer renglones en la foto. Acerca la cámara.",
                     "transcripcion": transcripcion, "ms_vision": ms_vl}
@@ -248,8 +251,9 @@ def main():
                 pendientes.append({"producto": pid, "nombre": productos[pid]["nombres"][0], "renglon": ren,
                                    "cantidad": float(cant_txt.replace(",", ".")) if cant_txt else None})
                 vistos.add(pid)
-            elif not pid:
-                pendientes.append({"producto": None, "renglon": ren, "cantidad": None})
+            elif not pid:   # producto fuera del catálogo: la persona pone precio o lo descarta
+                pendientes.append({"producto": None, "nombre": nombre, "renglon": ren,
+                                   "cantidad": float(cant_txt.replace(",", ".")) if cant_txt else None})
         if not r["items"] and not any(x["producto"] for x in pendientes):
             return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "transcripcion": transcripcion,
                     "error": "No encontré productos del catálogo en la hoja.",
@@ -268,6 +272,12 @@ def main():
 
     alias = sorted(((normaliza(n), pid) for pid, info in productos.items()
                     for n in list(info["nombres"]) + [pid.replace("_", " ")]), key=lambda x: -len(x[0]))
+
+    def renglones_de(transcripcion):
+        return [l.strip(" -•\t") for l in transcripcion.splitlines() if l.strip(" -•\t?")]
+
+    def reconocidos(transcripcion):
+        return sum(1 for ren in renglones_de(transcripcion) if busca_producto(ren))
 
     def mencionados(texto):
         """Productos del catálogo cuyo nombre (o alias) aparece en lo que dijo la persona."""
