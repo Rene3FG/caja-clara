@@ -118,7 +118,7 @@ def dibuja(img, dets, salida):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--engine", default="dino_rtx2060_fp32.engine")
+    ap.add_argument("--engine", default="dino_v3_rtx2060.engine")
     ap.add_argument("--clases", default=",".join(CLASES))
     ap.add_argument("--umbral", type=float, default=0.5)
     ap.add_argument("--puerto", type=int, default=8002)

@@ -2,10 +2,9 @@
 
 Detector de productos entrenado por el equipo (DINO ResNet-50, TAO Toolkit 5.5), corriendo con TensorRT 11.5 en GPU NVIDIA.
 
-Servidor: `python3 servir_detector.py --engine dino_v3_rtx2060.engine` → `http://<IP-laptop>:8002`
+Servidor: `python3 servir_detector.py` → `http://<IP-laptop>:8002`
 
 **Modelo en uso: v3** — sha256 del engine `e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed`.
-(El `--engine` por defecto del script sigue siendo el de v1; hay que pasar el de v3.)
 
 ## GET /salud
 Muestra en la app la pantalla "modelo en uso" con este hash (bases 6c).
@@ -38,4 +37,4 @@ Respuesta:
 5. Productos fuera de las 7 clases: el modelo v3 los marca como `otro_producto` → se cuentan en `no_reconocidos`, no se cobran, y se muestra el `mensaje` para agregarlos a mano.
 
 ## Rendimiento medido
-- RTX 2060 + TensorRT FP32: ~75 ms por foto (mediana de 50 corridas, sin contar red).
+v3: ~89 ms por foto (mediana, RTX 2060 + TensorRT 11.5, fotos propias p03). El servidor arranca con v3 por defecto.
