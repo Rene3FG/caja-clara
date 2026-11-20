@@ -1,0 +1,2 @@
+eb16811500d17d703e8968ca685b021894a3093e531e35d7330d98a606ec4c5a  resultados/dino_v2/dino_v2.onnx
+01bab6c970972f260af8bf8132d7a88376ad62ed4669985099dbe4b512938e5f  resultados/dino_v2/train/model_epoch_011.pth

@@ -1,0 +1,7 @@
+p02_031: otro_producto -> chokis
+p01_021: + sabritas
+p01_021: + otro_producto
+p01_028: + sabritas
+p02_037: otro_producto -> chokis
+p01_026: + sabritas
+p01_023: + sabritas

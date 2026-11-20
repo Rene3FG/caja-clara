@@ -1,0 +1,483 @@
+{
+  "gpu": "NVIDIA GeForce RTX 2060",
+  "sha256_engine": "c3be861cfe91e89c55489abb9a7bf4109b73891d8e1d8f912cc47f4ea6aa6ed8",
+  "fotos": 36,
+  "ms_mediana": 89.1,
+  "por_umbral": [
+    {
+      "umbral": 0.3,
+      "fotos": 36,
+      "conteo_exacto": 0.639,
+      "deteccion_sabritas": 0.556,
+      "falsos_positivos": 0.111
+    },
+    {
+      "umbral": 0.4,
+      "fotos": 36,
+      "conteo_exacto": 0.611,
+      "deteccion_sabritas": 0.519,
+      "falsos_positivos": 0.111
+    },
+    {
+      "umbral": 0.5,
+      "fotos": 36,
+      "conteo_exacto": 0.639,
+      "deteccion_sabritas": 0.519,
+      "falsos_positivos": 0.0
+    },
+    {
+      "umbral": 0.6,
+      "fotos": 36,
+      "conteo_exacto": 0.611,
+      "deteccion_sabritas": 0.481,
+      "falsos_positivos": 0.0
+    },
+    {
+      "umbral": 0.7,
+      "fotos": 36,
+      "conteo_exacto": 0.611,
+      "deteccion_sabritas": 0.481,
+      "falsos_positivos": 0.0
+    }
+  ],
+  "umbral_app": 0.5,
+  "detalle_umbral_app": [
+    {
+      "archivo": "p03_001.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "barritas marinela (nuevo)"
+    },
+    {
+      "archivo": "p03_002.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "barritas marinela (nuevo)"
+    },
+    {
+      "archivo": "p03_003.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "barritas marinela (nuevo)"
+    },
+    {
+      "archivo": "p03_004.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "barritas marinela (nuevo)"
+    },
+    {
+      "archivo": "p03_005.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_006.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_007.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts rojo (movida)"
+    },
+    {
+      "archivo": "p03_008.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_009.jpg",
+      "sesion": "p03",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_010.jpg",
+      "sesion": "p03",
+      "tipo": "chokis+distractor",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_011.jpg",
+      "sesion": "p03",
+      "tipo": "chokis+distractor",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_012.jpg",
+      "sesion": "p03",
+      "tipo": "chokis+distractor",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_013.jpg",
+      "sesion": "p03",
+      "tipo": "chokis+distractor",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_014.jpg",
+      "sesion": "p03",
+      "tipo": "chokis+distractor",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": "golden nuts rojo"
+    },
+    {
+      "archivo": "p03_015.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts amarillo"
+    },
+    {
+      "archivo": "p03_016.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts amarillo"
+    },
+    {
+      "archivo": "p03_017.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts amarillo"
+    },
+    {
+      "archivo": "p03_018.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": "golden nuts amarillo"
+    },
+    {
+      "archivo": "p03_019.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts amarillo"
+    },
+    {
+      "archivo": "p03_020.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_021.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_022.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_023.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_024.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "sabritas de reverso"
+    },
+    {
+      "archivo": "p03_025.jpg",
+      "sesion": "p03",
+      "tipo": "mezcla",
+      "esperado": {
+        "chokis": 1,
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_026.jpg",
+      "sesion": "p03",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_027.jpg",
+      "sesion": "p03",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": "muy movida"
+    },
+    {
+      "archivo": "p03_028.jpg",
+      "sesion": "p03",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_029.jpg",
+      "sesion": "p03",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_030.jpg",
+      "sesion": "p03",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_031.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": "reverso blanco"
+    },
+    {
+      "archivo": "p03_032.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": "movida, cortada"
+    },
+    {
+      "archivo": "p03_033.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_034.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_035.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p03_036.jpg",
+      "sesion": "p03",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    }
+  ]
+}

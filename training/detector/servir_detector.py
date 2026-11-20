@@ -15,7 +15,7 @@ import tensorrt as trt
 import torch
 from PIL import Image, ImageDraw, UnidentifiedImageError
 
-CLASES = ["chokis", "coca_cola", "doritos", "gansito", "panditas", "sabritas", "skittles"]  # ids 1..7
+CLASES = ["chokis", "coca_cola", "doritos", "gansito", "panditas", "sabritas", "skittles", "otro_producto"]  # ids 1..8
 MEDIA = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 DESV = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 TIPOS = {trt.float32: torch.float32, trt.float16: torch.float16, trt.int32: torch.int32,
@@ -38,7 +38,13 @@ class Detector:
         self.buf = {}
         for i in range(self.engine.num_io_tensors):
             n = self.engine.get_tensor_name(i)
-            forma = tuple(self.engine.get_tensor_shape(n))
+            if self.engine.get_tensor_mode(n) == trt.TensorIOMode.INPUT:
+                f = tuple(self.engine.get_tensor_shape(n))
+                if -1 in f:
+                    self.ctx.set_input_shape(n, tuple(1 if d == -1 else d for d in f))
+        for i in range(self.engine.num_io_tensors):
+            n = self.engine.get_tensor_name(i)
+            forma = tuple(self.ctx.get_tensor_shape(n))
             self.buf[n] = torch.empty(forma, dtype=TIPOS[self.engine.get_tensor_dtype(n)], device="cuda")
             self.ctx.set_tensor_address(n, self.buf[n].data_ptr())
             if self.engine.get_tensor_mode(n) == trt.TensorIOMode.INPUT:
@@ -77,10 +83,13 @@ class Detector:
             dets.append({"producto": nombre, "confianza": round(s, 3), "caja": [round(v, 1) for v in caja]})
         dets = nms(dets)
         ms = (time.perf_counter() - t0) * 1000
-        conteo = {}
+        conteo, otros = {}, 0
         for d in dets:
-            conteo[d["producto"]] = conteo.get(d["producto"], 0) + 1
-        return {"detecciones": dets, "conteo": conteo, "ms": round(ms, 1)}
+            if d["producto"] == "otro_producto":
+                otros += 1
+            else:
+                conteo[d["producto"]] = conteo.get(d["producto"], 0) + 1
+        return {"detecciones": dets, "conteo": conteo, "no_reconocidos": otros, "ms": round(ms, 1)}
 
 
 def iou(a, b):
@@ -162,6 +171,8 @@ def main():
         r.update({"ok": True, "requiere_revision": True, "sha256_engine": det.sha})
         if not r["detecciones"]:
             r["mensaje"] = "No reconocí productos. Acerca la cámara o agrégalos a mano."
+        elif r["no_reconocidos"]:
+            r["mensaje"] = f'Hay {r["no_reconocidos"]} producto(s) que no reconozco. Agrégalos a mano.'
         return r
 
     uvicorn.run(app, host="0.0.0.0", port=a.puerto)
