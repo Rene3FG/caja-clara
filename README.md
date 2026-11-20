@@ -1,140 +1,102 @@
 # Caja Clara
 
-App móvil para micronegocios (por ahora, comida y tienda) que digitaliza un proceso
-concreto: **registrar una venta y su cobro**.
+App móvil (Flutter, Android) para micronegocios de Oaxaca —por ahora **tiendita y puesto de comida**—
+que digitaliza un proceso concreto: **registrar una venta y su cobro**, y pasar a digital lo que hoy
+se anota en la libreta.
 
 Hackathon NVIDIA Oaxaca 2026 — Economía Digital.
 
-## Flujo
+## Recorrido principal
 
-1. La persona toma una **foto** de los productos.
-2. Un **detector entrenado por el equipo** reconoce los productos y calcula el total.
-3. La persona **revisa y corrige** (cantidades, productos faltantes o sobrantes).
-4. Elige **efectivo** o **transferencia** (DiMo/CoDi **SIMULADO**: estados pendiente / pagado / falló).
-5. La venta **se guarda**.
-6. Un **asistente ajustado con LoRA** permite registrar o corregir por **voz o texto** y explica el resultado.
+1. La persona toma una **foto** de los productos en el mostrador.
+2. El **detector entrenado por el equipo** (DINO ResNet-50, TAO → TensorRT) reconoce y cuenta los productos.
+3. La persona **revisa y corrige** la cuenta (cantidades, productos que faltan o sobran).
+4. También puede **dictar o escribir** ("cobra 2 sabritas y 3 cocas"): el **asistente ajustado con LoRA**
+   propone la acción y la app la muestra para confirmar.
+5. Elige **efectivo, QR o transferencia**. El cobro QR/transferencia es **SIMULADO** (aprobado / QR expirado / saldo insuficiente).
+6. La venta **se guarda** y se consulta después en el libro de ventas.
 
-## Arquitectura
+Recorrido secundario: **pasar la libreta a digital** — foto de la hoja → Nemotron 3.5 Super VL
+(servicio de NVIDIA, complemento) transcribe → nuestro LoRA interpreta → la persona revisa, completa
+pendientes y guarda con la fecha que elija.
+
+## Arquitectura (la que corre en la demo)
 
 ```
-┌──────────────┐   HTTP/JSON   ┌──────────────────────────┐
-│ App Flutter  │ ────────────► │ Backend FastAPI + SQLite │
-│ (APK / web)  │ ◄──────────── │  /salud /detectar        │
-└──────────────┘               │  /asistente /ventas      │
-                               │  /pagos (simulado)       │
-                               └──────┬─────────┬─────────┘
-                                      │         │
-                    ┌─────────────────▼──┐  ┌───▼──────────────────────────┐
-                    │ Detector           │  │ Asistente                    │
-                    │ RT-DETR (TAO) →    │  │ Nemotron 3 Nano 4B + LoRA    │
-                    │ TensorRT           │  │ /v1/chat/completions         │
-                    │ (plan B: YOLO)     │  │      │                       │
-                    └────────────────────┘  │  ┌───▼───────────────────┐   │
-                                            │  │ RAG: embeddings NIM   │   │
-                                            │  │ Ley Economía Digital, │   │
-                                            │  │ guías DiMo / CoDi     │   │
-                                            │  └───────────────────────┘   │
-                                            └──────────────────────────────┘
-                 Modelos servidos en NVIDIA DGX Spark (ARM64)
+┌──────────────────┐  HTTPS (túnel)   ┌─────────────────────────────────────────────┐
+│ App Flutter      │ ───────────────► │ Gateway FastAPI  scripts/ia_gateway.py :8000│
+│ (APK Android)    │ ◄─────────────── │  /detectar  /asistente  /libreta  /salud    │
+│ voz: STT Android │                  │  /api/*  ──► Gundani (VPS del equipo)       │
+└──────────────────┘                  └──────┬──────────────┬───────────────────────┘
+                                             │              │
+                     ┌───────────────────────▼──┐   ┌───────▼──────────────────────────┐
+                     │ Detector :8002           │   │ Asistente :8001                  │
+                     │ DINO ResNet-50 (TAO 5.5) │   │ Qwen2.5-1.5B-Instruct + LoRA     │
+                     │ → ONNX → TensorRT 11.5   │   │ (PEFT, entrenado por el equipo)  │
+                     │ RTX 2060 (laptop)        │   │ RTX 2060, fp16                   │
+                     └──────────────────────────┘   │ /libreta → Nemotron 3.5 Super VL │
+                                                    │   (API build.nvidia.com)         │
+                                                    └──────────────────────────────────┘
+Entrenamiento: servidores NVIDIA DLI (Tesla T4). Inferencia: laptop del equipo (RTX 2060).
+Gundani: Qwen2.5-3B + QLoRA (GGUF en llama-server) — cobros simulados, movimientos y resumen de caja.
 ```
+
+El LLM **solo propone**: el código valida la acción, que cada producto exista en el catálogo **y que
+la persona lo haya mencionado**, y calcula precios y totales. Nada se guarda sin que la persona confirme.
 
 ## Estructura
 
 | Carpeta | Contenido |
 |---|---|
 | `app/` | App Flutter (ver `app/README.md`) |
-| `backend/` | API FastAPI, BD SQLite, detector, asistente, pagos simulados |
-| `training/vision/` | Datos, división por sesión, specs, exportación TensorRT, evaluación |
-| `training/asistente/` | Dataset sintético, config LoRA, evaluación base vs LoRA |
-| `rag/` | Fuentes oficiales y script de indexado |
-| `scripts/` | Chequeo de salud y respaldo de logs |
-| `logs/` | Registros de entrenamiento y evaluación (evidencia) |
+| `scripts/` | `demo_up.sh` / `demo_down.sh` (levantan todo), `ia_gateway.py`, chequeo de salud |
+| `training/vision/` | Cuaderno TAO del detector, specs, distribución de datos, logs v1–v3, evaluaciones con fotos propias |
+| `training/detector/` | Servidor TensorRT del detector y conversión a `.engine` |
+| `training/asistente/` | Dataset sintético, entrenamiento LoRA, evaluación base vs LoRA, servidor del asistente |
+| `backend_gundani/` | Asistente Gundani (QLoRA) y API de caja/cobros simulados |
+| `backend/` | API inicial (SQLite) — no la usa la demo; se conserva con sus pruebas |
 | `modelos/` | Dónde están los pesos y su sha256 |
-| `docs/` | Ficha, evidencias, decisiones HCI, funciones, declaración de IA |
+| `docs/` | Ficha, evidencias, decisiones HCI, funciones, pruebas de uso, declaración de IA y licencias |
+| `logs/` | Evidencia de pruebas del recorrido |
 
 ## Cómo ejecutar
 
-### Backend
-
-```bash
-cp .env.example .env          # llenar variables (nunca subir .env)
-cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-# para el detector plan B también: pip install ultralytics
-uvicorn app:app --host 0.0.0.0 --port 8000
-```
-
-Documentación interactiva: `http://localhost:8000/docs`
-
-### App
-
-App Flutter en `app/`. Ver [`app/README.md`](app/README.md).
-
-### Demo de punta a punta (app + modelos del equipo)
-
-`bash scripts/demo_up.sh` levanta detector, asistente, gateway y túnel; la app usa esa única URL.
 Guía completa: [`docs/DEMO.md`](docs/DEMO.md).
 
-### Chequeo de salud
-
 ```bash
-./scripts/chequeo_salud.sh
+# 1. Servicios (laptop con GPU NVIDIA; pesos en ~/caja-clara/{asistente,detector}, ver modelos/README.md)
+bash scripts/demo_up.sh          # asistente + detector + gateway + túnel; imprime la URL y los hashes
+# 2. App
+cd app && flutter pub get && flutter test
+flutter build apk --release --dart-define=API_URL=<URL que imprimió demo_up.sh>
 ```
 
-## Cómo cargar los modelos
+La URL también se puede cambiar dentro de la app: **Sin red → Servidor de IA y modelo en uso**.
+`/libreta` necesita `NVIDIA_API_KEY` en `~/caja-clara/.env` (nunca en git).
 
-1. **Detector:** entrenar (`training/vision/`), exportar con
-   `training/vision/export_tensorrt.sh` y poner la ruta del archivo en
-   `VISION_WEIGHTS`. El backend lo carga al arrancar.
-2. **Asistente:** servir Nemotron 3 Nano 4B con el adaptador LoRA en el DGX Spark
-   detrás de una API compatible con OpenAI (`/v1/chat/completions`) y poner
-   `LLM_BASE_URL` y `LLM_MODEL`. TODO: documentar el comando exacto de servicio usado.
-3. **RAG:** colocar las fuentes en `rag/fuentes/`, configurar `NIM_EMBED_URL` y
-   `NIM_EMBED_MODEL` y correr `python rag/indexar.py`.
+## Cómo verificar que la app usa los modelos entrenados
 
-## Cómo verificar que la app usa los pesos entrenados
-
-1. En el DGX Spark: `sha256sum <archivo de pesos>` y comparar con la tabla de
-   [`modelos/README.md`](modelos/README.md).
-2. Poner ese hash en `VISION_SHA256` del `.env`.
-3. `curl http://localhost:8000/salud` → el bloque `detector` muestra el `sha256`
-   del archivo realmente cargado y `sha256_coincide: true`.
-4. Cada respuesta de `/detectar` incluye `modelo_sha256`.
-5. Para el asistente: `sha256sum` del adaptador LoRA vs `modelos/README.md`;
-   `LORA_SHA256` aparece en `/salud`. TODO: verificar también desde el servidor del LLM.
+1. `curl <URL>/salud` muestra el `sha256` del engine del detector y del adaptador LoRA **que están cargados**.
+2. Compararlos con [`modelos/README.md`](modelos/README.md) y con `sha256sum` de los archivos entregados.
+3. En la app: **Sin red → Servidor de IA y modelo en uso** muestra los mismos hashes; cada respuesta de
+   `/detectar` incluye `sha256_engine`.
 
 ## Herramientas NVIDIA usadas
 
 | Herramienta | Para qué |
 |---|---|
-| NVIDIA DGX Spark (ARM64) | Entrenamiento y servicio de los modelos |
-| TAO Toolkit (RT-DETR) | Entrenar el detector de productos |
-| TensorRT | Optimizar el detector para inferencia |
-| NeMo AutoModel | Ajuste LoRA del asistente |
-| Nemotron 3 Nano 4B | Modelo base del asistente |
-| NIM (embeddings) | Indexado y búsqueda del RAG |
+| Servidores NVIDIA DLI (Tesla T4) | Entrenamiento del detector (3 versiones) y del LoRA del asistente |
+| TAO Toolkit 5.5 (DINO) | Ajuste fino del detector desde `pretrained_dino_coco` (NGC) |
+| TensorRT 11.5 | Optimizar el detector para inferencia (ONNX → `.engine`, ~90 ms por foto en RTX 2060) |
+| Contenedores PyTorch de NGC (DLI) | Entrenamiento LoRA del asistente (torch `nv24.04`) |
+| Nemotron 3.5 Super VL (build.nvidia.com) | Complemento: transcribir la hoja de la libreta (no acredita el requisito de visión) |
+| Nemotron 3.5 Bolt E4B (build.nvidia.com) | Solo referencia en la evaluación del asistente; no se usa en la app |
 
-TODO: confirmar versiones exactas usadas y quitar lo que no se haya usado al final.
+## Funciones, componentes previos y licencias
 
-## Componentes previos, fuentes y licencias
-
-> Todo lo que no fue creado durante el hackathon debe declararse aquí.
-
-| Componente | Origen | Licencia | Uso en el proyecto |
-|---|---|---|---|
-| Nemotron 3 Nano 4B | NVIDIA | TODO: verificar licencia del modelo | Modelo base del asistente |
-| RT-DETR / backbone preentrenado | NVIDIA TAO | TODO | Punto de partida del detector |
-| YOLO (plan B, si se usa) | Ultralytics | AGPL-3.0 (TODO: confirmar implicaciones) | Detector alternativo |
-| FastAPI, Uvicorn, Pydantic | PyPI | MIT / BSD | Backend |
-| Flutter | Google | BSD-3-Clause | App |
-| Ley de Economía Digital | DOF | Documento público | Fuente del RAG |
-| Guías DiMo / CoDi | Banxico | TODO | Fuente del RAG |
-| Imágenes de entrenamiento | Ver `training/vision/data/README.md` | — | Dataset del detector |
-
-Código desarrollado previamente al hackathon: TODO (declarar o escribir "ninguno").
-
-Declaración de uso de IA: [`docs/declaracion_ia.md`](docs/declaracion_ia.md).
+- Implementadas / simuladas / pendientes: [`docs/funciones.md`](docs/funciones.md).
+- Declaración de uso de IA, componentes previos, datos y licencias: [`docs/DECLARACION_IA_Y_LICENCIAS.md`](docs/DECLARACION_IA_Y_LICENCIAS.md).
+- No se incluyen claves en el repositorio (`.env` está en `.gitignore`).
 
 ## Licencia
 

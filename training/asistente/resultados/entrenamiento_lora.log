@@ -1,0 +1,12 @@
+[2026-11-20 03:14:18 UTC] Inicio | modelo base=Qwen/Qwen2.5-1.5B-Instruct | GPU=Tesla T4 | torch=2.3.0a0+6ddf5cf85e.nv24.04 | python=3.10.12
+[2026-11-20 03:14:46 UTC] LoRA r=16: parametros entrenables 18,464,768 de 1,562,179,072 (1.18%)
+[2026-11-20 03:14:48 UTC] Datos (sinteticos): train=1165 val=113
+[2026-11-20 03:30:05 UTC] FIN entrenamiento: 219 pasos, 15.3 min, train_loss=0.0300
+[2026-11-20 03:30:09 UTC] Evaluando BASE en 74 casos
+[2026-11-20 03:37:38 UTC] Inicio | modelo base=Qwen/Qwen2.5-1.5B-Instruct | GPU=Tesla T4 | torch=2.3.0a0+6ddf5cf85e.nv24.04 | python=3.10.12
+[2026-11-20 03:38:04 UTC] Evaluando BASE en 74 casos
+[2026-11-20 03:40:45 UTC] Inicio | modelo base=Qwen/Qwen2.5-1.5B-Instruct | GPU=Tesla T4 | torch=2.3.0a0+6ddf5cf85e.nv24.04 | python=3.10.12
+[2026-11-20 03:41:11 UTC] Evaluando BASE en 74 casos
+[2026-11-20 03:42:46 UTC] EVAL base_local: {"json_valido": 0.459, "accion_correcta": 0.203, "exacto": 0.014, "nombre": "base_local", "casos": 74, "latencia_media_s": 1.28, "reservados_exacto": "0/14"}
+[2026-11-20 03:42:46 UTC] Evaluando BASE+LoRA en 74 casos
+[2026-11-20 03:46:41 UTC] EVAL lora_local: {"json_valido": 1.0, "accion_correcta": 0.892, "exacto": 0.865, "nombre": "lora_local", "casos": 74, "latencia_media_s": 3.17, "reservados_exacto": "13/14"}

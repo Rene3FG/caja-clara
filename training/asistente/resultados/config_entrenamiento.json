@@ -1,0 +1,16 @@
+{
+ "modelo": "Qwen/Qwen2.5-1.5B-Instruct",
+ "datos": "datos_asistente",
+ "salida": "resultados_asistente",
+ "epocas": 3,
+ "lr": 0.0002,
+ "rango": 16,
+ "max_len": 384,
+ "n_test": 60,
+ "entrenar": true,
+ "evaluar": true,
+ "gpu": "Tesla T4",
+ "duracion_s": 917,
+ "pasos": 219,
+ "train_loss_final": 0.03004779250969149
+}

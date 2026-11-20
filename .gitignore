@@ -30,8 +30,7 @@ app/ios/Pods/
 # Datasets (no se suben imágenes ni datos crudos)
 training/vision/data/*
 !training/vision/data/README.md
-training/asistente/data/*
-!training/asistente/data/README.md
+# El dataset del asistente es sintético (sin datos personales) y es entregable (bases 8)
 rag/fuentes/*
 !rag/fuentes/README.md
 rag/indice.json
@@ -53,6 +52,8 @@ modelos/*
 # Logs (solo se versionan los copiados a logs/ como evidencia)
 *.log
 !logs/*.log
+!training/asistente/resultados/*.log
+!training/vision/logs/*.log
 logs/demo/
 
 # Editor / SO

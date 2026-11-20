@@ -1,0 +1,45 @@
+{
+ "train": {
+  "ejemplos": 1165,
+  "por_accion": {
+   "fuera_de_alcance": 84,
+   "agregar": 516,
+   "consulta_ley": 63,
+   "forma_pago": 42,
+   "quitar": 134,
+   "confirmar": 36,
+   "registrar_libreta": 133,
+   "consulta": 110,
+   "aclarar": 47
+  }
+ },
+ "val": {
+  "ejemplos": 113,
+  "por_accion": {
+   "registrar_libreta": 17,
+   "consulta": 3,
+   "agregar": 63,
+   "fuera_de_alcance": 2,
+   "forma_pago": 10,
+   "quitar": 14,
+   "aclarar": 2,
+   "consulta_ley": 2
+  }
+ },
+ "test": {
+  "ejemplos": 122,
+  "por_accion": {
+   "confirmar": 2,
+   "aclarar": 1,
+   "quitar": 19,
+   "agregar": 66,
+   "fuera_de_alcance": 2,
+   "forma_pago": 5,
+   "consulta": 4,
+   "registrar_libreta": 22,
+   "consulta_ley": 1
+  }
+ },
+ "casos_reservados": 14,
+ "nota": "Datos sinteticos generados con plantillas; val/test usan plantillas no vistas en train."
+}

@@ -1,0 +1,232 @@
+{
+ "fecha": "2026-11-20 08:26:07",
+ "gateway": "http://127.0.0.1:8000",
+ "casos": [
+  {
+   "caso": "1",
+   "tipo": "habitual",
+   "nombre": "Venta por foto (foto nueva p03, no usada en entrenamiento)",
+   "entrada": "POST /detectar p03_022.jpg (chokis + sabritas)",
+   "esperado": "Detecta chokis 1 y sabritas 1",
+   "http": 200,
+   "ms": 295,
+   "respuesta": {
+    "detecciones": [
+     {
+      "producto": "sabritas",
+      "confianza": 0.856,
+      "caja": [
+       30.2,
+       319.3,
+       1470.4,
+       1426.3
+      ]
+     }
+    ],
+    "conteo": {
+     "sabritas": 1
+    },
+    "no_reconocidos": 0,
+    "ms": 221.8,
+    "ok": true,
+    "requiere_revision": true,
+    "sha256_engine": "e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed"
+   }
+  },
+  {
+   "caso": "2",
+   "tipo": "habitual",
+   "nombre": "Venta por voz",
+   "entrada": "POST /asistente 'cobra 2 sabritas y 3 cocas'",
+   "esperado": "agregar sabritas 2, coca_cola 3, total propuesto",
+   "http": 200,
+   "ms": 1250,
+   "respuesta": {
+    "ok": true,
+    "accion": {
+     "accion": "agregar",
+     "productos": [
+      {
+       "producto": "sabritas",
+       "cantidad": 2
+      },
+      {
+       "producto": "coca_cola",
+       "cantidad": 3
+      }
+     ]
+    },
+    "items": [
+     {
+      "producto": "sabritas",
+      "nombre": "sabritas",
+      "cantidad": 2,
+      "unidad": "pieza",
+      "precio": 20,
+      "subtotal": 40
+     },
+     {
+      "producto": "coca_cola",
+      "nombre": "coca",
+      "cantidad": 3,
+      "unidad": "pieza",
+      "precio": 22,
+      "subtotal": 66
+     }
+    ],
+    "total_propuesto": 106.0,
+    "texto_original": "cobra 2 sabritas y 3 cocas",
+    "ms": 1217,
+    "requiere_confirmacion": true
+   }
+  },
+  {
+   "caso": "3",
+   "tipo": "incompleto",
+   "nombre": "Dictado cortado sin producto",
+   "entrada": "POST /asistente 'cobra tres'",
+   "esperado": "aclarar: pide producto, no inventa",
+   "http": 200,
+   "ms": 743,
+   "respuesta": {
+    "ok": false,
+    "accion": {
+     "accion": "aclarar",
+     "pregunta": "No escuché qué producto. ¿Me dices qué y cuántos?"
+    },
+    "error": "No escuché qué producto. ¿Me dices qué y cuántos?",
+    "salida_modelo": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"refresco\", \"cantidad\": 3}]}",
+    "texto_original": "cobra tres",
+    "ms": 710
+   }
+  },
+  {
+   "caso": "4",
+   "tipo": "invalido",
+   "nombre": "Archivo que no es imagen",
+   "entrada": "POST /detectar texto plano",
+   "esperado": "error 4xx con mensaje claro",
+   "http": 400,
+   "ms": 373,
+   "respuesta": {
+    "detail": "El archivo no es una imagen válida (usa JPG o PNG)."
+   }
+  },
+  {
+   "caso": "5",
+   "tipo": "invalido",
+   "nombre": "Foto oscura",
+   "entrada": "POST /detectar imagen negra 640x480",
+   "esperado": "aviso de foto oscura / sin productos",
+   "http": 200,
+   "ms": 117,
+   "respuesta": {
+    "detecciones": [],
+    "conteo": {},
+    "no_reconocidos": 0,
+    "ms": 64.1,
+    "ok": true,
+    "requiere_revision": true,
+    "sha256_engine": "e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed",
+    "mensaje": "No reconocí productos. Acerca la cámara o agrégalos a mano."
+   }
+  },
+  {
+   "caso": "6",
+   "tipo": "fuera_de_alcance",
+   "nombre": "Pregunta fuera de alcance",
+   "entrada": "POST /asistente '¿a qué hora abre el banco?'",
+   "esperado": "fuera_de_alcance",
+   "http": 200,
+   "ms": 1043,
+   "respuesta": {
+    "ok": true,
+    "accion": {
+     "accion": "fuera_de_alcance",
+     "respuesta": "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."
+    },
+    "items": [],
+    "total_propuesto": 0.0,
+    "texto_original": "¿a qué hora abre el banco?",
+    "ms": 1010,
+    "requiere_confirmacion": false
+   }
+  },
+  {
+   "caso": "7",
+   "tipo": "pago",
+   "nombre": "Cobro QR simulado aprobado",
+   "entrada": "POST /api/qr/cobrar monto 84",
+   "esperado": "ok true, estado aprobado (SIMULADO)",
+   "http": 200,
+   "ms": 585,
+   "respuesta": {
+    "ok": true,
+    "mensaje_voz": "Cobro anotado.",
+    "motivo": null
+   }
+  },
+  {
+   "caso": "8",
+   "tipo": "fallo_servicio",
+   "nombre": "Cobro QR simulado con QR expirado",
+   "entrada": "POST /api/qr/cobrar qr_expirado=true",
+   "esperado": "ok false, motivo qr_expirado",
+   "http": 200,
+   "ms": 584,
+   "respuesta": {
+    "ok": false,
+    "mensaje_voz": "El código expiró. No se anotó la venta.",
+    "motivo": "qr_expirado"
+   }
+  },
+  {
+   "caso": "9",
+   "tipo": "habitual",
+   "nombre": "Pasar libreta por foto (hoja nueva, de lado)",
+   "entrada": "POST /libreta hoja manuscrita 2 tlayudas / 1 quesadilla / 1 tlayuda",
+   "esperado": "tlayuda 3; quesadilla pendiente (fuera de catálogo)",
+   "http": 200,
+   "ms": 9698,
+   "respuesta": {
+    "ok": true,
+    "accion": {
+     "accion": "registrar_libreta",
+     "productos": [
+      {
+       "producto": "tlayuda",
+       "cantidad": 3
+      }
+     ]
+    },
+    "items": [
+     {
+      "producto": "tlayuda",
+      "nombre": "tlayuda",
+      "cantidad": 3,
+      "unidad": "pieza",
+      "precio": 90,
+      "subtotal": 270
+     }
+    ],
+    "total_propuesto": 270.0,
+    "texto_original": "pásame lo de la libreta: 2 tlayuda, 1 quesadilla, 1 tlayuda",
+    "ms": 9618,
+    "requiere_confirmacion": true,
+    "requiere_fecha": true,
+    "transcripcion": "2 tlayuda\n1 quesadilla\n1 tlayuda",
+    "ms_vision": 8030,
+    "modelo_vision": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    "pendientes": [
+     {
+      "producto": null,
+      "nombre": "quesadilla",
+      "renglon": "1 quesadilla",
+      "cantidad": 1.0
+     }
+    ],
+    "mensaje": "Revisa estos renglones: 1 quesadilla. Indica la cantidad o el producto antes de guardar."
+   }
+  }
+ ]
+}

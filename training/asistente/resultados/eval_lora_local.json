@@ -1,0 +1,1369 @@
+{
+ "resumen": {
+  "json_valido": 1.0,
+  "accion_correcta": 0.892,
+  "exacto": 0.865,
+  "nombre": "lora_local",
+  "casos": 74,
+  "latencia_media_s": 3.17,
+  "reservados_exacto": "13/14"
+ },
+ "detalle": [
+  {
+   "categoria": "habitual",
+   "frase": "dame tres memelas y un café de olla",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "memela",
+      "cantidad": 3
+     },
+     {
+      "producto": "cafe_olla",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"memela\", \"cantidad\": 3}, {\"producto\": \"cafe_olla\", \"cantidad\": 1}]}",
+   "segundos": 3.98,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual",
+   "frase": "véndele dos cocas y unas sabritas",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "coca_cola",
+      "cantidad": 2
+     },
+     {
+      "producto": "sabritas",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"coca_cola\", \"cantidad\": 2}, {\"producto\": \"sabritas\", \"cantidad\": 1}]}",
+   "segundos": 4.17,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual",
+   "frase": "anótale cinco metros de cable del 12",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "cable_12",
+      "cantidad": 5
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"cable_12\", \"cantidad\": 5}]}",
+   "segundos": 2.77,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual",
+   "frase": "lo pagó por transferencia al celular",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "transferencia"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"transferencia\"}",
+   "segundos": 1.59,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual",
+   "frase": "¿cómo voy de ventas hoy?",
+   "esperado": {
+    "accion": "consulta",
+    "tipo": "ventas_hoy"
+   },
+   "salida": "{\"accion\": \"consulta\", \"tipo\": \"ventas_hoy\"}",
+   "segundos": 1.49,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual",
+   "frase": "quítale el gansito",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "gansito",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"gansito\", \"cantidad\": 1}]}",
+   "segundos": 2.58,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "incompleto",
+   "frase": "ponme tlayudas",
+   "esperado": {
+    "accion": "aclarar"
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tlayuda\", \"cantidad\": 1}]}",
+   "segundos": 2.56,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "incompleto",
+   "frase": "dame de los rojos",
+   "esperado": {
+    "accion": "aclarar"
+   },
+   "salida": "{\"accion\": \"aclarar\", \"pregunta\": \"¿Cuántos rojos le pongo?\"}",
+   "segundos": 2.46,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "fuera_de_alcance",
+   "frase": "¿a qué hora abre el banco?",
+   "esperado": {
+    "accion": "fuera_de_alcance"
+   },
+   "salida": "{\"accion\": \"fuera_de_alcance\", \"respuesta\": \"Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales.\"}",
+   "segundos": 3.57,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "fuera_de_alcance",
+   "frase": "ayúdame con la tarea de mi hijo",
+   "esperado": {
+    "accion": "fuera_de_alcance"
+   },
+   "salida": "{\"accion\": \"fuera_de_alcance\", \"respuesta\": \"Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales.\"}",
+   "segundos": 3.6,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual_dictado",
+   "frase": "dame dos la yudas y una orchata",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tlayuda",
+      "cantidad": 2
+     },
+     {
+      "producto": "agua_horchata",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tlayuda\", \"cantidad\": 2}, {\"producto\": \"agua_horchata\", \"cantidad\": 1}]}",
+   "segundos": 4.05,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "habitual_dictado",
+   "frase": "anota tres bariyas y un kilo de clavo",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "varilla",
+      "cantidad": 3
+     },
+     {
+      "producto": "clavo",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"varilla\", \"cantidad\": 3}, {\"producto\": \"clavo\", \"cantidad\": 1}]}",
+   "segundos": 3.78,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "limite_confirmacion",
+   "frase": "borra toda la venta de la señora",
+   "esperado": {
+    "accion": "confirmar"
+   },
+   "salida": "{\"accion\": \"confirmar\", \"pregunta\": \"¿Seguro que quieres borrar toda la venta? Responde sí o no.\"}",
+   "segundos": 3.08,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "limite_confirmacion",
+   "frase": "¿me van a cobrar impuestos por recibir transferencias?",
+   "esperado": {
+    "accion": "consulta_ley",
+    "tema": "impuestos"
+   },
+   "salida": "{\"accion\": \"consulta_ley\", \"tema\": \"impuestos\"}",
+   "segundos": 1.68,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_confirmar",
+   "frase": "empieza de cero la venta",
+   "esperado": {
+    "accion": "confirmar",
+    "pregunta": "¿Seguro que quieres borrar toda la venta? Responde sí o no."
+   },
+   "salida": "{\"accion\": \"confirmar\", \"pregunta\": \"¿Seguro que quieres borrar toda la venta? Responde sí o no.\"}",
+   "segundos": 3.07,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_aclarar",
+   "frase": "lo mismo que ayer",
+   "esperado": {
+    "accion": "aclarar",
+    "pregunta": "¿Qué producto y cuántos?"
+   },
+   "salida": "{\"accion\": \"registrar_libreta\", \"fecha\": \"ayer\"}",
+   "segundos": 1.58,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "sácale 6 panditas de la cuenta",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "panditas",
+      "cantidad": 6
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"panditas\", \"cantidad\": 6}]}",
+   "segundos": 2.55,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva 6 tornillo",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tornillo",
+      "cantidad": 6
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tornillo\", \"cantidad\": 6}]}",
+   "segundos": 2.58,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "siempre no 2 varilla",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "varilla",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"varilla\", \"cantidad\": 2}]}",
+   "segundos": 2.47,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_fuera_de_alcance",
+   "frase": "recomiéndame una película",
+   "esperado": {
+    "accion": "fuera_de_alcance",
+    "respuesta": "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."
+   },
+   "salida": "{\"accion\": \"fuera_de_alcance\", \"respuesta\": \"Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales.\"}",
+   "segundos": 3.55,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_forma_pago",
+   "frase": "esa fue por billete",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "efectivo"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"efectivo\"}",
+   "segundos": 1.68,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_consulta",
+   "frase": "¿qué tal las ventas del día?",
+   "esperado": {
+    "accion": "consulta",
+    "tipo": "ventas_hoy"
+   },
+   "salida": "{\"accion\": \"consulta\", \"tipo\": \"ventas_hoy\"}",
+   "segundos": 1.48,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, sumale una doritos",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "doritos",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"doritos\", \"cantidad\": 1}]}",
+   "segundos": 2.58,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_fuera_de_alcance",
+   "frase": "¿quién es el presidente?",
+   "esperado": {
+    "accion": "fuera_de_alcance",
+    "respuesta": "Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales."
+   },
+   "salida": "{\"accion\": \"fuera_de_alcance\", \"respuesta\": \"Solo puedo ayudarte con tus ventas, cobros, caja y pagos digitales.\"}",
+   "segundos": 3.55,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "sácale 2 refresco de la cuenta",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "refresco",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"refresco\", \"cantidad\": 2}]}",
+   "segundos": 2.48,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, súmale una chokis y también cuatro gansito",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "chokis",
+      "cantidad": 1
+     },
+     {
+      "producto": "gansito",
+      "cantidad": 4
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"chokis\", \"cantidad\": 1}, {\"producto\": \"gansito\", \"cantidad\": 4}]}",
+   "segundos": 3.95,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apúntale media docena de memelas, una tlayuda y también media docena de café de olla a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "memela",
+      "cantidad": 6
+     },
+     {
+      "producto": "tlayuda",
+      "cantidad": 1
+     },
+     {
+      "producto": "cafe_olla",
+      "cantidad": 6
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"memela\", \"cantidad\": 6}, {\"producto\": \"tlayuda\", \"cantidad\": 1}, {\"producto\": \"cafe_olla\", \"cantidad\": 6}]}",
+   "segundos": 5.38,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_forma_pago",
+   "frase": "lo va a pagar con billete",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "efectivo"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"efectivo\"}",
+   "segundos": 1.69,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_confirmar",
+   "frase": "tira toda la cuenta",
+   "esperado": {
+    "accion": "confirmar",
+    "pregunta": "¿Seguro que quieres borrar toda la venta? Responde sí o no."
+   },
+   "salida": "{\"accion\": \"confirmar\", \"pregunta\": \"¿Seguro que quieres borrar toda la venta? Responde sí o no.\"}",
+   "segundos": 3.06,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva seis ordenes de enfrijoladas y también tres vaso de horchata",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "enfrijoladas",
+      "cantidad": 6
+     },
+     {
+      "producto": "agua_horchata",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"enfrijoladas\", \"cantidad\": 6}, {\"producto\": \"agua_horchata\", \"cantidad\": 3}]}",
+   "segundos": 4.26,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_consulta",
+   "frase": "hay pagos por confirmar?",
+   "esperado": {
+    "accion": "consulta",
+    "tipo": "pendientes"
+   },
+   "salida": "{\"accion\": \"consulta\", \"tipo\": \"pagos_hoy\"}",
+   "segundos": 1.58,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_registrar_libreta",
+   "frase": "pásame lo de la libreta: dos doritos, una chokis y 5 papas",
+   "esperado": {
+    "accion": "registrar_libreta",
+    "productos": [
+     {
+      "producto": "doritos",
+      "cantidad": 2
+     },
+     {
+      "producto": "chokis",
+      "cantidad": 1
+     },
+     {
+      "producto": "sabritas",
+      "cantidad": 5
+     }
+    ],
+    "fecha": "ayer"
+   },
+   "salida": "{\"accion\": \"registrar_libreta\", \"productos\": [{\"producto\": \"doritos\", \"cantidad\": 2}, {\"producto\": \"chokis\", \"cantidad\": 1}, {\"producto\": \"sabritas\", \"cantidad\": 5}], \"fecha\": \"\"}",
+   "segundos": 6.03,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, súmale medio litros de pintura y también 4 bulto de cemento",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "pintura",
+      "cantidad": 0.5
+     },
+     {
+      "producto": "cemento",
+      "cantidad": 4
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"pintura\", \"cantidad\": 0.5}, {\"producto\": \"cemento\", \"cantidad\": 4}]}",
+   "segundos": 4.1,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "siempre no 20 litro de pintura",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "pintura",
+      "cantidad": 20
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"pintura\", \"cantidad\": 20}]}",
+   "segundos": 2.7,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale 2 skittles y un panditas",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "skittles",
+      "cantidad": 2
+     },
+     {
+      "producto": "panditas",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"skittles\", \"cantidad\": 2}, {\"producto\": \"panditas\", \"cantidad\": 1}]}",
+   "segundos": 4.1,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_forma_pago",
+   "frase": "esa fue por DiMo",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "transferencia"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"transferencia\"}",
+   "segundos": 1.6,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apuntale dos litros de pintura a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "pintura",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"pintura\", \"cantidad\": 2}]}",
+   "segundos": 2.56,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, sumale 5 tubos y cuatro varillas",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tubo_pvc",
+      "cantidad": 5
+     },
+     {
+      "producto": "varilla",
+      "cantidad": 4
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tubo_pvc\", \"cantidad\": 5}, {\"producto\": \"varilla\", \"cantidad\": 4}]}",
+   "segundos": 3.95,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, súmale dos memelas",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "memela",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"memela\", \"cantidad\": 2}]}",
+   "segundos": 2.48,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "echale 10 cafe de olla y tambien doce memela",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "cafe_olla",
+      "cantidad": 10
+     },
+     {
+      "producto": "memela",
+      "cantidad": 12
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"cafe_olla\", \"cantidad\": 10}, {\"producto\": \"memela\", \"cantidad\": 12}]}",
+   "segundos": 4.13,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale un skittles, un agua de litro y también 3 coca cola",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "skittles",
+      "cantidad": 1
+     },
+     {
+      "producto": "agua_1l",
+      "cantidad": 1
+     },
+     {
+      "producto": "coca_cola",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"skittles\", \"cantidad\": 1}, {\"producto\": \"agua_1l\", \"cantidad\": 1}, {\"producto\": \"coca_cola\", \"cantidad\": 3}]}",
+   "segundos": 5.54,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "echale una tlayudas",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tlayuda",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tlayuda\", \"cantidad\": 1}]}",
+   "segundos": 2.57,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_consulta_ley",
+   "frase": "¿cobra algo el banco por recibir por celular?",
+   "esperado": {
+    "accion": "consulta_ley",
+    "tema": "comisiones"
+   },
+   "salida": "{\"accion\": \"consulta_ley\", \"tema\": \"obligaciones\"}",
+   "segundos": 1.78,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_forma_pago",
+   "frase": "esa fue por cash",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "efectivo"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"efectivo\"}",
+   "segundos": 1.66,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale una docena de galletas choquis",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "chokis",
+      "cantidad": 12
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"chokis\", \"cantidad\": 12}]}",
+   "segundos": 2.65,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva un agua de horchata",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "agua_horchata",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"agua_horchata\", \"cantidad\": 1}]}",
+   "segundos": 2.67,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva 12 coca-cola y también dos gansitos",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "coca_cola",
+      "cantidad": 12
+     },
+     {
+      "producto": "gansito",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"coca_cola\", \"cantidad\": 12}, {\"producto\": \"gansito\", \"cantidad\": 2}]}",
+   "segundos": 4.16,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_registrar_libreta",
+   "frase": "el lunes salieron cinco bultos de cemento",
+   "esperado": {
+    "accion": "registrar_libreta",
+    "productos": [
+     {
+      "producto": "cemento",
+      "cantidad": 5
+     }
+    ],
+    "fecha": "lunes"
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"cemento\", \"cantidad\": 5}]}",
+   "segundos": 2.49,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, súmale una chokis, diez doritos y también una docena de gansitos",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "chokis",
+      "cantidad": 1
+     },
+     {
+      "producto": "doritos",
+      "cantidad": 10
+     },
+     {
+      "producto": "gansito",
+      "cantidad": 12
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"chokis\", \"cantidad\": 1}, {\"producto\": \"doritos\", \"cantidad\": 10}, {\"producto\": \"gansito\", \"cantidad\": 12}]}",
+   "segundos": 5.52,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale una doritos y también 3 skittles",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "doritos",
+      "cantidad": 1
+     },
+     {
+      "producto": "skittles",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"doritos\", \"cantidad\": 1}, {\"producto\": \"skittles\", \"cantidad\": 3}]}",
+   "segundos": 3.94,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "sácale 6 cafe de olla de la cuenta",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "cafe_olla",
+      "cantidad": 6
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"cafe_olla\", \"cantidad\": 6}]}",
+   "segundos": 2.68,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_registrar_libreta",
+   "frase": "pásame lo de la libreta: 1 varilla de tres octavos y un kilo de clavos",
+   "esperado": {
+    "accion": "registrar_libreta",
+    "productos": [
+     {
+      "producto": "varilla",
+      "cantidad": 1
+     },
+     {
+      "producto": "clavo",
+      "cantidad": 1
+     }
+    ],
+    "fecha": "ayer"
+   },
+   "salida": "{\"accion\": \"registrar_libreta\", \"productos\": [{\"producto\": \"varilla\", \"cantidad\": 1}, {\"producto\": \"clavo\", \"cantidad\": 1}], \"fecha\": \"\"}",
+   "segundos": 4.39,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "siempre no tres bultos de cemento",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "cemento",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"cemento\", \"cantidad\": 3}]}",
+   "segundos": 2.49,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_consulta",
+   "frase": "cierra la caja",
+   "esperado": {
+    "accion": "consulta",
+    "tipo": "cierre_caja"
+   },
+   "salida": "{\"accion\": \"confirmar\", \"pregunta\": \"¿Seguro que quieres borrar toda la venta? Responde sí o no.\"}",
+   "segundos": 3.05,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale seis ganzito",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "gansito",
+      "cantidad": 6
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"gansito\", \"cantidad\": 6}]}",
+   "segundos": 2.57,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_registrar_libreta",
+   "frase": "el lunes salieron una docena de varilla",
+   "esperado": {
+    "accion": "registrar_libreta",
+    "productos": [
+     {
+      "producto": "varilla",
+      "cantidad": 12
+     }
+    ],
+    "fecha": "lunes"
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"varilla\", \"cantidad\": 12}]}",
+   "segundos": 2.58,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale una enfrijoladas y dos memela",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "enfrijoladas",
+      "cantidad": 1
+     },
+     {
+      "producto": "memela",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"enfrijoladas\", \"cantidad\": 1}, {\"producto\": \"memela\", \"cantidad\": 2}]}",
+   "segundos": 4.06,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "sacale un vaso de horchata de la cuenta",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "agua_horchata",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"agua_horchata\", \"cantidad\": 1}]}",
+   "segundos": 2.71,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apúntale dos metro de arena a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "arena",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"arena\", \"cantidad\": 2}]}",
+   "segundos": 2.4,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "oye, sumale dos bultos de cemento y 5 kilo de clavo",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "cemento",
+      "cantidad": 2
+     },
+     {
+      "producto": "clavo",
+      "cantidad": 5
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"cemento\", \"cantidad\": 2}, {\"producto\": \"clavo\", \"cantidad\": 5}]}",
+   "segundos": 3.77,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale una cafecito",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "cafe_olla",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"cafe_olla\", \"cantidad\": 1}]}",
+   "segundos": 2.69,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva 3 papas, 3 galletas choquis y también diez eskitels",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "sabritas",
+      "cantidad": 3
+     },
+     {
+      "producto": "chokis",
+      "cantidad": 3
+     },
+     {
+      "producto": "skittles",
+      "cantidad": 10
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"sabritas\", \"cantidad\": 3}, {\"producto\": \"chokis\", \"cantidad\": 3}, {\"producto\": \"skittles\", \"cantidad\": 10}]}",
+   "segundos": 5.53,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "siempre no 3 varilla",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "varilla",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"varilla\", \"cantidad\": 3}]}",
+   "segundos": 2.47,
+   "json_valido": 1,
+   "accion_correcta": 0,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apúntale dos tlayuda, 5 memelas y un chesco a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tlayuda",
+      "cantidad": 2
+     },
+     {
+      "producto": "memela",
+      "cantidad": 5
+     },
+     {
+      "producto": "refresco",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tlayuda\", \"cantidad\": 2}, {\"producto\": \"memela\", \"cantidad\": 5}, {\"producto\": \"refresco\", \"cantidad\": 1}]}",
+   "segundos": 5.15,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apúntale doce tamal y una ordenes de enfrijoladas a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tamal",
+      "cantidad": 12
+     },
+     {
+      "producto": "enfrijoladas",
+      "cantidad": 1
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tamal\", \"cantidad\": 12}, {\"producto\": \"enfrijoladas\", \"cantidad\": 1}]}",
+   "segundos": 4.2,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_consulta",
+   "frase": "que tal las ventas del dia?",
+   "esperado": {
+    "accion": "consulta",
+    "tipo": "ventas_hoy"
+   },
+   "salida": "{\"accion\": \"consulta\", \"tipo\": \"ventas_hoy\"}",
+   "segundos": 1.51,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_quitar",
+   "frase": "sácale 3 cafecito de la cuenta",
+   "esperado": {
+    "accion": "quitar",
+    "productos": [
+     {
+      "producto": "cafe_olla",
+      "cantidad": 3
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"quitar\", \"productos\": [{\"producto\": \"cafe_olla\", \"cantidad\": 3}]}",
+   "segundos": 2.7,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva dos horchata",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "agua_horchata",
+      "cantidad": 2
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"agua_horchata\", \"cantidad\": 2}]}",
+   "segundos": 2.68,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale un agua de horchata, 4 tamal y cuatro chesco",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "agua_horchata",
+      "cantidad": 1
+     },
+     {
+      "producto": "tamal",
+      "cantidad": 4
+     },
+     {
+      "producto": "refresco",
+      "cantidad": 4
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"agua_horchata\", \"cantidad\": 1}, {\"producto\": \"tamal\", \"cantidad\": 4}, {\"producto\": \"refresco\", \"cantidad\": 4}]}",
+   "segundos": 5.27,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale tres metros de arena y doce tubo pvc",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "arena",
+      "cantidad": 3
+     },
+     {
+      "producto": "tubo_pvc",
+      "cantidad": 12
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"arena\", \"cantidad\": 3}, {\"producto\": \"tubo_pvc\", \"cantidad\": 12}]}",
+   "segundos": 4.01,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_forma_pago",
+   "frase": "esa fue por celular",
+   "esperado": {
+    "accion": "forma_pago",
+    "metodo": "transferencia"
+   },
+   "salida": "{\"accion\": \"forma_pago\", \"metodo\": \"transferencia\"}",
+   "segundos": 1.6,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "apúntale una sabri tas, 1 panditas y también cinco skittles a la cuenta",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "sabritas",
+      "cantidad": 1
+     },
+     {
+      "producto": "panditas",
+      "cantidad": 1
+     },
+     {
+      "producto": "skittles",
+      "cantidad": 5
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"sabritas\", \"cantidad\": 1}, {\"producto\": \"skittles\", \"cantidad\": 5}]}",
+   "segundos": 4.08,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 0
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "el señor lleva medio litros de pintura, una bulto de cemento y también cinco metros de cable",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "pintura",
+      "cantidad": 0.5
+     },
+     {
+      "producto": "cemento",
+      "cantidad": 1
+     },
+     {
+      "producto": "cable_12",
+      "cantidad": 5
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"pintura\", \"cantidad\": 0.5}, {\"producto\": \"cemento\", \"cantidad\": 1}, {\"producto\": \"cable_12\", \"cantidad\": 5}]}",
+   "segundos": 5.84,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  },
+  {
+   "categoria": "test_agregar",
+   "frase": "échale 4 tamales",
+   "esperado": {
+    "accion": "agregar",
+    "productos": [
+     {
+      "producto": "tamal",
+      "cantidad": 4
+     }
+    ]
+   },
+   "salida": "{\"accion\": \"agregar\", \"productos\": [{\"producto\": \"tamal\", \"cantidad\": 4}]}",
+   "segundos": 2.53,
+   "json_valido": 1,
+   "accion_correcta": 1,
+   "exacto": 1
+  }
+ ]
+}

@@ -21,7 +21,8 @@ Firma del líder del equipo: ______________________ Fecha: ____________
 
 | Componente | Quién lo hizo | Función en Caja Clara |
 |---|---|---|
-| **Detector DINO ResNet-50 (v1 y v2)** | **Entrenado por el equipo** (TAO Toolkit, Tesla T4 DLI) | Reconocer y contar productos en la foto de la venta |
+| **Detector DINO ResNet-50 (v1, v2 y v3; la app usa v3)** | **Entrenado por el equipo** (TAO Toolkit, Tesla T4 DLI) | Reconocer y contar productos en la foto de la venta |
+| **Gundani: adaptador QLoRA sobre Qwen2.5-3B-Instruct** | **Entrenado por el equipo** (Tesla T4 DLI) | Consultas de caja y cobros simulados |
 | **Adaptador LoRA sobre Qwen2.5-1.5B-Instruct** | **Entrenado por el equipo** (PEFT, Tesla T4 DLI) | Convertir lo que dice/escribe la vendedora en acciones (agregar, quitar, pago, libreta…) |
 | Nemotron 3.5 Super VL (API build.nvidia.com) | NVIDIA (servicio ya entrenado, **complemento**) | Transcribir la foto de la hoja de la libreta; nuestro LoRA interpreta el texto |
 | Nemotron 3.5 Bolt E4B (API build.nvidia.com) | NVIDIA (**solo referencia**) | Comparación de desempeño contra nuestro asistente; no se usa en la app |
@@ -45,7 +46,7 @@ Conforme a la sección 7 de las bases, el servicio de OCR/visión de NVIDIA se u
 | Nemotron 3.5 Bolt E4B | build.nvidia.com | ⚠ confirmar |
 | **ProductosOXXO_V02** v3 — universe.roboflow.com/ipsum/productosoxxo_v02 | Roboflow Universe (autor: Ipsum) | CC BY 4.0 |
 | **Dataset Mercado** v1 — universe.roboflow.com/fundamentosia/dataset-mercado | Roboflow Universe (autor: FundamentosIA) | CC BY 4.0 |
-| Fotos propias (sesiones p01, p02, p03) | Tomadas por el equipo; sin rostros ni datos personales | Propias (CC BY 4.0 en Roboflow) |
+| Fotos propias (sesiones p01, p02, p03, p04; p03 reservada solo para evaluar) | Tomadas por el equipo; sin rostros ni datos personales | Propias (CC BY 4.0 en Roboflow) |
 | Dataset del asistente (~1,400 frases) | **Sintético**, generado con `generar_dataset.py` y revisado por el equipo | Propio |
 | PyTorch, Transformers, PEFT, Accelerate, FastAPI, Uvicorn, Pillow | PyPI | BSD / Apache 2.0 / MIT |
 | Flutter (app) | Google | BSD-3 |
@@ -62,15 +63,17 @@ Datos sintéticos (sección 10): el dataset del asistente es sintético y está 
 | Asistente de pedidos por voz/texto (LoRA propio) con confirmación | Implementada |
 | Pasar la libreta a digital por dictado/texto | Implementada |
 | Pasar la libreta a digital por foto (Nemotron VL + LoRA) | Implementada, **requiere internet** |
-| Revisión y corrección antes de guardar | Servidores listos · pantalla en la app: *[completar]* |
-| Manejo de errores (foto inválida, sin detecciones, servidor caído) | Servidores listos · app: *[completar]* |
-| Hash de los modelos en la app | Endpoint `/salud` listo · pantalla: *[completar]* |
+| Revisión y corrección antes de guardar | Implementada (cuenta propuesta con +/−, pendientes de libreta, Confirmar) |
+| Manejo de errores (foto inválida, sin detecciones, servidor caído, asistente sin respuesta) | Implementada (casos 3–5 y 8 de `docs/evidencias.md`) |
+| Hash de los modelos en la app | Implementada (Sin red → Servidor de IA y modelo en uso) |
 | Cobro en efectivo / transferencia (DiMo/CoDi) | **Simulado** (estados pendiente / pagado / falló) |
-| Cierre de caja | *[completar]* |
+| Resumen de caja del día | Implementada (Gundani + cálculo en el teléfono) |
+| Sincronizar ventas con un servidor central | **Pendiente** (se guardan en el teléfono) |
 | Detector con las 7 clases evaluado en fotos propias | **Pendiente**: solo sabritas y chokis evaluadas con fotos propias |
+| Evaluación del detector v3 en el conjunto de prueba (106 imágenes) | **Pendiente** (v1: mAP50 1.00) |
 
 ---
 
 ## 5. Secretos
 
-No se incluyen llaves en el repositorio. Las llaves de NVIDIA (`NVIDIA_API_KEY`) y Roboflow se leen de variables de entorno (`.env`, fuera de git). Las llaves usadas durante el desarrollo fueron revocadas al terminar.
+No se incluyen llaves en el repositorio. Las llaves de NVIDIA (`NVIDIA_API_KEY`) y Roboflow se leen de variables de entorno (`.env`, fuera de git). Las llaves usadas durante el desarrollo se revocan al terminar el hackathon.

@@ -1,0 +1,2 @@
+Lab 2: inicio asistente LoRA, Tesla T4 — Fri Nov 20 02:58:47 UTC 2026
+FIN LoRA: exacto base=0.014 lora=0.865, reservados 0/14 -> 13/14, T4, 15.3 min — Fri Nov 20 03:51:08 UTC 2026

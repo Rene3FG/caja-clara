@@ -1,0 +1,237 @@
+{
+ "comida": [
+  {
+   "id": "tlayuda",
+   "nombres": [
+    "tlayuda",
+    "tlayudas"
+   ],
+   "precio": 90,
+   "unidad": "pieza"
+  },
+  {
+   "id": "memela",
+   "nombres": [
+    "memela",
+    "memelas"
+   ],
+   "precio": 25,
+   "unidad": "pieza"
+  },
+  {
+   "id": "empanada_amarillo",
+   "nombres": [
+    "empanada de amarillo",
+    "empanadas de amarillo",
+    "empanada"
+   ],
+   "precio": 35,
+   "unidad": "pieza"
+  },
+  {
+   "id": "tamal",
+   "nombres": [
+    "tamal",
+    "tamales"
+   ],
+   "precio": 25,
+   "unidad": "pieza"
+  },
+  {
+   "id": "enfrijoladas",
+   "nombres": [
+    "enfrijoladas",
+    "orden de enfrijoladas",
+    "ordenes de enfrijoladas"
+   ],
+   "precio": 70,
+   "unidad": "orden"
+  },
+  {
+   "id": "agua_horchata",
+   "nombres": [
+    "agua de horchata",
+    "horchata",
+    "vaso de horchata"
+   ],
+   "precio": 25,
+   "unidad": "vaso"
+  },
+  {
+   "id": "refresco",
+   "nombres": [
+    "refresco",
+    "refrescos",
+    "chesco"
+   ],
+   "precio": 20,
+   "unidad": "pieza"
+  },
+  {
+   "id": "cafe_olla",
+   "nombres": [
+    "cafe de olla",
+    "café de olla",
+    "cafecito"
+   ],
+   "precio": 20,
+   "unidad": "taza"
+  }
+ ],
+ "tienda": [
+  {
+   "id": "coca_cola",
+   "nombres": [
+    "coca",
+    "coca cola",
+    "cocas",
+    "coca-cola"
+   ],
+   "precio": 22,
+   "unidad": "pieza"
+  },
+  {
+   "id": "sabritas",
+   "nombres": [
+    "sabritas",
+    "papas",
+    "papitas"
+   ],
+   "precio": 20,
+   "unidad": "pieza"
+  },
+  {
+   "id": "doritos",
+   "nombres": [
+    "doritos"
+   ],
+   "precio": 20,
+   "unidad": "pieza"
+  },
+  {
+   "id": "gansito",
+   "nombres": [
+    "gansito",
+    "gansitos"
+   ],
+   "precio": 18,
+   "unidad": "pieza"
+  },
+  {
+   "id": "chokis",
+   "nombres": [
+    "chokis",
+    "galletas chokis"
+   ],
+   "precio": 22,
+   "unidad": "pieza"
+  },
+  {
+   "id": "panditas",
+   "nombres": [
+    "panditas",
+    "gomitas panditas"
+   ],
+   "precio": 15,
+   "unidad": "pieza"
+  },
+  {
+   "id": "skittles",
+   "nombres": [
+    "skittles"
+   ],
+   "precio": 18,
+   "unidad": "pieza"
+  },
+  {
+   "id": "agua_1l",
+   "nombres": [
+    "agua",
+    "agua de litro",
+    "botella de agua"
+   ],
+   "precio": 15,
+   "unidad": "pieza"
+  }
+ ],
+ "materiales": [
+  {
+   "id": "cemento",
+   "nombres": [
+    "cemento",
+    "bulto de cemento",
+    "bultos de cemento"
+   ],
+   "precio": 260,
+   "unidad": "bulto"
+  },
+  {
+   "id": "varilla",
+   "nombres": [
+    "varilla",
+    "varillas",
+    "varilla de tres octavos"
+   ],
+   "precio": 120,
+   "unidad": "pieza"
+  },
+  {
+   "id": "clavo",
+   "nombres": [
+    "clavo",
+    "clavos",
+    "kilo de clavo"
+   ],
+   "precio": 45,
+   "unidad": "kilo"
+  },
+  {
+   "id": "arena",
+   "nombres": [
+    "arena",
+    "metro de arena"
+   ],
+   "precio": 350,
+   "unidad": "metro"
+  },
+  {
+   "id": "cable_12",
+   "nombres": [
+    "cable",
+    "cable del 12",
+    "metros de cable"
+   ],
+   "precio": 15,
+   "unidad": "metro"
+  },
+  {
+   "id": "tubo_pvc",
+   "nombres": [
+    "tubo pvc",
+    "tubo de media",
+    "tubos"
+   ],
+   "precio": 45,
+   "unidad": "pieza"
+  },
+  {
+   "id": "pintura",
+   "nombres": [
+    "pintura",
+    "litro de pintura",
+    "litros de pintura"
+   ],
+   "precio": 180,
+   "unidad": "litro"
+  },
+  {
+   "id": "tornillo",
+   "nombres": [
+    "tornillo",
+    "tornillos"
+   ],
+   "precio": 2,
+   "unidad": "pieza"
+  }
+ ]
+}
