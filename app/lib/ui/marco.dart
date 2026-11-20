@@ -27,28 +27,46 @@ class Marco extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text(marcaTienda, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: granaDeep, letterSpacing: 0.4)),
-                  const Spacer(),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: const Color(0xFFFFE8D6), borderRadius: BorderRadius.circular(14)),
+                    child: const Icon(Icons.storefront, color: Color(0xFF9A3412)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(marcaTienda, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: granaDeep, letterSpacing: 0.6)),
+                        Text(nombreTienda, style: epilogo(20, peso: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
                   IconButton(
                     tooltip: 'Perfil',
                     onPressed: () => _perfil(context),
                     icon: Container(
-                      width: 48,
-                      height: 48,
+                      width: 44,
+                      height: 44,
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: ink, width: 2)),
-                      child: const Text('E', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                      decoration: const BoxDecoration(color: Color(0xFFF3EBE6), shape: BoxShape.circle),
+                      child: const Icon(Icons.person_outline, color: ink),
                     ),
                   ),
                 ],
               ),
-              Text(nombreTienda, style: epilogo(22, peso: FontWeight.w700)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Pastilla(conectado: caja.conectado),
                   const Spacer(),
-                  TextButton(onPressed: caja.cicloDemo, child: Text(demo, style: const TextStyle(fontSize: 12, color: stone, decoration: TextDecoration.underline))),
+                  TextButton(
+                    onPressed: caja.cicloDemo,
+                    style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                    child: Text(demo, style: const TextStyle(fontSize: 12, color: stone)),
+                  ),
                 ],
               ),
             ],

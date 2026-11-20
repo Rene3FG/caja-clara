@@ -109,19 +109,23 @@ class Pastilla extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = conectado ? const Color(0xFF14532D) : const Color(0xFF7F1D1D);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: conectado ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        conectado ? 'Con conexión' : 'Sin conexión',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: conectado ? const Color(0xFF14532D) : const Color(0xFF7F1D1D),
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          const SizedBox(width: 8),
+          Text(
+            conectado ? 'Con conexión' : 'Sin conexión',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color),
+          ),
+        ],
       ),
     );
   }

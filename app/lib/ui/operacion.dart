@@ -238,7 +238,7 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
     final caja = Caja.of(context);
     final n = double.tryParse(_monto.text.replaceAll(',', '.')) ?? 0;
     return Scaffold(
-      appBar: Barra(titulo: 'Registrar gasto', onBack: caja.atras),
+      appBar: Barra(titulo: 'Registrar pago', onBack: caja.atras),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

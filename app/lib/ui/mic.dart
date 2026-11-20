@@ -38,7 +38,7 @@ class _MicGundaniState extends State<MicGundani> {
     final sesion = await escuchar();
     if (!mounted) return;
     if (sesion == null) {
-      setState(() => _error = 'El micrófono no está disponible. Escríbelo aquí.');
+      setState(() => _error = widget.expandir ? 'El micrófono no está disponible.' : 'El micrófono no está disponible. Escríbelo aquí.');
       return;
     }
     setState(() {
@@ -96,6 +96,7 @@ class _MicGundaniState extends State<MicGundani> {
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
+    if (widget.expandir) return _inicio(caja);
     const analizando = Center(
       child: Text('Gundani está analizando...', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
     );
@@ -148,13 +149,119 @@ class _MicGundaniState extends State<MicGundani> {
           Text(_error!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: granaDeep)),
           const SizedBox(height: 12),
         ],
-        if (widget.expandir)
-          Expanded(child: _cargando ? analizando : fila)
-        else
-          SizedBox(height: 160, child: _cargando ? analizando : fila),
+        SizedBox(height: 160, child: _cargando ? analizando : fila),
         const SizedBox(height: 12),
         Boton(texto: 'Enviar', onPressed: _cargando ? null : _enviar),
       ],
+    );
+  }
+
+  Widget _inicio(Caja caja) {
+    final escuchando = _sesion != null;
+    final fondo = escuchando ? grana : cempasuchil;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      children: [
+        const SizedBox(height: 8),
+        Center(
+          child: GestureDetector(
+            onTap: _cargando ? null : _mic,
+            child: Container(
+              width: 168,
+              height: 168,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: fondo.withValues(alpha: 0.18)),
+              child: Container(
+                width: 132,
+                height: 132,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: fondo.withValues(alpha: 0.35)),
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: fondo),
+                  child: _cargando
+                      ? const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF1F1A17)))
+                      : Icon(escuchando ? Icons.close : Icons.mic, size: 40, color: escuchando ? Colors.white : const Color(0xFF1F1A17)),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          _cargando ? 'Gundani está analizando...' : 'Hablar con Cempasúchil\npara registrar venta',
+          textAlign: TextAlign.center,
+          style: epilogo(22, peso: FontWeight.w700),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+          child: const Row(
+            children: [
+              Icon(Icons.info_outline, size: 18, color: stone),
+              SizedBox(width: 8),
+              Expanded(child: Text('Al escuchar: cambia a botón rojo para detener', style: TextStyle(fontSize: 14))),
+            ],
+          ),
+        ),
+        if (caja.aviso.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(caja.aviso, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, height: 1.3)),
+        ],
+        if (_error != null) ...[
+          const SizedBox(height: 10),
+          Text(_error!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: granaDeep)),
+        ],
+        const SizedBox(height: 14),
+        _tarjeta('Registrar ventas', 'Ingresar venta de productos', Icons.point_of_sale, grana, Colors.white, () => caja.ir(const Ruta('venta'))),
+        const SizedBox(height: 10),
+        _tarjeta('Registrar pagos', 'Abonos o pagos de clientes', Icons.payments_outlined, maguey, Colors.white, () => caja.ir(const Ruta('gasto'))),
+        const SizedBox(height: 10),
+        _tarjeta('Información de pago / QR', 'Mostrar cuenta y código QR', Icons.qr_code_2, Colors.white, ink, () => caja.ir(const Ruta('qr', metodo: Metodo.qr)), borde: const Color(0xFFE7E2DA), iconoFondo: const Color(0xFFFFF1E6)),
+      ],
+    );
+  }
+
+  Widget _tarjeta(String titulo, String detalle, IconData icono, Color fondo, Color tinta, VoidCallback onTap, {Color? borde, Color? iconoFondo}) {
+    return Material(
+      color: fondo,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: borde ?? fondo, width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: iconoFondo ?? tinta.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(12)),
+                child: Icon(icono, color: tinta),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(titulo, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: tinta)),
+                    Text(detalle, style: TextStyle(fontSize: 13, color: tinta.withValues(alpha: 0.85))),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: tinta),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
