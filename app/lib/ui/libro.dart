@@ -59,7 +59,13 @@ class Libro extends StatelessWidget {
           icon: const Icon(Icons.document_scanner_outlined),
           label: const Text('Pasar libreta a digital'),
         ),
-        const SizedBox(height: 14),
+        // Para el jurado (bases 6c): hashes del detector y del adaptador que están cargados.
+        TextButton.icon(
+          onPressed: () => caja.ir(const Ruta('servidor-ia')),
+          icon: const Icon(Icons.verified_outlined, size: 18),
+          label: const Text('Modelos de IA en uso'),
+        ),
+        const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),

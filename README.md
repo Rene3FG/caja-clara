@@ -38,7 +38,8 @@ pendientes y guarda con la fecha que elija.
                                                     │   (API build.nvidia.com)         │
                                                     └──────────────────────────────────┘
 Entrenamiento: servidores NVIDIA DLI (Tesla T4). Inferencia: laptop del equipo (RTX 2060).
-Gundani: Qwen2.5-3B + QLoRA (GGUF en llama-server) — cobros simulados, movimientos y resumen de caja.
+Gundani (VPS del equipo, la app le habla directo): Qwen2.5-3B + QLoRA (GGUF en llama-server) —
+cobros simulados, movimientos y resumen de caja.
 ```
 
 El LLM **solo propone**: el código valida la acción, que cada producto exista en el catálogo **y que
@@ -68,17 +69,18 @@ Guía completa: [`docs/DEMO.md`](docs/DEMO.md).
 bash scripts/demo_up.sh          # asistente + detector + gateway + túnel; imprime la URL y los hashes
 # 2. App
 cd app && flutter pub get && flutter test
-flutter build apk --release --dart-define=API_URL=<URL que imprimió demo_up.sh>
+flutter build apk --release
 ```
 
-La URL también se puede cambiar dentro de la app: **Sin red → Servidor de IA y modelo en uso**.
+La URL del servidor de IA está fija en `app/lib/servicios/config.dart` (`apiBase`). Si la URL del túnel
+cambia al reiniciar la demo, hay que actualizarla ahí y recompilar el APK.
 `/libreta` necesita `NVIDIA_API_KEY` en `~/caja-clara/.env` (nunca en git).
 
 ## Cómo verificar que la app usa los modelos entrenados
 
 1. `curl <URL>/salud` muestra el `sha256` del engine del detector y del adaptador LoRA **que están cargados**.
 2. Compararlos con [`modelos/README.md`](modelos/README.md) y con `sha256sum` de los archivos entregados.
-3. En la app: **Sin red → Servidor de IA y modelo en uso** muestra los mismos hashes; cada respuesta de
+3. En la app: **Libro → Modelos de IA en uso** muestra los mismos hashes; cada respuesta de
    `/detectar` incluye `sha256_engine`.
 
 ## Herramientas NVIDIA usadas

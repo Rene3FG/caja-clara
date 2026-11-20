@@ -23,7 +23,7 @@ Las fotos de los casos 1 y 9 **no se usaron para entrenar** (sesión p03 reserva
 | 8 | Fallo de servicio | Cobro QR con código expirado | Rechazo y explicación | `ok: false`, motivo `qr_expirado`, "El código expiró. No se anotó la venta." | ✅ |
 | 9 | Habitual | Foto nueva de libreta, **de lado**: "2 tlayudas / 1 quesadilla / 1 tlayuda" → `/libreta` | tlayuda 3; quesadilla pendiente | tlayuda 3 ($270); "quesadilla" pendiente (no está en el catálogo) con cantidad 1. 9.7 s (se leyó girada) | ✅ |
 
-Además, `cd app && flutter test` → **35 pruebas pasan**, entre ellas: venta sin red con cobro simulado
+Además, `cd app && flutter test` → **37 pruebas pasan**, entre ellas: venta sin red con cobro simulado
 en el teléfono, libro de ventas cuando Gundani no responde, flujo de voz y libreta
 (`app/test/*.dart`). Backend: `cd backend && pytest` → 11 pruebas.
 

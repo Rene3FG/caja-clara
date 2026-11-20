@@ -38,7 +38,7 @@ transferencias que llegan al celular), que es donde se pierde tiempo y se comete
   ¿Me dices qué y cuántos?"). Al pasar la libreta por foto, los renglones dudosos o fuera del catálogo
   aparecen como **pendientes** con lo que se leyó, para completar el precio o **Descartar**; y se
   muestra "Lo que leí en tu hoja" para compararlo con el papel. Sin red, las ventas se guardan en el
-  teléfono y la pantalla **Sin red** dice qué falta por enviar.
+  teléfono y el libro avisa "Guardado en este teléfono. Se envía cuando haya señal."
 - **Por qué:** un dato inventado que se guarda es peor que una pregunta: descuadra la caja y la
   persona deja de confiar en la app. Mostrar qué se leyó permite detectar el error de un vistazo.
 - **Cómo se verificó:** casos 3 y 9 de `evidencias.md`; los errores "1 cable" y "3 tlayudas" que

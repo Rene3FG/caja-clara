@@ -24,5 +24,5 @@ sha256sum detector/dino_v3_rtx2060.engine asistente/resultados_asistente/lora_ad
 curl -s <URL>/salud | python3 -m json.tool   # sha256_engine y sha256_adaptador de lo que está cargado
 ```
 
-Los dos hashes de `/salud` también aparecen en la app (**Sin red → Servidor de IA y modelo en uso**)
+Los dos hashes de `/salud` también aparecen en la app (**Libro → Modelos de IA en uso**)
 y `demo_up.sh` los imprime al arrancar (`e58f31e3…`, `72a3259e…`).

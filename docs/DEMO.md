@@ -29,21 +29,19 @@ bash scripts/demo_down.sh           # apagar todo (hazlo al terminar cada prueba
 
 ## 2. Poner la URL en la app
 
-Cualquiera de las dos (la de la app gana):
+Las dos direcciones están fijas en `app/lib/servicios/config.dart`:
 
-1. **En tiempo de ejecución:** pestaña **Sin red → "Servidor de IA y modelo en uso"** (o el formulario
-   **Tu negocio** al entrar por primera vez), pegar la URL del túnel y tocar **Guardar servidor**.
-   Se guarda en `shared_preferences`.
-2. **Al compilar:** `--dart-define=API_URL=https://xxxx.trycloudflare.com`.
+- `apiBase`: el gateway de IA (la URL del túnel que imprime `demo_up.sh`).
+- `gundaniBase`: el VPS de Gundani (cobros simulados, movimientos y resumen de caja), al que la app va directo.
 
-`GUNDANI_URL` ya no hace falta: si hay URL, Gundani va por el mismo gateway (`/api/*`).
-Solo sin ninguna URL la app usa `GUNDANI_URL` o el VPS de respaldo.
+**El túnel cambia cada vez que se reinicia la demo.** Antes de presentar: levantar la demo, copiar la
+URL de `logs/demo/url_tunel.txt` a `apiBase`, recompilar e instalar.
 
 ```bash
 cd app
 flutter pub get && flutter analyze && flutter test
-flutter run --dart-define=API_URL=https://xxxx.trycloudflare.com
-flutter build apk --release --dart-define=API_URL=https://xxxx.trycloudflare.com   # requiere Android SDK
+flutter build apk --release      # requiere Android SDK
+adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
 Prueba en vivo (pantallas reales contra el gateway real, sin teléfono):
@@ -65,7 +63,7 @@ flutter test test_en_vivo --dart-define=DEMO_URL=$(cat ../logs/demo/url_tunel.tx
 | Libro → **Pasar libreta a digital** (`ui/libreta.dart`) | Foto de la hoja → transcripción, pendientes, fecha → ventas pasadas | `POST /libreta`; sin foto: `POST /asistente` con "pásame lo de la libreta: …" |
 | Elegir forma de pago, QR, Pago creado (`ui/operacion.dart`) | Cobro **SIMULADO** | `POST /api/movimientos/confirmar`, `POST /api/qr/cobrar` |
 | Libro (`ui/libro.dart`) | Resumen del día | `GET /api/caja/resumen`; sin Gundani, las ventas del teléfono |
-| Sin red → **Servidor de IA y modelo en uso** (`ui/servidor_ia.dart`) | URL del túnel + modelos y hashes | `GET /salud` |
+| Libro → **Modelos de IA en uso** (`ui/servidor_ia.dart`) | Modelos cargados y sus hashes | `GET /salud` |
 
 Código de conexión: `app/lib/servicios/config.dart` (URL única), `ia_service.dart` (cliente y mensajes
 de error `IaError`), `carrito_ia.dart` (clase de la IA → producto del catálogo y líneas del carrito).

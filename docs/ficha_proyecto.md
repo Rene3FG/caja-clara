@@ -69,7 +69,7 @@ Detalle y verificación: `docs/decisiones_hci.md`.
 - **Detector v3:** en 36 fotos propias reservadas, conteo exacto 31% (v1) → **67%**; falsos positivos 100% → **11%**.
   Test público (v1): mAP50 1.00, mAP 0.915.
 - **Asistente LoRA vs base (74 casos):** coincidencia exacta 1.4% → **86.5%**; JSON válido 45.9% → **100%**; reservados 0/14 → **13/14**.
-- **App:** 9 casos del recorrido contra los servicios reales (8 como se esperaba, 1 error del detector corregible en la revisión); 35 pruebas automáticas.
+- **App:** 9 casos del recorrido contra los servicios reales (8 como se esperaba, 1 error del detector corregible en la revisión); 37 pruebas automáticas de la app.
 - **Pruebas de uso:** _[resumen de las 2 pruebas]_
 
 ## Limitaciones
@@ -77,7 +77,7 @@ Detalle y verificación: `docs/decisiones_hci.md`.
 - El detector pierde las chokis cuando están junto a sabritas (1/11 fotos mixtas correctas) y solo conoce 7 productos.
 - Leer la libreta por foto requiere internet; sin internet se dicta o se escribe.
 - Los cobros QR/transferencia son **simulados**; no hay conexión con bancos ni Banxico.
-- Las ventas se guardan en el teléfono; la sincronización con un servidor central quedó pendiente.
+- La URL del servidor de IA va fija en el APK; si cambia el túnel hay que recompilar.
 - Datos del asistente sintéticos; pruebas de uso con pocas personas.
 
 _Declaración de uso de IA: `docs/DECLARACION_IA_Y_LICENCIAS.md`._

@@ -65,10 +65,10 @@ Datos sintéticos (sección 10): el dataset del asistente es sintético y está 
 | Pasar la libreta a digital por foto (Nemotron VL + LoRA) | Implementada, **requiere internet** |
 | Revisión y corrección antes de guardar | Implementada (cuenta propuesta con +/−, pendientes de libreta, Confirmar) |
 | Manejo de errores (foto inválida, sin detecciones, servidor caído, asistente sin respuesta) | Implementada (casos 3–5 y 8 de `docs/evidencias.md`) |
-| Hash de los modelos en la app | Implementada (Sin red → Servidor de IA y modelo en uso) |
+| Hash de los modelos en la app | Implementada (Libro → Modelos de IA en uso) |
 | Cobro en efectivo / transferencia (DiMo/CoDi) | **Simulado** (estados pendiente / pagado / falló) |
 | Resumen de caja del día | Implementada (Gundani + cálculo en el teléfono) |
-| Sincronizar ventas con un servidor central | **Pendiente** (se guardan en el teléfono) |
+| Sincronizar ventas sin señal | Implementada (se guardan en el teléfono y se confirman en Gundani al volver la red) |
 | Detector con las 7 clases evaluado en fotos propias | **Pendiente**: solo sabritas y chokis evaluadas con fotos propias |
 | Evaluación del detector v3 en el conjunto de prueba (106 imágenes) | **Pendiente** (v1: mAP50 1.00) |
 
