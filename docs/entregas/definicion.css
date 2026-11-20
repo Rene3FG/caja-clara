@@ -1,0 +1,11 @@
+/* Documento 01 — se usa después de ficha.css y entregas.css: letra legible, sin compactar. */
+@page { size: Letter; margin: 18mm 18mm; }
+body { font-size: 10pt; line-height: 1.38; }
+table { font-size: 9pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { padding: 3px 5px; }
+h2 { margin: 14px 0 5px; page-break-after: avoid; }
+h3 { margin: 9px 0 3px; page-break-after: avoid; }
+p { margin: 4px 0; }
+.fuente { font-size: 8.8pt; }
+.firma td { height: 30px; } table:last-of-type td { height: 28px; }
