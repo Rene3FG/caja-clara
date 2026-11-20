@@ -1,4 +1,4 @@
-# Caja Clara — Documento de definición del proyecto
+# Gundani — Documento de definición del proyecto
 
 <p class="fuente">Hackathon NVIDIA Oaxaca 2026 · Economía Digital · Digitalización en procesos de negocios · Documento 01 ·
 Versión 1.0 · 2026-11-20. Cada cifra viene de un archivo del repositorio; lo que aún no se ha medido se indica como pendiente.</p>
@@ -7,18 +7,18 @@ Versión 1.0 · 2026-11-20. Cada cifra viene de un archivo del repositorio; lo q
 
 | Campo | Detalle |
 |---|---------|
-| **Nombre del proyecto** | Caja Clara |
+| **Nombre de la app** | Gundani |
 | **Convocatoria** | Hackathon NVIDIA Oaxaca 2026 — categoría Economía Digital (digitalización en procesos de negocios) |
 | **Tipo de producto** | App móvil Android (Flutter) con modelos de IA entrenados por el equipo |
 | **Proceso que digitaliza** | Registrar una venta y su cobro en una tiendita o puesto de comida, y pasar a digital la libreta de papel |
-| **Equipo** | René Fuentes Guzmán (app, modelos de IA, integración y documentación) · Luis Daniel Santibañez (backend Gundani, VPS e interfaz) · _[integrantes por completar]_ |
+| **Integrantes del equipo** | Alejandro Cinco Prieto · Luis Daniel Acevedo Herrera · René Fuentes Guzmán · Daniel Eugenio Santibañez Valdivia |
 | **Periodo de desarrollo** | 2026-11-19 (primer commit, 15:41) al 2026-11-20 (versión de la demo, commit `63502bd`) |
-| **Repositorio** | https://github.com/Rene3FG/caja-clara (público, licencia MIT) |
+| **Repositorio** | https://github.com/Rene3FG/caja-clara (público, licencia MIT; el nombre del repositorio es anterior al de la app) |
 | **Pesos de los modelos** | https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es (ONNX, engine TensorRT, adaptador LoRA, `SHA256SUMS`) |
 
 ## 2. Resumen
 
-Caja Clara es una app para la dueña o encargada de una tiendita o puesto de comida en Oaxaca que hoy anota
+Gundani es una app para la dueña o encargada de una tiendita o puesto de comida en Oaxaca que hoy anota
 sus ventas en una libreta. Con una **foto del mostrador** o **diciendo la venta** ("cobra 2 sabritas y 3 cocas"),
 la IA propone la cuenta; la persona la **revisa y corrige**, elige **efectivo, QR o transferencia** (cobro
 **simulado**) y confirma. La venta queda en un **libro de ventas** con totales por día, semana o mes. También
@@ -26,7 +26,7 @@ puede **pasar a digital una hoja de la libreta** tomándole una foto.
 
 El producto usa tres modelos que **entrenó el equipo** en servidores NVIDIA DLI: un detector de productos
 (DINO ResNet-50 con TAO Toolkit, optimizado con TensorRT), un asistente que convierte la voz o el texto en
-acciones (Qwen2.5-1.5B + LoRA) y Gundani, el asistente de caja y cobros simulados (Qwen2.5-3B + QLoRA).
+acciones (Qwen2.5-1.5B + LoRA) y el asistente de caja y cobros simulados (Qwen2.5-3B + QLoRA).
 **Los modelos proponen, el código valida y la persona confirma**: nada se guarda sin su aprobación.
 
 ## 3. Problema
@@ -44,7 +44,7 @@ su venta; y al final del día no queda claro cuánto entró en efectivo y cuánt
 
 **Relación con la economía digital:** la Ley de Economía Digital para Pagos Digitales y Electrónicos impulsa
 que estos negocios acepten cobros digitales (DiMo/CoDi). Para eso necesitan primero un **registro confiable
-que ligue cada cobro con su venta**. Caja Clara es ese primer paso, hecho a la velocidad del mostrador.
+que ligue cada cobro con su venta**. Gundani es ese primer paso, hecho a la velocidad del mostrador.
 
 ## 4. Usuaria y partes interesadas
 
@@ -70,8 +70,8 @@ tome menos pasos que la libreta, calcule los totales sin errores y deje cada cob
 |-|-----|--------|--|
 | O1 | Reconocer y contar productos en una foto del mostrador | Detector v3: conteo exacto 67 % y 11 % de falsos positivos en fotos propias reservadas (p03, 36 fotos); mAP 0.857 / mAP50 1.000 en el test público (106 imágenes); 89 ms por foto en RTX 2060 | ✅ medido |
 | O2 | Entender ventas dichas o escritas en lenguaje del mostrador | Asistente: coincidencia exacta 1.4 % (base) → 86.5 % (LoRA) en 74 casos; reservados 0/14 → 13/14; JSON válido 45.9 % → 100 % | ✅ medido |
-| O3 | Responder consultas de caja y cobros simulados | Gundani: intención exacta 57.1 % → 85.7 %; monto correcto 42.9 % → 100 % (14 casos) | ✅ medido |
-| O4 | Reducir los pasos para registrar una venta | Libreta: 5 pasos manuales → Caja Clara: 4 pasos con total calculado | ✅ conteo del flujo |
+| O3 | Responder consultas de caja y cobros simulados | Asistente de caja: intención exacta 57.1 % → 85.7 %; monto correcto 42.9 % → 100 % (14 casos) | ✅ medido |
+| O4 | Reducir los pasos para registrar una venta | Libreta: 5 pasos manuales → Gundani: 4 pasos con total calculado | ✅ conteo del flujo |
 | O5 | Reducir el tiempo y los errores por venta | 10 ventas de una lista fija, libreta contra app, con 2 personas ajenas al equipo (`docs/pruebas_uso.md`) | ⏳ pendiente |
 | O6 | Funcionar sin señal | Ventas y gastos se guardan en el teléfono y se envían al volver la conexión | ✅ implementado |
 
@@ -118,7 +118,7 @@ pendientes y guarda con la fecha que elija.
 
 **Comparación con el proceso actual**
 
-| Medida | Libreta (hoy) | Caja Clara |
+| Medida | Libreta (hoy) | Gundani |
 |---|---|---|
 | Pasos por venta de 3 productos con cobro | 5 manuales: sumar, anotar productos, anotar total, revisar transferencia, anotarla | 4: foto o voz, revisar, elegir cobro, confirmar; total calculado por la app |
 | Cobro digital ligado a la venta | No (se revisa el celular aparte) | Sí, en el mismo registro |
@@ -140,7 +140,7 @@ pendientes y guarda con la fecha que elija.
 | RF-08 | Libreta a digital por foto o texto (`POST /libreta`), con renglones pendientes | ✅ |
 | RF-09 | Alta y edición de productos del mostrador | ✅ |
 | RF-10 | Consultas de caja por voz con el periodo del libro | ✅ |
-| RF-11 | Guardar sin señal y enviar a Gundani al volver la conexión | ✅ |
+| RF-11 | Guardar sin señal y enviar al servidor de caja al volver la conexión | ✅ |
 | RF-12 | Cambiar la dirección del servidor de IA sin recompilar (Perfil → Servidor IA → Probar conexión) | ✅ |
 | RF-13 | Guía financiera con respuestas verificadas (RAG, `POST /api/guia/preguntar`) | ✅ en el backend |
 | RF-14 | Volver a abrir la guía desde el perfil; pantalla de fiados | ⏳ pendiente |
@@ -162,7 +162,7 @@ pendientes y guarda con la fecha que elija.
 | Capa | Componente | Tecnología |
 |---|---|---|
 | App | APK Android (`app/`) | Flutter/Dart; cámara, `speech_to_text` (STT de Android), `flutter_tts`, `connectivity_plus`, `shared_preferences` |
-| Gateway | `scripts/ia_gateway.py`, puerto 8000 | FastAPI; rutas `/detectar`, `/asistente`, `/libreta`, `/salud`; reenvía `/api/*` a Gundani |
+| Gateway | `scripts/ia_gateway.py`, puerto 8000 | FastAPI; rutas `/detectar`, `/asistente`, `/libreta`, `/salud`; reenvía `/api/*` al servidor de caja |
 | Detector | `training/detector/servir_detector.py`, puerto 8002 | DINO ResNet-50 v3 · TAO Toolkit 5.5 → ONNX → TensorRT 11.5 · RTX 2060 |
 | Asistente | `training/asistente/servir_asistente.py`, puerto 8001 | Qwen2.5-1.5B-Instruct + LoRA r=16 (PEFT), fp16 · RTX 2060; Nemotron 3.5 Super VL vía API para la libreta |
 | Caja | `backend_gundani/` en VPS | Qwen2.5-3B + QLoRA 4 bits → GGUF Q4_K_M en `llama-server`; SQLite; guía RAG |
@@ -175,7 +175,7 @@ pendientes y guarda con la fecha que elija.
 |---|---|---|---|
 | Detector DINO ResNet-50 (v1, v2, v3; la app usa v3) | Reconocer y contar productos en la foto | 819–930 imágenes de train: datasets públicos CC BY 4.0 + fotos propias (sesiones p01, p02, p04; p03 reservada para la prueba) | Sí — 3 versiones |
 | Qwen2.5-1.5B-Instruct + LoRA | Voz/texto → acción (agregar, quitar, pago, consulta, libreta, aclarar) | 1,165 ejemplos sintéticos revisados; 113 val; 122 test; 14 reservados | Sí |
-| Gundani: Qwen2.5-3B + QLoRA | Consultas de caja y cobros simulados | 108 ejemplos de train, 15 de validación | Sí |
+| Asistente de caja: Qwen2.5-3B + QLoRA | Consultas de caja y cobros simulados | 108 ejemplos de train, 15 de validación | Sí |
 | Nemotron 3.5 Super VL (build.nvidia.com) | Transcribir la hoja de la libreta | — | No: servicio de NVIDIA, declarado como complemento |
 
 Detalle completo de entrenamiento, evaluación y despliegue: **Documento 02 — Modelos de IA**
@@ -204,7 +204,7 @@ Detalle completo de entrenamiento, evaluación y despliegue: **Documento 02 — 
 | El detector omite o confunde un producto (p. ej. chokis en fotos mixtas) | Venta con cuenta incorrecta | La persona revisa y corrige antes de guardar; v2 y v3 se entrenaron con fotos propias para bajar falsos positivos (100 % → 11 %) |
 | El asistente inventa un producto o cantidad | Registro falso | El servidor rechaza productos no mencionados; pregunta si falta información |
 | La laptop, el túnel o la red se caen durante la demo | La IA deja de responder | Captura a mano, cola sin señal, URL del servidor editable desde el perfil y `scripts/demo_up.sh` para levantar todo de nuevo |
-| El VPS de Gundani no responde | No se anota el cobro en la caja | El teléfono guarda el cobro y lo envía después |
+| El servidor de caja (VPS) no responde | No se anota el cobro en la caja | El teléfono guarda el cobro y lo envía después |
 | La URL del túnel cambia al reiniciar | La app apunta a una dirección muerta | Cambiarla en Perfil → Servidor IA, sin recompilar |
 | Confusión entre cobro real y simulado | Expectativa equivocada de la usuaria | Etiqueta «Codi (simulado)» en todas las pantallas de cobro |
 | Pérdida de pesos al reiniciarse el DLI | No poder reproducir el modelo | Pesos exportados a Drive con `SHA256SUMS`; specs y logs en el repositorio |
@@ -227,7 +227,7 @@ Detalle completo de entrenamiento, evaluación y despliegue: **Documento 02 — 
 | Documento 01 — Definición del proyecto | `docs/entregas/01_definicion_proyecto.pdf` / `.docx` | ✅ este documento |
 | Documento 02 — Modelos de IA | `docs/entregas/02_modelos_ia.pdf` / `.docx` | ✅ |
 | Funciones implementadas / simuladas / pendientes | `docs/funciones.md` | ✅ |
-| Declaración de IA y licencias | `docs/DECLARACION_IA_Y_LICENCIAS.md` | ✍️ falta firma y fecha del líder |
+| Declaración de IA y licencias | `docs/DECLARACION_IA_Y_LICENCIAS.md` | ✍️ falta firma y fecha de los integrantes |
 | Ficha del proyecto (PDF) | `docs/pdf/ficha_proyecto.pdf` | ✍️ faltan nombres y cifras de pruebas de uso |
 | Evidencias y pruebas de uso | `docs/evidencias.md`, `docs/pruebas_uso.md` | ⏳ faltan pruebas con 2 personas ajenas |
 | Presentación (PDF) | `docs/pdf/presentacion.pdf` | ✍️ faltan nombres y tiempos |
@@ -243,22 +243,23 @@ Detalle completo de entrenamiento, evaluación y despliegue: **Documento 02 — 
 | 2026-11-20 06:28 | Demo funcional: gateway de IA + túnel; foto, voz y libreta con los modelos del equipo; cobro simulado |
 | 2026-11-20 08:12–08:39 | Libreta leída de lado; documentación de entrega; campo Servidor IA en el perfil |
 | 2026-11-20 10:22–10:46 | Documento 02 completo, pesos públicos en Drive |
-| 2026-11-20 11:18–11:44 | Libreta a mano con pendientes; guía financiera RAG de Gundani |
+| 2026-11-20 11:18–11:44 | Libreta a mano con pendientes; guía financiera RAG del servidor de caja |
 | 2026-11-20 12:09 | Versión de la demo (`63502bd`): APK con el túnel vigente instalado en los teléfonos |
 
 ## 15. Siguientes pasos
 
 1. Hacer las **pruebas de uso** con 2 personas ajenas al equipo y llenar tiempos y errores (`docs/pruebas_uso.md`).
-2. Completar nombres del equipo, firma de la declaración, ficha y presentación; grabar el video de respaldo.
+2. Completar la firma de la declaración, ficha y presentación; grabar el video de respaldo.
 3. Revocar la `NVIDIA_API_KEY` de desarrollo al cerrar la entrega.
 4. **Escalamiento (plan, no medido):** servir los modelos con NVIDIA NIM o el detector en un Jetson por tienda para
    no depender de la laptop ni del túnel; cuantizar (engine FP16/INT8, asistente en 4 bits) para GPUs más pequeñas;
    ampliar el catálogo del detector con fotos de cada tienda; conectar con CoDi/DiMo real cuando exista un convenio.
 
-## 16. Aprobación
+## 16. Firmas del equipo
 
 | Rol | Nombre | Firma | Fecha |
 |---|-----|----|--|
-| Líder del equipo | &nbsp; | | |
-| Integrante | &nbsp; | | |
-| Integrante | &nbsp; | | |
+| Integrante del equipo | Alejandro Cinco Prieto | | |
+| Integrante del equipo | Luis Daniel Acevedo Herrera | | |
+| Integrante del equipo | René Fuentes Guzmán | | |
+| Integrante del equipo | Daniel Eugenio Santibañez Valdivia | | |
