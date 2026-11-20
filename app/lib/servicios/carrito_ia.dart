@@ -189,7 +189,7 @@ Producto? productoEnTexto(String texto, List<Producto> productos) {
 
 /// Un pedazo de la orden que el asistente no cubrió: producto de la tienda (o null si
 /// hay que capturarlo a mano), el texto de ese pedazo y la cantidad que se dijo.
-typedef TramoVenta = ({Producto? producto, String tramo, int cantidad});
+typedef TramoVenta = ({Producto? producto, String? clase, String tramo, int cantidad});
 
 /// "cóbrame una coca y unas barritas" -> tramos ["cóbrame una coca", "unas barritas"].
 /// Devuelve los tramos que no nombran ninguna de las [clasesCubiertas] (lo que ya propuso el asistente),
@@ -206,17 +206,40 @@ List<TramoVenta> tramosSinCubrir(String texto, Iterable<String> clasesCubiertas,
 
   final cubiertas = clasesCubiertas.toList();
   final fuera = <TramoVenta>[];
-  for (final t in texto.split(RegExp(r'[,;\n]|\s+(?:y|e)\s+', caseSensitive: false))) {
+  // También parte antes de cada número: "2 cocas 3 sabritas" -> ["2 cocas", "3 sabritas"].
+  for (final t in texto.split(RegExp(r'[,;\n]|\s+(?:y|e)\s+|\s+(?=\d{1,2}\s+[a-záéíóúñ])(?!\d+\s*(?:ml|g|gr|kg|l|lt|litros?)\b)', caseSensitive: false))) {
     final tramo = t.trim();
     if (tramo.isEmpty || cubiertas.any((c) => nombra(tramo, c))) continue;
     final venta = desarmarVenta(tramo);
     if (venta.nombre.isEmpty) continue; // "por favor", "y ya"
     var producto = productoEnTexto(tramo, productos);
-    for (final clase in _alias.keys) {
-      if (producto != null) break;
-      if (nombra(tramo, clase)) producto = productoDeClase(clase, productos); // "coca" -> "Coca cola"
+    String? clase;
+    for (final c in _alias.keys) {
+      if (!nombra(tramo, c)) continue;
+      clase = c; // "papas" -> sabritas (sirve sin internet con el precio de respaldo)
+      producto ??= productoDeClase(c, productos); // "coca" -> "Coca cola" de la tienda
+      break;
     }
-    fuera.add((producto: producto, tramo: tramo, cantidad: venta.cantidad));
+    fuera.add((producto: producto, clase: clase, tramo: tramo, cantidad: venta.cantidad));
   }
   return fuera;
+}
+
+/// Sin el asistente (sin internet): la orden se entiende en el teléfono. Devuelve las líneas
+/// que se reconocen (catálogo de la tienda o precio de respaldo) y los tramos que faltan.
+({List<Linea> lineas, List<String> faltan}) ventaSinInternet(String texto, List<Producto> productos) {
+  final lineas = <Linea>[];
+  final faltan = <String>[];
+  for (final t in tramosSinCubrir(texto, const [], productos)) {
+    final p = t.producto;
+    final precio = preciosRespaldo[t.clase];
+    if (p != null) {
+      lineas.add(Linea(productoId: p.id, nombre: p.nombre, precio: p.precio, cantidad: t.cantidad));
+    } else if (t.clase != null && precio != null) {
+      lineas.add(Linea(productoId: t.clase!, nombre: nombreBonito(t.clase!), precio: precio, cantidad: t.cantidad));
+    } else {
+      faltan.add(t.tramo);
+    }
+  }
+  return (lineas: lineas, faltan: faltan);
 }

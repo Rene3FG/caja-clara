@@ -347,6 +347,7 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
       _metodoCarga = metodo;
     });
     try {
+      if (!caja.conectado) throw const ErrorGundani('Sin internet', sinRespuesta: true); // no esperar a la red
       await confirmarMovimiento(cobro);
       if (!mounted) return;
       caja.guardarCobro(cobro);
@@ -355,8 +356,8 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
     } on ErrorGundani catch (e) {
       if (!mounted) return;
       if (e.sinRespuesta && await simularCobroLocal() && mounted) {
-        caja.setAviso(avisoLocal);
-        caja.guardarCobro(cobro);
+        caja.setAviso(caja.conectado ? avisoLocal : 'Sin internet: venta guardada en el teléfono. Se sube al volver la señal.');
+        caja.guardarCobro(cobro, pendiente: true); // se sube con sincronizar() cuando vuelva la señal
         caja.raiz(const Ruta('pago-confirmado'));
         return;
       }
@@ -631,13 +632,19 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
                       _error = null;
                     });
                     try {
+                      if (!caja.conectado) throw const ErrorGundani('Sin internet', sinRespuesta: true);
                       await confirmarMovimiento(cobro);
                       if (!mounted) return;
                       caja.guardarCobro(cobro);
                       caja.refrescarCaja();
                       caja.raiz(const Ruta('inicio'));
                     } on ErrorGundani catch (e) {
-                      if (mounted) {
+                      if (e.sinRespuesta && mounted) {
+                        // Sin señal el gasto no se pierde: queda en el teléfono y se sube al volver.
+                        caja.guardarCobro(cobro, pendiente: true);
+                        caja.setAviso('Sin internet: gasto guardado en el teléfono. Se sube al volver la señal.');
+                        caja.raiz(const Ruta('inicio'));
+                      } else if (mounted) {
                         setState(() {
                           _guardando = false;
                           _error = e.mensaje;

@@ -103,13 +103,9 @@ class _MicGundaniState extends State<MicGundani> {
         RegExp(r'^\s*(c[oó]bra|c[oó]mpra|vend|agrega|pon|dame|anota)', caseSensitive: false).hasMatch(texto);
     if (esVenta) {
       // Una venta no espera a Gundani (tarda ~20 s): catálogo de la tienda y, si falta algo, a mano.
-      final tramos = tramosSinCubrir(texto, const [], caja.productos);
-      final conocidos = [
-        for (final t in tramos)
-          if (t.producto != null)
-            Linea(productoId: t.producto!.id, nombre: t.producto!.nombre, precio: t.producto!.precio, cantidad: t.cantidad),
-      ];
-      final falta = [for (final t in tramos) if (t.producto == null) t.tramo];
+      final local = ventaSinInternet(texto, caja.productos);
+      final conocidos = local.lineas;
+      final falta = local.faltan;
       if (conocidos.isNotEmpty) _agregarLineas(caja, conocidos, falta: falta.isEmpty ? null : falta.first);
       setState(() => _cargando = false);
       if (falta.isNotEmpty || conocidos.isEmpty) {

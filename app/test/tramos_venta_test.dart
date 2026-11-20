@@ -37,4 +37,22 @@ void main() {
     expect([for (final x in t) (x.producto?.id, x.cantidad, x.tramo)], [('p1', 1, '1 barrita'), (null, 2, '2 tortas')]);
     expect(tramosSinCubrir('2 papas y 3 cocas', ['sabritas', 'coca_cola'], tienda), isEmpty);
   });
+
+  test('sin internet: "2 papas y 3 cocas" con catálogo de la tienda y precio de respaldo', () {
+    final v = ventaSinInternet('2 papas y 3 cocas', tienda);
+    expect([for (final l in v.lineas) (l.nombre, l.cantidad, l.precio)], [('Sabritas', 2, 20.0), ('Coca cola', 3, 22.0)]);
+    expect(v.faltan, isEmpty);
+  });
+
+  test('sin internet: sin "y" ni comas, y lo desconocido queda pendiente', () {
+    final v = ventaSinInternet('2 cocas 3 sabritas 1 torta', tienda);
+    expect([for (final l in v.lineas) (l.productoId, l.cantidad)], [('p2', 2), ('sabritas', 3)]);
+    expect(v.faltan, ['1 torta']);
+  });
+
+  test('no parte "600 ml" del nombre', () {
+    final v = ventaSinInternet('2 coca 600 ml', tienda);
+    expect(v.lineas.single.cantidad, 2);
+    expect(v.faltan, isEmpty);
+  });
 }

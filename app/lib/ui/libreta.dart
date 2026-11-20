@@ -187,7 +187,23 @@ class _PasarLibretaState extends State<PasarLibreta> {
         setState(() => _duda = (r['error'] as String?) ?? (acc is Map ? acc['pregunta'] as String? : null) ?? 'No entendí. Escribe cantidad y producto, por ejemplo: 2 coca, 3 sabritas.');
       }
     } on IaError catch (e) {
-      if (mounted) setState(() => _error = e);
+      // Sin internet: se entiende en el teléfono ("2 papas y 3 cocas") y la persona revisa igual.
+      if (!mounted) return;
+      final escrito = _texto.text.trim().replaceFirst(RegExp(r'^p[aá]same[^:]*:\s*', caseSensitive: false), '');
+      final local = ventaSinInternet(escrito, Caja.of(context).productos);
+      if (local.lineas.isEmpty && local.faltan.isEmpty) {
+        setState(() => _error = e);
+        return;
+      }
+      _cargar({
+        'items': const [],
+        'pendientes': [
+          for (final t in local.faltan) {'renglon': t, 'nombre': desarmarVenta(t).nombre, 'cantidad': desarmarVenta(t).cantidad},
+        ],
+        'requiere_fecha': true,
+        'mensaje': 'Sin internet: lo leí en el teléfono. Revisa antes de guardar.',
+      }, transcripcion: _texto.text.trim());
+      setState(() => _lineas = mezclar(_lineas, local.lineas));
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
