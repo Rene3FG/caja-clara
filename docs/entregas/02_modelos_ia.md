@@ -1,8 +1,7 @@
 # Caja Clara — Modelos de IA: entrenamiento, evaluación y despliegue
 
 <p class="fuente">Hackathon NVIDIA Oaxaca 2026 · Economía Digital · Documento técnico 02 · 2026-11-20.
-Cada cifra lleva su archivo de origen en el repositorio. Lo que no está registrado aparece como
-<span class="falta">[FALTA: …]</span>.</p>
+Cada cifra lleva su archivo de origen en el repositorio; lo que aún no se ha medido se indica como pendiente.</p>
 
 ## 0. Resumen
 
@@ -352,8 +351,8 @@ y VPS; entrenamiento en NVIDIA DLI (Tesla T4).
 5. Para el cobro QR **simulado**, la app llama a `POST /api/qr/cobrar` en Gundani: responde aprobado o
    `qr_expirado` en **585 ms**.
 
-El tiempo que la persona tarda en revisar y confirmar todavía no se ha medido.
-<span class="falta">[FALTA: tiempo total por venta, pendiente de las pruebas de uso, `docs/pruebas_uso.md`]</span>
+**Tiempo total por venta (incluida la revisión de la persona): medición pendiente**; se obtendrá en las
+pruebas de uso (`docs/pruebas_uso.md`).
 
 **Implementado:** venta por foto, voz y texto; revisión y corrección; libreta por dictado y por foto; guardado
 en el teléfono y envío diferido sin red; hashes de los modelos en uso. **Simulado:** el cobro QR o transferencia
