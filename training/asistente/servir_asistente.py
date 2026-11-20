@@ -42,6 +42,8 @@ def main():
     ap.add_argument("--adaptador", default="resultados_asistente/lora_adaptador")
     ap.add_argument("--catalogo", default="datos_asistente/catalogo.json")
     ap.add_argument("--puerto", type=int, default=8001)
+    ap.add_argument("--giros", default=os.environ.get("GIROS", "tienda"),
+                    help="giros del catálogo que se atienden, separados por coma (por ahora solo tienda)")
     ap.add_argument("--modelo-vl", default=os.environ.get("MODELO_VL", "nvidia/nemotron-3.5-super-vl-120b-a12b"))
     a = ap.parse_args()
 
@@ -53,8 +55,13 @@ def main():
     import uvicorn
 
     cat = json.load(open(a.catalogo))
-    productos = {p["id"]: {**p, "giro": g} for g, ps in cat.items() for p in ps}
+    giros = {g.strip() for g in a.giros.split(",") if g.strip()}
+    productos = {p["id"]: {**p, "giro": g} for g, ps in cat.items() if g in giros for p in ps}
+    if not productos:
+        raise SystemExit(f"Ningún producto para los giros {sorted(giros)}; el catálogo tiene {sorted(cat)}")
     system = (json.loads(open(os.path.join(os.path.dirname(a.catalogo), "casos_reservados.jsonl")).readline())["system"])
+    # El prompt de entrenamiento lista los productos de todos los giros; se deja solo el giro atendido.
+    system = re.sub(r"Productos validos \(id\): [^.]*\.", "Productos validos (id): " + ", ".join(productos) + ".", system)
     hash_adapt = sha256(os.path.join(a.adaptador, "adapter_model.safetensors"))
 
     dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -73,7 +80,7 @@ def main():
                                  temperature=None, top_p=None, top_k=None, pad_token_id=tok.eos_token_id)
         return tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
 
-    def valida(salida):
+    def valida(salida, texto):
         m = re.search(r"\{.*\}", salida, flags=re.S)
         try:
             acc = json.loads(m.group(0)) if m else None
@@ -86,6 +93,8 @@ def main():
             pid, cant = (p or {}).get("producto"), (p or {}).get("cantidad")
             if pid not in productos or not isinstance(cant, (int, float)) or cant <= 0:
                 return None, "No reconocí algún producto o cantidad. ¿Me lo repites?"
+            if pid not in mencionados(texto):                         # el modelo no puede inventar productos
+                return None, "No escuché qué producto. ¿Me dices qué y cuántos?"
             suma[pid] = suma.get(pid, 0) + cant                       # "2 cocas" + "1 coca" = 3
         if acc["accion"] in CON_PRODUCTOS and not suma:
             return None, "No encontré productos. ¿Me dices qué y cuántos?"
@@ -118,8 +127,9 @@ def main():
         if not texto:
             return {"ok": False, "error": "No escuché nada. Intenta de nuevo o escribe tu venta."}
         salida = genera(texto[:300])
-        res, err = valida(salida)
+        res, err = valida(salida, texto)
         ms = int((time.time() - t0) * 1000)
+        print(f"asistente: {texto!r} -> {salida[:160]!r}{' | ' + err if err else ''}", flush=True)
         if err:
             return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "error": err,
                     "salida_modelo": salida[:200], "texto_original": texto, "ms": ms}
@@ -192,7 +202,7 @@ def main():
                     "transcripcion": transcripcion, "ms_vision": ms_vl}
         texto = "pásame lo de la libreta: " + ", ".join(renglones)
         salida = genera(texto[:400], max_new=220)
-        res, err = valida(salida)
+        res, err = valida(salida, texto)
         ms = int((time.time() - t0) * 1000)
         if err:
             return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "error": err,
@@ -226,6 +236,11 @@ def main():
 
     alias = sorted(((normaliza(n), pid) for pid, info in productos.items()
                     for n in list(info["nombres"]) + [pid.replace("_", " ")]), key=lambda x: -len(x[0]))
+
+    def mencionados(texto):
+        """Productos del catálogo cuyo nombre (o alias) aparece en lo que dijo la persona."""
+        n = normaliza(texto)
+        return {pid for al, pid in alias if al and re.search(rf"\b{re.escape(al)}s?\b", n)}
 
     def busca_producto(nombre):
         n = normaliza(nombre)

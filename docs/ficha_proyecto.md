@@ -6,7 +6,7 @@
 TODO: nombres y roles.
 
 ## Problema
-TODO: qué le pasa hoy a un micronegocio (comida, tienda, materiales) al registrar ventas y cobros. Respaldar con fuente o con lo observado en las pruebas de uso.
+TODO: qué le pasa hoy a un micronegocio (por ahora, tiendas) al registrar ventas y cobros. Respaldar con fuente o con lo observado en las pruebas de uso.
 
 ## Usuarios
 TODO: quién usa la app, en qué contexto (manos ocupadas, luz, conectividad).

@@ -1,6 +1,6 @@
 # Caja Clara
 
-App móvil para micronegocios (comida, tienda, materiales) que digitaliza un proceso
+App móvil para micronegocios (por ahora, tiendas) que digitaliza un proceso
 concreto: **registrar una venta y su cobro**.
 
 Hackathon NVIDIA Oaxaca 2026 — Economía Digital.

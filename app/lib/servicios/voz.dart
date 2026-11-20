@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -28,11 +30,15 @@ double nivelVoz(double level) {
 
 Future<SesionVoz?> escuchar({void Function(double nivel)? alOir}) async {
   _ultimo = '';
+  final fin = Completer<void>(); // se completa con el resultado FINAL del dictado, no el parcial
   try {
     if (!_lista) _lista = await _voz.initialize();
     if (!_lista) return null;
     await _voz.listen(
-      onResult: (r) => _ultimo = r.recognizedWords,
+      onResult: (r) {
+        _ultimo = r.recognizedWords;
+        if (r.finalResult && !fin.isCompleted) fin.complete();
+      },
       onSoundLevelChange: alOir == null ? null : (level) => alOir(nivelVoz(level)),
       listenOptions: SpeechListenOptions(localeId: 'es_MX', listenMode: ListenMode.confirmation),
     );
@@ -42,6 +48,9 @@ Future<SesionVoz?> escuchar({void Function(double nivel)? alOir}) async {
   return SesionVoz(() async {
     try {
       await _voz.stop();
+      // Al detener, Android aún manda el texto final ("cobra 2 sabritas"); sin esperar
+      // quedaba el parcial ("cobra 2") y el asistente adivinaba el producto.
+      await fin.future.timeout(const Duration(milliseconds: 1500), onTimeout: () {});
     } catch (_) {}
     return _ultimo.trim();
   });
