@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+llama.cpp/
+modelo_fusionado/
+modelo_gundani_lora/
+checkpoints_gundani/
+*.gguf
+*.safetensors
+*.db
+*.log
+!entrenamiento_asistente.log
