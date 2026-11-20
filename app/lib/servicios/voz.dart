@@ -56,8 +56,20 @@ Future<SesionVoz?> escuchar({void Function(double nivel)? alOir}) async {
   });
 }
 
+/// El TTS lee "\$45" como "45 dólares": se cambia a "45 pesos" (y centavos si hay).
+String montosEnPesos(String texto) => texto.replaceAllMapped(
+      RegExp(r'\$\s?(\d[\d,]*)(?:\.(\d{1,2}))?(?:\s?(?:MXN|mxn|pesos))?'),
+      (m) {
+        final enteros = m[1]!.replaceAll(',', '');
+        final cent = int.tryParse((m[2] ?? '0').padRight(2, '0')) ?? 0;
+        final pesos = '$enteros ${enteros == '1' ? 'peso' : 'pesos'}';
+        if (cent == 0) return pesos;
+        return '$pesos con $cent ${cent == 1 ? 'centavo' : 'centavos'}';
+      },
+    );
+
 Future<void> decir(String texto) async {
-  final limpio = texto.trim();
+  final limpio = montosEnPesos(texto.trim());
   if (limpio.isEmpty) return;
   try {
     final tts = FlutterTts();
