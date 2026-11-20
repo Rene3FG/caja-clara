@@ -12,6 +12,9 @@ Endpoints:
   POST /asistente            -> {"texto": "dame dos la yudas y una orchata"}
        responde {"ok": true, "accion": {...JSON validado...}, "items": [... con precio y subtotal ...],
                  "total_propuesto": 205.0, "requiere_confirmacion": true, "texto_original": "...", "ms": 850}
+  POST /libreta              -> multipart 'foto' (hoja de libreta escrita a mano). Transcribe con
+                                Nemotron 3.5 Super VL (API NVIDIA, requiere NVIDIA_API_KEY e internet),
+                                interpreta con nuestro LoRA (registrar_libreta) y valida igual que /asistente.
   POST /v1/chat/completions  -> compatible con OpenAI (para evaluar_asistente.py)
 
 Reglas de diseno:
@@ -19,8 +22,10 @@ Reglas de diseno:
   - Si la salida no es valida -> accion "aclarar" con mensaje claro (bases 6e: manejar errores).
   - La app siempre muestra lo entendido para que la persona REVISE y CONFIRME (bases 6d).
 """
-import argparse, hashlib, json, os, re, time
+import argparse, base64, hashlib, io, json, os, re, time, urllib.error, urllib.request
 
+URL_VL = "https://integrate.api.nvidia.com/v1/chat/completions"
+CON_PRODUCTOS = {"agregar", "quitar", "registrar_libreta"}
 ACCIONES = {"agregar", "quitar", "forma_pago", "consulta", "registrar_libreta", "consulta_ley",
             "confirmar", "aclarar", "fuera_de_alcance"}
 
@@ -37,6 +42,7 @@ def main():
     ap.add_argument("--adaptador", default="resultados_asistente/lora_adaptador")
     ap.add_argument("--catalogo", default="datos_asistente/catalogo.json")
     ap.add_argument("--puerto", type=int, default=8001)
+    ap.add_argument("--modelo-vl", default=os.environ.get("MODELO_VL", "nvidia/nemotron-3.5-super-vl-120b-a12b"))
     a = ap.parse_args()
 
     import torch
@@ -75,11 +81,19 @@ def main():
             acc = None
         if not isinstance(acc, dict) or acc.get("accion") not in ACCIONES:
             return None, "No entendí bien. ¿Puedes repetirlo o escribirlo?"
-        items, total = [], 0.0
+        suma = {}
         for p in acc.get("productos", []) or []:
-            pid, cant = p.get("producto"), p.get("cantidad")
+            pid, cant = (p or {}).get("producto"), (p or {}).get("cantidad")
             if pid not in productos or not isinstance(cant, (int, float)) or cant <= 0:
                 return None, "No reconocí algún producto o cantidad. ¿Me lo repites?"
+            suma[pid] = suma.get(pid, 0) + cant                       # "2 cocas" + "1 coca" = 3
+        if acc["accion"] in CON_PRODUCTOS and not suma:
+            return None, "No encontré productos. ¿Me dices qué y cuántos?"
+        if suma:
+            acc["productos"] = [{"producto": k, "cantidad": v} for k, v in suma.items()]
+        acc.pop("fecha", None)                                        # la fecha la elige la persona en la app
+        items, total = [], 0.0
+        for pid, cant in suma.items():
             info = productos[pid]
             sub = round(info["precio"] * cant, 2)
             items.append({"producto": pid, "nombre": info["nombres"][0], "cantidad": cant, "unidad": info["unidad"],
@@ -109,9 +123,116 @@ def main():
         if err:
             return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "error": err,
                     "salida_modelo": salida[:200], "texto_original": texto, "ms": ms}
+        return responde(res, texto, ms)
+
+    def responde(res, texto, ms):
         acc = res["accion"]["accion"]
-        return {"ok": True, **res, "texto_original": texto, "ms": ms,
-                "requiere_confirmacion": acc in ("agregar", "quitar", "registrar_libreta", "confirmar", "forma_pago")}
+        r = {"ok": True, **res, "texto_original": texto, "ms": ms,
+             "requiere_confirmacion": acc in ("agregar", "quitar", "registrar_libreta", "confirmar", "forma_pago")}
+        if acc == "registrar_libreta":
+            r["requiere_fecha"] = True        # la app pregunta de qué día son esas ventas
+        return r
+
+    lineas_cat = "\n".join(f"- {pid.replace('_', ' ')} (también: {', '.join(info['nombres'][:3])})"
+                           for pid, info in productos.items())
+    prompt_vl = ("Esta es una hoja de la libreta de ventas de un negocio pequeño en México, escrita a mano. "
+                 "Transcribe cada renglón en español, uno por línea, con el formato: cantidad producto. "
+                 "Ignora palabras como 'vendí'. Escribe los números con dígitos. Si un renglón no tiene cantidad, "
+                 "escribe solo el producto. Si no se entiende, escribe ?. Cuando el producto se parezca a uno "
+                 "de este catálogo, usa el nombre del catálogo:\n" + lineas_cat +
+                 "\nNo agregues explicaciones, solo la lista.")
+
+    def transcribe(datos_img):
+        from PIL import Image, ImageOps
+        llave = os.environ.get("NVIDIA_API_KEY")
+        if not llave:
+            raise RuntimeError("Falta NVIDIA_API_KEY en el servidor.")
+        img = ImageOps.exif_transpose(Image.open(io.BytesIO(datos_img))).convert("RGB")
+        img.thumbnail((1024, 1024))
+        for q in (85, 70, 55):
+            buf = io.BytesIO(); img.save(buf, "JPEG", quality=q)
+            if buf.tell() < 170_000:
+                break
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        cuerpo = {"model": a.modelo_vl, "max_tokens": 600, "temperature": 0,
+                  "chat_template_kwargs": {"enable_thinking": False},
+                  "messages": [{"role": "user", "content": [
+                      {"type": "text", "text": prompt_vl},
+                      {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]}]}
+        req = urllib.request.Request(URL_VL, json.dumps(cuerpo).encode(),
+                                     {"Content-Type": "application/json", "Accept": "application/json",
+                                      "Authorization": f"Bearer {llave}"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            m = json.load(r)["choices"][0]["message"]
+        txt = (m.get("content") or "").strip() or (m.get("reasoning_content") or "").strip()
+        return txt.split("</think>")[-1].strip()
+
+    from fastapi import File, HTTPException, UploadFile
+
+    @app.post("/libreta")
+    async def libreta(foto: UploadFile = File(...)):
+        t0 = time.time()
+        datos_img = await foto.read()
+        if not datos_img:
+            raise HTTPException(400, "La foto llegó vacía. Vuelve a tomarla.")
+        try:
+            from PIL import Image
+            Image.open(io.BytesIO(datos_img)).verify()
+        except Exception:
+            raise HTTPException(400, "El archivo no es una imagen válida (usa JPG o PNG).")
+        try:
+            transcripcion = transcribe(datos_img)
+        except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
+            return {"ok": False, "error": "No pude leer la foto ahora (sin conexión o servicio no disponible). "
+                                          "Puedes dictar o escribir lo de la libreta.", "detalle": str(e)[:200]}
+        ms_vl = int((time.time() - t0) * 1000)
+        renglones = [l.strip(" -•\t") for l in transcripcion.splitlines() if l.strip(" -•\t?")]
+        if not renglones:
+            return {"ok": False, "error": "No pude leer renglones en la foto. Acerca la cámara o dicta la libreta.",
+                    "transcripcion": transcripcion, "ms_vision": ms_vl}
+        texto = "pásame lo de la libreta: " + ", ".join(renglones)
+        salida = genera(texto[:400], max_new=220)
+        res, err = valida(salida)
+        ms = int((time.time() - t0) * 1000)
+        if err:
+            return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "error": err,
+                    "transcripcion": transcripcion, "texto_original": texto, "ms": ms}
+        r = responde(res, texto, ms)
+        r.update({"transcripcion": transcripcion, "ms_vision": ms_vl, "modelo_vision": a.modelo_vl})
+        # Revisión cruzada: renglones de la foto que el LoRA no incluyó -> pendientes (la app pregunta cantidad)
+        vistos = {it["producto"] for it in r["items"]}
+        pendientes = []
+        for ren in renglones:
+            m = re.match(r"^\s*(\d+(?:[.,]\d+)?)?\s*(.+?)\s*$", ren)
+            cant_txt, nombre = (m.group(1), m.group(2)) if m else (None, ren)
+            pid = busca_producto(nombre)
+            if pid and pid not in vistos:
+                pendientes.append({"producto": pid, "nombre": productos[pid]["nombres"][0], "renglon": ren,
+                                   "cantidad": float(cant_txt.replace(",", ".")) if cant_txt else None})
+                vistos.add(pid)
+            elif not pid:
+                pendientes.append({"producto": None, "renglon": ren, "cantidad": None})
+        if pendientes:
+            r["pendientes"] = pendientes
+            r["mensaje"] = "Revisa estos renglones: " + ", ".join(x["renglon"] for x in pendientes) + \
+                           ". Indica la cantidad o el producto antes de guardar."
+        return r
+
+    def normaliza(t):
+        t = t.lower().strip()
+        for x, y in (("á", "a"), ("é", "e"), ("í", "i"), ("ó", "o"), ("ú", "u")):
+            t = t.replace(x, y)
+        return re.sub(r"[^a-z0-9 ]", " ", t).strip()
+
+    alias = sorted(((normaliza(n), pid) for pid, info in productos.items()
+                    for n in list(info["nombres"]) + [pid.replace("_", " ")]), key=lambda x: -len(x[0]))
+
+    def busca_producto(nombre):
+        n = normaliza(nombre)
+        for al, pid in alias:                       # el alias más largo primero ("coca cola" antes que "coca")
+            if al and (n == al or re.search(rf"\b{re.escape(al)}s?\b", n)):
+                return pid
+        return None
 
     @app.post("/v1/chat/completions")
     def chat(body: dict):

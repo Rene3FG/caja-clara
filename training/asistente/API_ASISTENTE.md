@@ -54,3 +54,24 @@ Respuesta cuando no se pudo interpretar (mostrar el mensaje y dejar escribir):
 ## Errores a manejar en la app (bases 6e)
 - Sin conexión con el servidor / timeout (> 8 s): "No pude conectar con el asistente. Puedes registrar con los botones."
 - `ok: false`: mostrar `error` y dejar la caja de texto visible.
+
+## POST /libreta — pasar la libreta a digital desde una foto
+- `multipart/form-data`, campo **`foto`** (JPG/PNG de la hoja escrita a mano).
+- Requiere internet: la letra la lee **Nemotron 3.5 Super VL** (API de NVIDIA); la interpretación la hace **nuestro LoRA**.
+- Respuesta (ejemplo real, ~4 s):
+```json
+{"ok": true, "transcripcion": "2 coca cola\n3 sabritas\n1 coca cola\n1 panditas\nchokis",
+ "accion": {"accion": "registrar_libreta", "productos": [{"producto": "coca_cola", "cantidad": 3}, ...]},
+ "items": [...con precio y subtotal...], "total_propuesto": 163.0,
+ "requiere_confirmacion": true, "requiere_fecha": true, "ms_vision": 1500, "ms": 4100}
+```
+Si algún renglón no tiene cantidad o no se reconoce, llega en `"pendientes"` (p. ej. `{"producto": "chokis", "renglon": "chokis", "cantidad": null}`) y un `"mensaje"`. La IA **no adivina cantidades**: la app debe pedirlas antes de guardar.
+
+Qué debe hacer la app:
+0. Si hay `pendientes`, pedir la cantidad (o el producto) de cada uno y sumarlos a la lista.
+1. Mostrar la **transcripción** junto a la lista para que la persona compare con su hoja y corrija.
+2. **Pedir la fecha** de esas ventas (`requiere_fecha`). La IA nunca decide la fecha.
+3. Guardar como ventas pasadas (no cobra nada).
+4. Si `ok: false` → mostrar `error` y ofrecer **dictar o escribir** lo de la libreta (mismo `/asistente`, empezando con "pásame lo de la libreta: ...").
+
+Cambios en `/asistente` (también aplican aquí): productos repetidos se suman en un solo renglón; si una acción de venta o libreta llega sin productos responde `aclarar`; se descarta cualquier fecha que invente el modelo.
