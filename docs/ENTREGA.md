@@ -1,0 +1,31 @@
+# Lista de entrega (bases, sección 14 y 19)
+
+✅ listo · ✍️ lo completa el equipo · ⏳ falta hacerlo
+
+| Entregable | Dónde | Estado |
+|---|---|---|
+| **A.** APK instalable | `app/build/app/outputs/flutter-apk/app-release.apk` (compilar con la URL vigente, ver `docs/DEMO.md`) | ✍️ subir al Panel |
+| **A.** Instrucciones de instalación y uso, datos de prueba, versión | `docs/DEMO.md`, `README.md`, `docs/pruebas_uso.md` (lista de 10 ventas); versión = commit final | ✅ |
+| **B.** Código, entrenamientos, dependencias, conexión app↔modelos | Este repositorio; `README.md` | ✅ |
+| **B.** Componentes previos, herramientas de IA, licencias | `docs/DECLARACION_IA_Y_LICENCIAS.md` | ✍️ firma y fecha del líder |
+| **B.** Funciones implementadas / simuladas / pendientes | `docs/funciones.md` | ✅ |
+| **C.** Paquete de entrenamiento — detector | `training/vision/` (cuaderno, specs, logs, distribución, evaluaciones) + pesos | ✍️ subir `.pth`/`.onnx`/`.engine` (ubicación en el Panel) |
+| **C.** Paquete de entrenamiento — asistente | `training/asistente/` (datos, config, logs, evaluaciones) + adaptador | ✍️ subir `lora_adaptador/` (ubicación en el Panel) |
+| **C.** Evaluación del detector v3 en el test (106) | `tao model dino evaluate` en el servidor DLI con el checkpoint v3 | ⏳ |
+| **D.** Ficha (PDF, ≤ 4 páginas) | `docs/pdf/ficha_proyecto.pdf` (fuente `docs/ficha_proyecto.md`) | ✍️ nombres y cifras de las pruebas de uso |
+| **E.** Evidencias | `docs/evidencias.md`, `logs/pruebas_app_2026-11-20.json` | ⏳ pruebas de uso y tiempos |
+| **E.** Pruebas con 2 usuarios ajenos | `docs/pruebas_uso.md` | ⏳ |
+| **F.** Presentación (PDF) | `docs/pdf/presentacion.pdf` (fuente `docs/presentacion/presentacion.html`) | ✍️ nombres, pruebas de uso, tiempos |
+| **G.** Video de respaldo (≤ 3 min) | — | ⏳ grabar |
+
+Regenerar los PDF después de editar las fuentes:
+
+```bash
+pandoc docs/ficha_proyecto.md -s --metadata pagetitle="Caja Clara — Ficha" -c docs/pdf/ficha.css -o /tmp/ficha.html --self-contained
+google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/pdf/ficha_proyecto.pdf /tmp/ficha.html
+google-chrome --headless --no-pdf-header-footer --allow-file-access-from-files \
+  --print-to-pdf=docs/pdf/presentacion.pdf docs/presentacion/presentacion.html
+```
+
+Antes de cerrar: revocar la `NVIDIA_API_KEY` usada en desarrollo y verificar que los enlaces del Panel abran
+sin iniciar sesión (el repositorio es privado: hacerlo público o dar acceso al jurado).

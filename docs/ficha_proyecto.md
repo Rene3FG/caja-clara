@@ -17,8 +17,8 @@ costumbre de usar apps de punto de venta.
 
 ## Proceso actual y relación con la economía digital
 
-1. El cliente elige productos → 2. la vendedora suma → 3. cobra (efectivo o transferencia) →
-4. anota en la libreta (si le da tiempo) → 5. al cierre, cuenta el efectivo y revisa el celular.
+(1) El cliente elige productos → (2) la vendedora suma → (3) cobra en efectivo o por transferencia →
+(4) anota en la libreta, si le da tiempo → (5) al cierre cuenta el efectivo y revisa el celular.
 
 El paso que se mejora es **2–4: sumar y anotar**. La Ley de Economía Digital para Pagos Digitales y
 Electrónicos impulsa que estos negocios acepten cobros digitales (DiMo/CoDi); para eso necesitan
