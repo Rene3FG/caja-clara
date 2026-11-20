@@ -88,17 +88,18 @@ def main():
             acc = None
         if not isinstance(acc, dict) or acc.get("accion") not in ACCIONES:
             return None, "No entendí bien. ¿Puedes repetirlo o escribirlo?"
-        suma = {}
+        suma, inventados = {}, 0
         for p in acc.get("productos", []) or []:
             pid, cant = (p or {}).get("producto"), (p or {}).get("cantidad")
             if pid not in productos or not isinstance(cant, (int, float)) or cant <= 0:
                 return None, "No reconocí algún producto o cantidad. ¿Me lo repites?"
             if pid not in mencionados(texto):                         # el modelo no puede inventar productos
-                if not estricto:
-                    continue                                          # libreta: ese renglón queda como pendiente
-                return None, "No escuché qué producto. ¿Me dices qué y cuántos?"
+                inventados += 1                                       # se descarta solo ese producto; la app
+                continue                                              # busca el resto en el catálogo de la tienda
             suma[pid] = suma.get(pid, 0) + cant                       # "2 cocas" + "1 coca" = 3
         if acc["accion"] in CON_PRODUCTOS and not suma:
+            if inventados:
+                return None, "No escuché qué producto. ¿Me dices qué y cuántos?"
             return None, "No encontré productos. ¿Me dices qué y cuántos?"
         if suma:
             acc["productos"] = [{"producto": k, "cantidad": v} for k, v in suma.items()]
@@ -110,7 +111,7 @@ def main():
             items.append({"producto": pid, "nombre": info["nombres"][0], "cantidad": cant, "unidad": info["unidad"],
                           "precio": info["precio"], "subtotal": sub})
             total += sub
-        return {"accion": acc, "items": items, "total_propuesto": round(total, 2)}, None
+        return {"accion": acc, "items": items, "total_propuesto": round(total, 2), "incompleto": inventados > 0}, None
 
     app = FastAPI(title="Caja Clara - asistente")
 

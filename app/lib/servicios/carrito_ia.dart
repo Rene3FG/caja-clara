@@ -130,7 +130,7 @@ const _numeros = <String, int>{
 
 /// Palabras de la orden que no son parte del nombre del producto.
 const _relleno = {
-  'cobrame', 'cobra', 'cobre', 'cobrale', 'cobrar', 'vendi', 'vende', 'vendele', 'vender', 'venta',
+  'cobrame', 'cobra', 'cobre', 'comprame', 'compra', 'cobrale', 'cobrar', 'vendi', 'vende', 'vendele', 'vender', 'venta',
   'agrega', 'agregame', 'agregale', 'pon', 'ponme', 'ponle', 'dame', 'anota', 'anotame', 'registra',
   'suma', 'mete', 'de', 'del', 'el', 'la', 'los', 'las', 'unos', 'unas', 'por', 'favor', 'porfa',
   'me', 'le', 'y', 'mas', 'otro', 'otra', 'otros', 'otras', 'pieza', 'piezas',
@@ -185,4 +185,38 @@ Producto? productoEnTexto(String texto, List<Producto> productos) {
     }
   }
   return null;
+}
+
+/// Un pedazo de la orden que el asistente no cubrió: producto de la tienda (o null si
+/// hay que capturarlo a mano), el texto de ese pedazo y la cantidad que se dijo.
+typedef TramoVenta = ({Producto? producto, String tramo, int cantidad});
+
+/// "cóbrame una coca y unas barritas" -> tramos ["cóbrame una coca", "unas barritas"].
+/// Devuelve los tramos que no nombran ninguna de las [clasesCubiertas] (lo que ya propuso el asistente),
+/// cada uno con el producto del catálogo de la tienda que nombra, si lo hay.
+List<TramoVenta> tramosSinCubrir(String texto, Iterable<String> clasesCubiertas, List<Producto> productos) {
+  String singular(String w) => w.length > 3 ? w.replaceAll(RegExp(r'(es|s)$'), '') : w;
+  bool nombra(String tramo, String clase) {
+    final palabras = {for (final w in _palabras(tramo).split(' ')) if (w.isNotEmpty) singular(w)};
+    final pegado = _normal(tramo);
+    final partes = clase.split('_').map(singular);
+    if (partes.every(palabras.contains)) return true;
+    return [...?_alias[clase], _normal(clase)].any((k) => k.isNotEmpty && (palabras.contains(singular(k)) || pegado.contains(k)));
+  }
+
+  final cubiertas = clasesCubiertas.toList();
+  final fuera = <TramoVenta>[];
+  for (final t in texto.split(RegExp(r',|\s+(?:y|e)\s+', caseSensitive: false))) {
+    final tramo = t.trim();
+    if (tramo.isEmpty || cubiertas.any((c) => nombra(tramo, c))) continue;
+    final venta = desarmarVenta(tramo);
+    if (venta.nombre.isEmpty) continue; // "por favor", "y ya"
+    var producto = productoEnTexto(tramo, productos);
+    for (final clase in _alias.keys) {
+      if (producto != null) break;
+      if (nombra(tramo, clase)) producto = productoDeClase(clase, productos); // "coca" -> "Coca cola"
+    }
+    fuera.add((producto: producto, tramo: tramo, cantidad: venta.cantidad));
+  }
+  return fuera;
 }

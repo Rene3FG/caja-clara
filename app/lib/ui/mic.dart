@@ -83,8 +83,11 @@ class _MicGundaniState extends State<MicGundani> {
     try {
       final r = await const IaService().asistente(texto);
       if (!mounted) return;
-      if (_aplicarLora(caja, r)) {
+      if (_aplicarLora(caja, r, texto)) {
         setState(() => _cargando = false);
+        final falta = _faltaCapturar;
+        _faltaCapturar = null;
+        if (falta != null) await _capturarAMano(caja, falta);
         return;
       }
       if (r['ok'] == false) {
@@ -97,14 +100,20 @@ class _MicGundaniState extends State<MicGundani> {
     // El asistente no conoce el producto (solo sabe su catálogo de entrenamiento):
     // primero se busca en el catálogo de la tienda; si tampoco está, se captura a mano.
     final esVenta = (dudaLora?.contains('producto') ?? false) ||
-        RegExp(r'^\s*(c[oó]bra|vend|agrega|pon|dame|anota)', caseSensitive: false).hasMatch(texto);
+        RegExp(r'^\s*(c[oó]bra|c[oó]mpra|vend|agrega|pon|dame|anota)', caseSensitive: false).hasMatch(texto);
     if (esVenta) {
-      final p = productoEnTexto(texto, caja.productos);
-      if (p != null) {
-        _agregarAMano(caja, p.id, p.nombre, p.precio, desarmarVenta(texto).cantidad);
-        setState(() => _cargando = false);
-        return;
-      }
+      // Una venta no espera a Gundani (tarda ~20 s): catálogo de la tienda y, si falta algo, a mano.
+      final tramos = tramosSinCubrir(texto, const [], caja.productos);
+      final conocidos = [
+        for (final t in tramos)
+          if (t.producto != null)
+            Linea(productoId: t.producto!.id, nombre: t.producto!.nombre, precio: t.producto!.precio, cantidad: t.cantidad),
+      ];
+      final falta = [for (final t in tramos) if (t.producto == null) t.tramo];
+      if (conocidos.isNotEmpty) _agregarLineas(caja, conocidos);
+      setState(() => _cargando = false);
+      if (falta.isNotEmpty || conocidos.isEmpty) await _capturarAMano(caja, falta.isNotEmpty ? falta.first : texto);
+      return;
     }
     // 2) Respaldo: Gundani (gastos y lo que el LoRA no cubre), por el mismo gateway.
     try {
@@ -140,15 +149,22 @@ class _MicGundaniState extends State<MicGundani> {
     }
   }
 
-  void _agregarAMano(Caja caja, String id, String nombre, double precio, int cantidad) {
+  void _agregarAMano(Caja caja, String id, String nombre, double precio, int cantidad) =>
+      _agregarLineas(caja, [Linea(productoId: id, nombre: nombre, precio: precio, cantidad: cantidad)]);
+
+  void _agregarLineas(Caja caja, List<Linea> nuevas) {
     final enVenta = caja.ruta.id == 'venta';
-    final linea = Linea(productoId: id, nombre: nombre, precio: precio, cantidad: cantidad);
-    caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], [linea]));
-    final total = precio * cantidad;
-    caja.setAviso('Propuesta: $cantidad $nombre · total ${pesos(total)}. Revisa y confirma.');
+    caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], nuevas));
+    final total = nuevas.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
+    caja.setAviso('Propuesta: ${listaLineas([for (final l in nuevas) (nombre: l.nombre, cantidad: l.cantidad)])} '
+        '· total ${pesos(total)}. Revisa y confirma.');
     decir('Total ${pesos(total)}. Revisa y confirma.');
     if (!enVenta) caja.ir(const Ruta('venta'));
   }
+
+  /// Tramo de la orden que el asistente y el catálogo de la tienda no conocen ("unas barritas"):
+  /// se pide a mano después de agregar lo que sí se entendió.
+  String? _faltaCapturar;
 
   /// Producto que no está en ningún catálogo: la persona escribe nombre y precio,
   /// se agrega a la cuenta y queda guardado en sus productos para la próxima vez.
@@ -236,7 +252,7 @@ class _MicGundaniState extends State<MicGundani> {
 
   /// Aplica la respuesta del LoRA. Devuelve false si no es una acción de venta que entienda.
   /// Nunca guarda: solo arma la cuenta para que la persona confirme (bases 6d).
-  bool _aplicarLora(Caja caja, Map<String, dynamic> r) {
+  bool _aplicarLora(Caja caja, Map<String, dynamic> r, String texto) {
     if (r['ok'] != true) return false;
     final acc = r['accion'];
     if (acc is! Map) return false;
@@ -245,10 +261,24 @@ class _MicGundaniState extends State<MicGundani> {
     switch (tipo) {
       case 'agregar':
       case 'registrar_libreta':
-        final nuevas = lineasDeItems(r['items'] is List ? r['items'] as List : const [], caja.productos);
+        final items = r['items'] is List ? r['items'] as List : const [];
+        final nuevas = lineasDeItems(items, caja.productos);
         if (nuevas.isEmpty) return false;
+        var total = (r['total_propuesto'] as num?)?.toDouble() ?? 0;
+        if (tipo == 'agregar') {
+          // Lo que el asistente no conoce ("unas barritas") se busca en el catálogo de la tienda.
+          final clases = [for (final i in items) if (i is Map) '${i['producto']}'];
+          for (final t in tramosSinCubrir(texto, clases, caja.productos)) {
+            final p = t.producto;
+            if (p == null) {
+              _faltaCapturar ??= t.tramo;
+              continue;
+            }
+            nuevas.add(Linea(productoId: p.id, nombre: p.nombre, precio: p.precio, cantidad: t.cantidad));
+            total += p.precio * t.cantidad;
+          }
+        }
         caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], nuevas));
-        final total = (r['total_propuesto'] as num?)?.toDouble() ?? 0;
         final aviso = 'Propuesta: ${listaLineas([for (final l in nuevas) (nombre: l.nombre, cantidad: l.cantidad)])} '
             '· total ${pesos(total)}. Revisa y confirma.';
         caja.setAviso(aviso);
