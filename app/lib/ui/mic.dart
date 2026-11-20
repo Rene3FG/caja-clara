@@ -87,7 +87,7 @@ class _MicGundaniState extends State<MicGundani> {
         setState(() => _cargando = false);
         final falta = _faltaCapturar;
         _faltaCapturar = null;
-        if (falta != null) await _capturarAMano(caja, falta);
+        if (falta != null) await _capturarAMano(caja, falta, hablar: false);
         return;
       }
       if (r['ok'] == false) {
@@ -110,9 +110,11 @@ class _MicGundaniState extends State<MicGundani> {
             Linea(productoId: t.producto!.id, nombre: t.producto!.nombre, precio: t.producto!.precio, cantidad: t.cantidad),
       ];
       final falta = [for (final t in tramos) if (t.producto == null) t.tramo];
-      if (conocidos.isNotEmpty) _agregarLineas(caja, conocidos);
+      if (conocidos.isNotEmpty) _agregarLineas(caja, conocidos, falta: falta.isEmpty ? null : falta.first);
       setState(() => _cargando = false);
-      if (falta.isNotEmpty || conocidos.isEmpty) await _capturarAMano(caja, falta.isNotEmpty ? falta.first : texto);
+      if (falta.isNotEmpty || conocidos.isEmpty) {
+        await _capturarAMano(caja, falta.isNotEmpty ? falta.first : texto, hablar: conocidos.isEmpty);
+      }
       return;
     }
     // 2) Respaldo: Gundani (gastos y lo que el LoRA no cubre), por el mismo gateway.
@@ -152,13 +154,13 @@ class _MicGundaniState extends State<MicGundani> {
   void _agregarAMano(Caja caja, String id, String nombre, double precio, int cantidad) =>
       _agregarLineas(caja, [Linea(productoId: id, nombre: nombre, precio: precio, cantidad: cantidad)]);
 
-  void _agregarLineas(Caja caja, List<Linea> nuevas) {
+  void _agregarLineas(Caja caja, List<Linea> nuevas, {String? falta}) {
     final enVenta = caja.ruta.id == 'venta';
     caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], nuevas));
     final total = nuevas.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
     caja.setAviso('Propuesta: ${listaLineas([for (final l in nuevas) (nombre: l.nombre, cantidad: l.cantidad)])} '
         '· total ${pesos(total)}. Revisa y confirma.');
-    decir('Total ${pesos(total)}. Revisa y confirma.');
+    decir(falta == null ? 'Total ${pesos(total)}. Revisa y confirma.' : 'Total ${pesos(total)}. ${_noConozco(falta)}');
     if (!enVenta) caja.ir(const Ruta('venta'));
   }
 
@@ -166,10 +168,17 @@ class _MicGundaniState extends State<MicGundani> {
   /// se pide a mano después de agregar lo que sí se entendió.
   String? _faltaCapturar;
 
+  /// "unas barritas" -> "No conozco barritas, escribe su precio."
+  String _noConozco(String tramo) {
+    final n = desarmarVenta(tramo).nombre.toLowerCase();
+    return n.isEmpty ? 'No conozco ese producto, escríbelo con su precio.' : 'No conozco $n, escribe su precio.';
+  }
+
   /// Producto que no está en ningún catálogo: la persona escribe nombre y precio,
   /// se agrega a la cuenta y queda guardado en sus productos para la próxima vez.
-  Future<void> _capturarAMano(Caja caja, String texto) async {
+  Future<void> _capturarAMano(Caja caja, String texto, {bool hablar = true}) async {
     final previo = desarmarVenta(texto);
+    if (hablar) decir(_noConozco(texto));
     final nombre = TextEditingController(text: previo.nombre);
     final cantidad = TextEditingController(text: '${previo.cantidad}');
     final precio = TextEditingController();
@@ -282,7 +291,8 @@ class _MicGundaniState extends State<MicGundani> {
         final aviso = 'Propuesta: ${listaLineas([for (final l in nuevas) (nombre: l.nombre, cantidad: l.cantidad)])} '
             '· total ${pesos(total)}. Revisa y confirma.';
         caja.setAviso(aviso);
-        decir('Total ${pesos(total)}. Revisa y confirma.');
+        final falta = _faltaCapturar;
+        decir(falta == null ? 'Total ${pesos(total)}. Revisa y confirma.' : 'Total ${pesos(total)}. ${_noConozco(falta)}');
         if (!enVenta) caja.ir(const Ruta('venta'));
         return true;
       case 'quitar':
