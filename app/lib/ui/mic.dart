@@ -94,6 +94,18 @@ class _MicGundaniState extends State<MicGundani> {
     } on IaError catch (e) {
       dudaLora = e.mensaje;
     }
+    // El asistente no conoce el producto (solo sabe su catálogo de entrenamiento):
+    // primero se busca en el catálogo de la tienda; si tampoco está, se captura a mano.
+    final esVenta = (dudaLora?.contains('producto') ?? false) ||
+        RegExp(r'^\s*(c[oó]bra|vend|agrega|pon|dame|anota)', caseSensitive: false).hasMatch(texto);
+    if (esVenta) {
+      final p = productoEnTexto(texto, caja.productos);
+      if (p != null) {
+        _agregarAMano(caja, p.id, p.nombre, p.precio, desarmarVenta(texto).cantidad);
+        setState(() => _cargando = false);
+        return;
+      }
+    }
     // 2) Respaldo: Gundani (gastos y lo que el LoRA no cubre), por el mismo gateway.
     try {
       final r = await consultarGundani(texto);
@@ -106,6 +118,9 @@ class _MicGundaniState extends State<MicGundani> {
         caja.setAviso(r.respuestaVoz);
         decir(r.respuestaVoz);
         caja.refrescarCaja();
+      } else if (esVenta) {
+        setState(() => _cargando = false);
+        await _capturarAMano(caja, texto);
       } else if (dudaLora != null) {
         setState(() => _error = dudaLora);
       } else {
@@ -113,10 +128,110 @@ class _MicGundaniState extends State<MicGundani> {
         decir(r.respuestaVoz);
       }
     } on ErrorGundani catch (e) {
-      if (mounted) setState(() => _error = dudaLora ?? e.mensaje);
+      if (!mounted) return;
+      if (esVenta) {
+        setState(() => _cargando = false);
+        await _capturarAMano(caja, texto);
+      } else {
+        setState(() => _error = dudaLora ?? e.mensaje);
+      }
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
+  }
+
+  void _agregarAMano(Caja caja, String id, String nombre, double precio, int cantidad) {
+    final enVenta = caja.ruta.id == 'venta';
+    final linea = Linea(productoId: id, nombre: nombre, precio: precio, cantidad: cantidad);
+    caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], [linea]));
+    final total = precio * cantidad;
+    caja.setAviso('Propuesta: $cantidad $nombre · total ${pesos(total)}. Revisa y confirma.');
+    decir('Total ${pesos(total)}. Revisa y confirma.');
+    if (!enVenta) caja.ir(const Ruta('venta'));
+  }
+
+  /// Producto que no está en ningún catálogo: la persona escribe nombre y precio,
+  /// se agrega a la cuenta y queda guardado en sus productos para la próxima vez.
+  Future<void> _capturarAMano(Caja caja, String texto) async {
+    final previo = desarmarVenta(texto);
+    final nombre = TextEditingController(text: previo.nombre);
+    final cantidad = TextEditingController(text: '${previo.cantidad}');
+    final precio = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, refrescar) {
+          final n = double.tryParse(precio.text.replaceAll(',', '.')) ?? 0;
+          final c = int.tryParse(cantidad.text) ?? 0;
+          final listo = nombre.text.trim().isNotEmpty && n > 0 && c > 0;
+          InputDecoration deco(String hint) => InputDecoration(
+                hintText: hint,
+                filled: true,
+                fillColor: Colors.white,
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE7E2DA))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: grana, width: 2)),
+              );
+          return AlertDialog(
+            title: const Text('No conozco ese producto'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Escuché: “$texto”. Escribe el producto y su precio.', style: const TextStyle(fontSize: 14, color: stone)),
+                  const SizedBox(height: 12),
+                  const Text('Producto', style: TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  TextField(controller: nombre, autofocus: previo.nombre.isEmpty, decoration: deco('Ej. Barritas'), onChanged: (_) => refrescar(() {})),
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        const Text('Cantidad', style: TextStyle(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 6),
+                        TextField(controller: cantidad, keyboardType: TextInputType.number, decoration: deco('1'), onChanged: (_) => refrescar(() {})),
+                      ]),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        const Text('Precio c/u', style: TextStyle(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: precio,
+                          autofocus: previo.nombre.isNotEmpty,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: deco('\$ 0.00'),
+                          onChanged: (_) => refrescar(() {}),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: grana),
+                onPressed: listo ? () => Navigator.pop(ctx, true) : null,
+                child: const Text('Agregar a la cuenta'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    final n = nombre.text.trim();
+    final p = double.tryParse(precio.text.replaceAll(',', '.')) ?? 0;
+    final c = int.tryParse(cantidad.text) ?? 1;
+    nombre.dispose();
+    cantidad.dispose();
+    precio.dispose();
+    if (ok != true || !mounted) return;
+    caja.guardarProducto(nombre: n, precio: p);
+    final nuevo = productoEnTexto(n, caja.productos);
+    _agregarAMano(caja, nuevo?.id ?? '', n, p, c);
   }
 
   /// Aplica la respuesta del LoRA. Devuelve false si no es una acción de venta que entienda.

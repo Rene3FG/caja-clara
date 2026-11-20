@@ -122,3 +122,67 @@ List<Linea> lineasDeAccion(List productos, List<Producto> catalogo) => [
         if (p is Map && p['producto'] != null && (p['cantidad'] as num? ?? 0) > 0)
           lineaDeIa(p['producto'].toString(), (p['cantidad'] as num).round(), catalogo),
     ];
+
+const _numeros = <String, int>{
+  'un': 1, 'una': 1, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
+  'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10, 'once': 11, 'doce': 12,
+};
+
+/// Palabras de la orden que no son parte del nombre del producto.
+const _relleno = {
+  'cobrame', 'cobra', 'cobre', 'cobrale', 'cobrar', 'vendi', 'vende', 'vendele', 'vender', 'venta',
+  'agrega', 'agregame', 'agregale', 'pon', 'ponme', 'ponle', 'dame', 'anota', 'anotame', 'registra',
+  'suma', 'mete', 'de', 'del', 'el', 'la', 'los', 'las', 'unos', 'unas', 'por', 'favor', 'porfa',
+  'me', 'le', 'y', 'mas', 'otro', 'otra', 'otros', 'otras', 'pieza', 'piezas',
+};
+
+String _palabras(String s) {
+  const acentos = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ü': 'u', 'ñ': 'n'};
+  final b = StringBuffer();
+  for (final ch in s.toLowerCase().split('')) {
+    final c = acentos[ch] ?? ch;
+    b.write(RegExp(r'[a-z0-9]').hasMatch(c) ? c : ' ');
+  }
+  return b.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+/// "cóbrame 1 barritas" -> (nombre: "Barritas", cantidad: 1). Sirve para prellenar la captura a mano.
+({String nombre, int cantidad}) desarmarVenta(String texto) {
+  var cantidad = 0;
+  final resto = <String>[];
+  for (final w in _palabras(texto).split(' ')) {
+    if (w.isEmpty) continue;
+    final n = int.tryParse(w) ?? _numeros[w];
+    if (n != null && cantidad == 0 && resto.isEmpty) {
+      cantidad = n;
+    } else if (resto.isNotEmpty || !_relleno.contains(w)) {
+      resto.add(w); // "barritas de fresa": el "de" ya es parte del nombre
+    }
+  }
+  while (resto.isNotEmpty && _relleno.contains(resto.last)) {
+    resto.removeLast(); // "... por favor"
+  }
+  final nombre = resto.join(' ');
+  return (nombre: nombre.isEmpty ? '' : nombreBonito(nombre), cantidad: cantidad < 1 ? 1 : cantidad);
+}
+
+/// Producto del catálogo de la tienda que la persona nombró (también en plural: "barritas" -> "Barrita").
+/// El asistente solo conoce su catálogo de entrenamiento; esto cubre lo que la tienda dio de alta.
+Producto? productoEnTexto(String texto, List<Producto> productos) {
+  String singular(String w) => w.length > 3 ? w.replaceAll(RegExp(r'(es|s)$'), '') : w;
+  List<String> palabras(String s) => [for (final w in _palabras(s).split(' ')) if (w.isNotEmpty) singular(w)];
+  final t = palabras(texto);
+  final orden = [...productos]..sort((a, b) => b.nombre.length.compareTo(a.nombre.length));
+  for (final p in orden) {
+    final n = palabras(p.nombre);
+    if (n.isEmpty) continue;
+    for (var i = 0; i + n.length <= t.length; i++) {
+      var igual = true;
+      for (var j = 0; j < n.length && igual; j++) {
+        igual = t[i + j] == n[j];
+      }
+      if (igual) return p;
+    }
+  }
+  return null;
+}
