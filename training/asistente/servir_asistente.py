@@ -80,7 +80,7 @@ def main():
                                  temperature=None, top_p=None, top_k=None, pad_token_id=tok.eos_token_id)
         return tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
 
-    def valida(salida, texto):
+    def valida(salida, texto, estricto=True):
         m = re.search(r"\{.*\}", salida, flags=re.S)
         try:
             acc = json.loads(m.group(0)) if m else None
@@ -94,6 +94,8 @@ def main():
             if pid not in productos or not isinstance(cant, (int, float)) or cant <= 0:
                 return None, "No reconocí algún producto o cantidad. ¿Me lo repites?"
             if pid not in mencionados(texto):                         # el modelo no puede inventar productos
+                if not estricto:
+                    continue                                          # libreta: ese renglón queda como pendiente
                 return None, "No escuché qué producto. ¿Me dices qué y cuántos?"
             suma[pid] = suma.get(pid, 0) + cant                       # "2 cocas" + "1 coca" = 3
         if acc["accion"] in CON_PRODUCTOS and not suma:
@@ -193,22 +195,39 @@ def main():
         try:
             transcripcion = transcribe(datos_img)
         except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
-            return {"ok": False, "error": "No pude leer la foto ahora (sin conexión o servicio no disponible). "
-                                          "Puedes dictar o escribir lo de la libreta.", "detalle": str(e)[:200]}
+            return {"ok": False, "error": "No pude leer la foto ahora (sin conexión o servicio no disponible).", "detalle": str(e)[:200]}
         ms_vl = int((time.time() - t0) * 1000)
         renglones = [l.strip(" -•\t") for l in transcripcion.splitlines() if l.strip(" -•\t?")]
         if not renglones:
-            return {"ok": False, "error": "No pude leer renglones en la foto. Acerca la cámara o dicta la libreta.",
+            return {"ok": False, "error": "No pude leer renglones en la foto. Acerca la cámara.",
                     "transcripcion": transcripcion, "ms_vision": ms_vl}
         texto = "pásame lo de la libreta: " + ", ".join(renglones)
         salida = genera(texto[:400], max_new=220)
-        res, err = valida(salida, texto)
+        res, err = valida(salida, texto, estricto=False)
         ms = int((time.time() - t0) * 1000)
-        if err:
-            return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "error": err,
-                    "transcripcion": transcripcion, "texto_original": texto, "ms": ms}
+        print(f"libreta: {transcripcion!r} -> {salida[:200]!r}{' | ' + err if err else ''}", flush=True)
+        if err:   # el modelo no armó nada usable: los renglones leídos quedan todos como pendientes
+            res = {"accion": {"accion": "registrar_libreta", "productos": []}, "items": [], "total_propuesto": 0.0}
         r = responde(res, texto, ms)
         r.update({"transcripcion": transcripcion, "ms_vision": ms_vl, "modelo_vision": a.modelo_vl})
+        # La hoja ya viene como "cantidad producto": esa cantidad gana sobre la del LoRA, que a veces
+        # se desfasa un renglón ("1 cemento, 2 doritos" -> doritos 1).
+        leidas = {}
+        for ren in renglones:
+            m = re.match(r"^\s*(\d+(?:[.,]\d+)?)\s+(.+?)\s*$", ren)
+            pid = busca_producto(m.group(2)) if m else None
+            if pid:
+                leidas[pid] = leidas.get(pid, 0) + float(m.group(1).replace(",", "."))
+        if leidas:
+            total = 0.0
+            for it in r["items"]:
+                if it["producto"] in leidas:
+                    q = leidas[it["producto"]]
+                    it["cantidad"] = int(q) if q.is_integer() else q
+                    it["subtotal"] = round(it["precio"] * it["cantidad"], 2)
+                total += it["subtotal"]
+            r["total_propuesto"] = round(total, 2)
+            r["accion"]["productos"] = [{"producto": it["producto"], "cantidad": it["cantidad"]} for it in r["items"]]
         # Revisión cruzada: renglones de la foto que el LoRA no incluyó -> pendientes (la app pregunta cantidad)
         vistos = {it["producto"] for it in r["items"]}
         pendientes = []
@@ -222,6 +241,10 @@ def main():
                 vistos.add(pid)
             elif not pid:
                 pendientes.append({"producto": None, "renglon": ren, "cantidad": None})
+        if not r["items"] and not any(x["producto"] for x in pendientes):
+            return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "transcripcion": transcripcion,
+                    "error": "No encontré productos de la tienda en la hoja.",
+                    "texto_original": texto, "ms": ms}
         if pendientes:
             r["pendientes"] = pendientes
             r["mensaje"] = "Revisa estos renglones: " + ", ".join(x["renglon"] for x in pendientes) + \
