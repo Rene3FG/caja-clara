@@ -5,6 +5,7 @@ import '../modelos.dart';
 import '../servicios/asistente.dart';
 import '../servicios/voz.dart';
 import '../tema.dart';
+import 'voz_orb.dart';
 import 'widgets.dart';
 
 class MicGundani extends StatefulWidget {
@@ -21,6 +22,7 @@ class _MicGundaniState extends State<MicGundani> {
   final _texto = TextEditingController();
   SesionVoz? _sesion;
   var _cargando = false;
+  var _nivel = 0.0;
   String? _error;
 
   @override
@@ -36,7 +38,10 @@ class _MicGundaniState extends State<MicGundani> {
       await _enviar();
       return;
     }
-    final sesion = await escuchar();
+    final sesion = await escuchar(alOir: (n) {
+      if (!mounted || (n - _nivel).abs() < 0.04) return;
+      setState(() => _nivel = n);
+    });
     if (!mounted) return;
     if (sesion == null) {
       setState(() => _error = widget.expandir ? 'El micrófono no está disponible.' : 'El micrófono no está disponible. Escríbelo aquí.');
@@ -44,6 +49,7 @@ class _MicGundaniState extends State<MicGundani> {
     }
     setState(() {
       _sesion = sesion;
+      _nivel = 0;
       _error = null;
     });
   }
@@ -54,6 +60,7 @@ class _MicGundaniState extends State<MicGundani> {
     if (_sesion != null) {
       final oido = await _sesion!.detener();
       _sesion = null;
+      _nivel = 0;
       if (oido.isNotEmpty) {
         texto = oido;
         _texto.text = oido;
@@ -195,36 +202,14 @@ class _MicGundaniState extends State<MicGundani> {
 
   Widget _inicio(Caja caja) {
     final escuchando = _sesion != null;
-    final fondo = escuchando ? grana : cempasuchil;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       children: [
         const SizedBox(height: 8),
         Center(
-          child: GestureDetector(
-            onTap: _cargando ? null : _mic,
-            child: Container(
-              width: 168,
-              height: 168,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: fondo.withValues(alpha: 0.18)),
-              child: Container(
-                width: 132,
-                height: 132,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: fondo.withValues(alpha: 0.35)),
-                child: Container(
-                  width: 96,
-                  height: 96,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: fondo),
-                  child: _cargando
-                      ? const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF1F1A17)))
-                      : Icon(escuchando ? Icons.close : Icons.mic, size: 40, color: escuchando ? Colors.white : const Color(0xFF1F1A17)),
-                ),
-              ),
-            ),
-          ),
+          child: _cargando
+              ? const SizedBox(width: 96, height: 96, child: CircularProgressIndicator(strokeWidth: 3, color: cempasuchil))
+              : VoiceSpeakingOrb(isListening: escuchando, voiceLevel: _nivel, onTap: _mic, coreSize: 96),
         ),
         const SizedBox(height: 16),
         Text(
@@ -240,7 +225,7 @@ class _MicGundaniState extends State<MicGundani> {
             children: [
               Icon(Icons.info_outline, size: 18, color: stone),
               SizedBox(width: 8),
-              Expanded(child: Text('Al escuchar: cambia a botón rojo para detener', style: TextStyle(fontSize: 14))),
+              Expanded(child: Text('Al escuchar: toca el botón para detener', style: TextStyle(fontSize: 14))),
             ],
           ),
         ),

@@ -17,8 +17,6 @@ class Guia extends StatefulWidget {
 }
 
 class _GuiaState extends State<Guia> {
-  var _paso = -1;
-  var _vista = 1;
   var _desdeCero = true;
   final _texto = TextEditingController();
   String? _pregunta;
@@ -33,68 +31,62 @@ class _GuiaState extends State<Guia> {
     super.dispose();
   }
 
-  void _salir() {
-    final caja = Caja.of(context);
-    caja.completarGuia();
-    caja.raiz(const Ruta('inicio'));
-  }
-
   void _continuarBienvenida() {
+    final caja = Caja.of(context);
     if (_desdeCero) {
-      setState(() => _paso = 0);
+      caja.moverGuia(0, 1);
     } else {
-      _salir();
+      caja.completarGuia();
     }
   }
 
   void _siguiente() {
-    if (_paso < 0) return;
-    if (_vista < 3) {
-      setState(() {
-        if (_vista == 2 && _pregunta == null) {
-          _pregunta = pasos[_paso].pregunta;
-          _respuesta = pasos[_paso].respuesta;
-        }
-        _vista += 1;
-      });
+    final caja = Caja.of(context);
+    if (caja.pasoGuia < 0) return;
+    if (caja.vistaGuia < 3) {
+      if (caja.vistaGuia == 2 && _pregunta == null) {
+        setState(() {
+          _pregunta = pasos[caja.pasoGuia].pregunta;
+          _respuesta = pasos[caja.pasoGuia].respuesta;
+        });
+      }
+      caja.moverGuia(caja.pasoGuia, caja.vistaGuia + 1);
       return;
     }
-    if (_paso < pasos.length - 1) {
+    if (caja.pasoGuia < pasos.length - 1) {
       setState(() {
-        _paso += 1;
-        _vista = 1;
         _pregunta = null;
         _respuesta = '';
         _texto.clear();
       });
+      caja.moverGuia(caja.pasoGuia + 1, 1);
       return;
     }
-    _salir();
+    caja.completarGuia();
   }
 
   void _volver() {
-    setState(() {
-      if (_vista > 1) {
-        _vista -= 1;
-      } else if (_paso == 0) {
-        _paso = -1;
-      } else {
-        _paso -= 1;
-        _vista = 3;
-      }
-    });
+    final caja = Caja.of(context);
+    if (caja.vistaGuia > 1) {
+      caja.moverGuia(caja.pasoGuia, caja.vistaGuia - 1);
+    } else if (caja.pasoGuia <= 0) {
+      caja.moverGuia(-1, 1);
+    } else {
+      caja.moverGuia(caja.pasoGuia - 1, 3);
+    }
   }
 
   Future<void> _enviar() async {
     final q = _texto.text.trim();
-    if (q.isEmpty || _paso < 0 || _cargando) return;
-    final tema = pasos[_paso].id;
+    if (q.isEmpty || Caja.of(context).pasoGuia < 0 || _cargando) return;
+    final caja = Caja.of(context);
+    final tema = pasos[caja.pasoGuia].id;
     setState(() {
       _pregunta = q;
-      _vista = 3;
       _cargando = true;
       _texto.clear();
     });
+    caja.moverGuia(caja.pasoGuia, 3);
     final r = await preguntar(q, tema);
     if (!mounted) return;
     setState(() {
@@ -118,8 +110,9 @@ class _GuiaState extends State<Guia> {
 
   @override
   Widget build(BuildContext context) {
-    if (_paso < 0) return _bienvenida();
-    final actual = pasos[_paso];
+    final caja = Caja.of(context);
+    if (caja.pasoGuia < 0 || caja.pasoGuia >= pasos.length) return _bienvenida();
+    final actual = pasos[caja.pasoGuia];
     return Scaffold(
       appBar: Barra(titulo: actual.titulo, onBack: _volver, accion: const PerfilBoton()),
       body: Column(
@@ -132,9 +125,9 @@ class _GuiaState extends State<Guia> {
                 const SizedBox(height: 12),
                 _asistente(),
                 const SizedBox(height: 12),
-                if (_vista == 1) ..._mensaje(actual),
-                if (_vista == 2) ..._detalle(actual),
-                if (_vista == 3) ..._duda(actual),
+                if (caja.vistaGuia == 1) ..._mensaje(actual),
+                if (caja.vistaGuia == 2) ..._detalle(actual),
+                if (caja.vistaGuia == 3) ..._duda(actual),
               ],
             ),
           ),
@@ -433,7 +426,7 @@ class _GuiaState extends State<Guia> {
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: () => setState(() => _vista = 2),
+        onTap: () => Caja.of(context).moverGuia(Caja.of(context).pasoGuia, 2),
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

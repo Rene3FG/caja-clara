@@ -10,6 +10,7 @@ import 'ui/inicio.dart';
 import 'ui/libro.dart';
 import 'ui/marco.dart';
 import 'ui/operacion.dart';
+import 'ui/perfil.dart';
 import 'ui/productos.dart';
 import 'ui/revisar.dart';
 import 'ui/sin_red.dart';
@@ -107,6 +108,8 @@ class _Cuerpo extends StatelessWidget {
     switch (caja.ruta.id) {
       case 'guia':
         return const Guia();
+      case 'perfil':
+        return const FormularioPerfil();
       case 'inicio':
         return const Inicio();
       case 'sin-red':

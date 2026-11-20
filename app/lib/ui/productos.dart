@@ -167,7 +167,7 @@ class _FormularioProductoState extends State<FormularioProducto> {
               child: const Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(Icons.storefront, size: 14, color: Color(0xFF9A3412)),
                 SizedBox(width: 6),
-                Text('Catálogo de Doña Elena', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF9A3412))),
+                Text('Catálogo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF9A3412))),
               ]),
             ),
           ),

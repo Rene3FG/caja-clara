@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
-import '../datos.dart';
 import '../modelos.dart';
 import '../tema.dart';
 import 'widgets.dart';
@@ -13,11 +12,6 @@ class Marco extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caja = Caja.of(context);
-    final demo = switch (caja.modoRed) {
-      ModoRed.auto => 'Demo: automática',
-      ModoRed.offline => 'Demo: sin red',
-      ModoRed.online => 'Demo: con red',
-    };
     return Column(
       children: [
         Padding(
@@ -39,8 +33,8 @@ class Marco extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(marcaTienda, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: granaDeep, letterSpacing: 0.6)),
-                        Text(nombreTienda, style: epilogo(20, peso: FontWeight.w700)),
+                        Text(caja.nombre, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: granaDeep, letterSpacing: 0.6)),
+                        Text(caja.negocio, style: epilogo(20, peso: FontWeight.w700)),
                       ],
                     ),
                   ),
@@ -48,17 +42,7 @@ class Marco extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Pastilla(conectado: caja.conectado),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: caja.cicloDemo,
-                    style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-                    child: Text(demo, style: const TextStyle(fontSize: 12, color: stone)),
-                  ),
-                ],
-              ),
+              Pastilla(conectado: caja.conectado),
             ],
           ),
         ),
@@ -128,9 +112,9 @@ void mostrarPerfil(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(duena, style: epilogo(24, peso: FontWeight.w700)),
+            Text(caja.nombre, style: epilogo(24, peso: FontWeight.w700)),
             const SizedBox(height: 4),
-            const Text(nombreTienda, style: TextStyle(fontSize: 16, color: stone)),
+            Text(caja.negocio, style: const TextStyle(fontSize: 16, color: stone)),
             const SizedBox(height: 16),
             Boton(
               texto: 'Mis productos',

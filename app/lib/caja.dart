@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cuentas.dart';
-import 'datos.dart';
 import 'modelos.dart';
 import 'servicios/asistente.dart';
 import 'servicios/sync.dart';
@@ -19,6 +18,12 @@ class Caja extends ChangeNotifier {
   var gastos = <Gasto>[];
   var fiados = <Fiado>[];
   var guiaHecha = false;
+  var cuentaId = '';
+  var pasoGuia = -1;
+  var vistaGuia = 1;
+  var negocio = '';
+  var nombre = '';
+  var clabe = '';
   var modoRed = ModoRed.auto;
   var redNavegador = true;
   var periodo = const Periodo('hoy');
@@ -31,6 +36,7 @@ class Caja extends ChangeNotifier {
   Ruta get ruta => pila.last;
   bool get conectado => modoRed == ModoRed.online || (modoRed == ModoRed.auto && redNavegador);
   int get pendientes => ventas.where((v) => v.pendiente).length + gastos.where((g) => g.pendiente).length;
+  bool get perfilListo => negocio.trim().isNotEmpty && nombre.trim().isNotEmpty;
 
   Future<void> iniciar() async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,11 +66,11 @@ class Caja extends ChangeNotifier {
         refrescarCaja();
       }
     });
-    if (!guiaHecha) {
-      pila = [const Ruta('guia')];
-    } else {
-      pila = [const Ruta('inicio')];
+    if (cuentaId.isEmpty) {
+      cuentaId = _id();
+      await _persist();
     }
+    _abrir();
     lista = true;
     notifyListeners();
     if (conectado) {
@@ -74,11 +80,17 @@ class Caja extends ChangeNotifier {
   }
 
   void _semilla() {
-    productos = productosBase();
-    ventas = ventasBase();
-    gastos = gastosBase();
-    fiados = fiadosBase();
+    productos = [];
+    ventas = [];
+    gastos = [];
+    fiados = [];
     guiaHecha = false;
+    cuentaId = '';
+    pasoGuia = -1;
+    vistaGuia = 1;
+    negocio = '';
+    nombre = '';
+    clabe = '';
     modoRed = ModoRed.auto;
     periodo = const Periodo('hoy');
   }
@@ -89,6 +101,12 @@ class Caja extends ChangeNotifier {
     gastos = (j['gastos'] as List).map((e) => Gasto.fromJson(e as Map<String, dynamic>)).toList();
     fiados = (j['fiados'] as List).map((e) => Fiado.fromJson(e as Map<String, dynamic>)).toList();
     guiaHecha = j['guiaHecha'] == true;
+    cuentaId = j['cuentaId'] is String ? j['cuentaId'] as String : '';
+    pasoGuia = j['pasoGuia'] is int ? j['pasoGuia'] as int : -1;
+    vistaGuia = j['vistaGuia'] is int ? j['vistaGuia'] as int : 1;
+    negocio = j['negocio'] is String ? j['negocio'] as String : '';
+    nombre = j['nombre'] is String ? j['nombre'] as String : '';
+    clabe = j['clabe'] is String ? j['clabe'] as String : '';
     modoRed = ModoRed.values.firstWhere((m) => m.name == j['modoRed'], orElse: () => ModoRed.auto);
     final p = j['periodo'];
     if (p is Map && p['tipo'] is String) {
@@ -102,6 +120,12 @@ class Caja extends ChangeNotifier {
         'gastos': gastos.map((g) => g.toJson()).toList(),
         'fiados': fiados.map((f) => f.toJson()).toList(),
         'guiaHecha': guiaHecha,
+        'cuentaId': cuentaId,
+        'pasoGuia': pasoGuia,
+        'vistaGuia': vistaGuia,
+        'negocio': negocio,
+        'nombre': nombre,
+        'clabe': clabe,
         'modoRed': modoRed.name,
         'periodo': {'tipo': periodo.tipo, 'desde': periodo.desde, 'hasta': periodo.hasta},
       };
@@ -172,19 +196,6 @@ class Caja extends ChangeNotifier {
     }
   }
 
-  void cicloDemo() {
-    modoRed = switch (modoRed) {
-      ModoRed.auto => ModoRed.offline,
-      ModoRed.offline => ModoRed.online,
-      ModoRed.online => ModoRed.auto,
-    };
-    _persist();
-    if (conectado) {
-      sincronizar();
-      refrescarCaja();
-    }
-  }
-
   void setPeriodo(Periodo valor) {
     periodo = valor;
     _persist();
@@ -235,14 +246,56 @@ class Caja extends ChangeNotifier {
     _persist();
   }
 
-  void completarGuia() {
-    guiaHecha = true;
-    _persist();
+  void _abrir() {
+    if (perfilListo) {
+      pila = [const Ruta('inicio')];
+    } else if (guiaHecha) {
+      pila = [const Ruta('perfil')];
+    } else {
+      pila = [const Ruta('guia')];
+    }
   }
 
-  void reabrirGuia() {
+  Future<void> moverGuia(int paso, int vista) {
+    pasoGuia = paso;
+    vistaGuia = vista;
+    return _persist();
+  }
+
+  Future<void> completarGuia() {
+    guiaHecha = true;
+    pila = [const Ruta('perfil')];
+    return _persist();
+  }
+
+  Future<void> reabrirGuia() {
     guiaHecha = false;
-    _persist();
+    pasoGuia = -1;
+    vistaGuia = 1;
+    return _persist();
+  }
+
+  Future<bool> guardarPerfil({required String negocio, required String nombre, required String clabe}) async {
+    final n = negocio.trim();
+    final p = nombre.trim();
+    final c = clabe.replaceAll(RegExp(r'\s'), '');
+    if (n.isEmpty || p.isEmpty) return false;
+    if (c.isNotEmpty && !RegExp(r'^\d{18}$').hasMatch(c)) return false;
+    this.negocio = n;
+    this.nombre = p;
+    this.clabe = c;
+    pila = [const Ruta('inicio')];
+    await _persist();
+    return true;
+  }
+
+  String get clabeVisible {
+    final b = StringBuffer();
+    for (var i = 0; i < clabe.length; i++) {
+      if (i > 0 && i % 4 == 0) b.write(' ');
+      b.write(clabe[i]);
+    }
+    return b.toString();
   }
 
   Future<void> sincronizar() async {

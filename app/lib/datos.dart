@@ -1,15 +1,5 @@
 import 'modelos.dart';
 
-const marcaTienda = 'MIS ABARROTES';
-const nombreTienda = 'Abarrotes Doña Elena';
-const duena = 'Doña Elena';
-
-const titular = 'Elena Morales';
-const banco = 'Cuenta Básica / SPEI';
-const clabe = '646180112000458912';
-const clabeVisible = '6461 8011 2000 4589 12';
-const notaSeguridad = 'Solo comparte estos datos para recibir pagos; nunca des contraseñas ni códigos.';
-
 const bienvenidaSaludo = '¡Hola! Soy Cempasúchil';
 const bienvenidaTexto =
     'Te acompaño paso a paso a cuidar tu negocio y tus cuentas con total tranquilidad. Aquí aprenderemos juntos cosas como cómo abrir una cuenta de banco, hacer transferencias y cobrar con QR, sin prisas ni palabras difíciles.';

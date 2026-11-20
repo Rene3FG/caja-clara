@@ -19,13 +19,21 @@ class SesionVoz {
   }
 }
 
-Future<SesionVoz?> escuchar() async {
+/// El plugin manda decibeles o una escala corta; esto lo deja entre 0 y 1.
+/// ponytail: Android ~0–10, iOS en dB. Si la plataforma cambia la escala, recalibrar aquí.
+double nivelVoz(double level) {
+  if (level <= 0) return ((level + 2) / 12).clamp(0.0, 1.0);
+  return (level / 10).clamp(0.0, 1.0);
+}
+
+Future<SesionVoz?> escuchar({void Function(double nivel)? alOir}) async {
   _ultimo = '';
   try {
     if (!_lista) _lista = await _voz.initialize();
     if (!_lista) return null;
     await _voz.listen(
       onResult: (r) => _ultimo = r.recognizedWords,
+      onSoundLevelChange: alOir == null ? null : (level) => alOir(nivelVoz(level)),
       listenOptions: SpeechListenOptions(localeId: 'es_MX', listenMode: ListenMode.confirmation),
     );
   } catch (_) {

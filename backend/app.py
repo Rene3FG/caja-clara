@@ -16,9 +16,19 @@ import asistente  # noqa: E402
 import db  # noqa: E402
 import detector  # noqa: E402
 import pagos_simulados  # noqa: E402
+from servicios.caja import router as caja_router  # noqa: E402
+from servicios.fiados import router as fiados_router  # noqa: E402
+from servicios.mostrador import router as mostrador_router  # noqa: E402
+from servicios.movimientos import router as movimientos_router  # noqa: E402
+from servicios.qr import router as qr_router  # noqa: E402
 
 app = FastAPI(title="Caja Clara API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.include_router(movimientos_router)
+app.include_router(caja_router)
+app.include_router(qr_router)
+app.include_router(fiados_router)
+app.include_router(mostrador_router)
 # TODO: restringir allow_origins antes de la demo pública.
 
 

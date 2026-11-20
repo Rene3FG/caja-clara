@@ -3,7 +3,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../caja.dart';
 import '../cuentas.dart';
-import '../datos.dart';
 import '../modelos.dart';
 import '../servicios/asistente.dart';
 import '../servicios/vision.dart';
@@ -67,7 +66,7 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
         children: [
           Row(
             children: [
-              const Expanded(child: Text(nombreTienda, style: TextStyle(fontSize: 13, color: stone))),
+              Expanded(child: Text(caja.negocio, style: const TextStyle(fontSize: 13, color: stone))),
               const Text('Cobro rápido', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
               const SizedBox(width: 8),
               Container(
@@ -402,7 +401,7 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(nombreTienda, style: TextStyle(fontSize: 13, color: stone)),
+          Text(caja.negocio, style: const TextStyle(fontSize: 13, color: stone)),
           const SizedBox(height: 12),
           const Text('¿Cuánto gastaste?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
@@ -593,7 +592,7 @@ class _QrPagoState extends State<QrPago> {
   }
 
   Future<void> _copiar() async {
-    await copiarTexto(clabe);
+    await copiarTexto(Caja.of(context).clabe);
     if (mounted) setState(() => _copiado = true);
   }
 
@@ -604,9 +603,10 @@ class _QrPagoState extends State<QrPago> {
     final concepto = _concepto ?? caja.cobro?.concepto ?? 'Venta';
     final cobrar = caja.ruta.cerrarVenta;
     final datos = cobrar
-        ? 'GUNDANI\n$concepto\n${pesos(monto ?? 0)}\ncliente_demo'
-        : 'CLABE $clabe\nTitular $titular${monto == null ? '' : '\nmonto ${pesos(monto)}'}';
-    final saldo = caja.resumen?.saldoCliente;
+        ? 'GUNDANI\n$concepto\n${pesos(monto ?? 0)}'
+        : caja.clabe.isEmpty
+            ? 'Falta la CLABE'
+            : 'CLABE ${caja.clabe}\nTitular ${caja.nombre}${monto == null ? '' : '\nmonto ${pesos(monto)}'}';
     return Scaffold(
       appBar: Barra(
         titulo: 'QR e información',
@@ -644,7 +644,7 @@ class _QrPagoState extends State<QrPago> {
             child: Column(
               children: [
                 if (!cobrar) ...[
-                  const Text(titular, style: TextStyle(fontWeight: FontWeight.w800)),
+                  Text(caja.nombre, style: const TextStyle(fontWeight: FontWeight.w800)),
                   const Text('Cobro general sin monto fijo', style: TextStyle(fontSize: 13, color: stone)),
                   const SizedBox(height: 8),
                 ],
@@ -687,17 +687,21 @@ class _QrPagoState extends State<QrPago> {
           ),
           const SizedBox(height: 14),
           _spei(),
-          if (cobrar) ...[
+          if (caja.clabe.isEmpty) ...[
             const SizedBox(height: 12),
-            const Text('Entorno de prueba simulado (sin dinero real)', style: TextStyle(fontWeight: FontWeight.w700)),
-            if (saldo != null) Text('Saldo de prueba del cliente: ${pesos(saldo)}'),
+            const Text('Falta la CLABE para recibir pagos.', style: TextStyle(fontWeight: FontWeight.w700)),
+          ],
+          if (caja.clabe.isEmpty || cobrar) ...[
+            const SizedBox(height: 8),
+            const Text('Este cobro no mueve dinero de un banco.', style: TextStyle(fontWeight: FontWeight.w700)),
+          ],
+          if (cobrar)
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Simular QR expirado', style: TextStyle(fontWeight: FontWeight.w700)),
+              title: const Text('QR expirado', style: TextStyle(fontWeight: FontWeight.w700)),
               value: _expirado,
               onChanged: _cobrando || _aprobado ? null : (v) => setState(() => _expirado = v),
             ),
-          ],
           if (_mensaje != null) ...[
             const SizedBox(height: 8),
             Text(_mensaje!, style: const TextStyle(fontSize: 16, height: 1.35)),
@@ -709,12 +713,12 @@ class _QrPagoState extends State<QrPago> {
               icono: Icons.check_circle_outline,
               onPressed: _cobrando ? null : (_aprobado ? () => caja.raiz(const Ruta('inicio')) : _cobrar),
             )
-          else
+          else if (caja.clabe.isNotEmpty)
             Boton(
               texto: _copiado ? 'Datos copiados' : 'Compartir datos de pago',
               icono: Icons.share_outlined,
               onPressed: () async {
-                await copiarTexto('$titular\n$banco\nCLABE $clabeVisible');
+                await copiarTexto('${caja.nombre}\nCLABE ${caja.clabeVisible}');
                 if (mounted) setState(() => _copiado = true);
               },
             ),
@@ -724,6 +728,10 @@ class _QrPagoState extends State<QrPago> {
   }
 
   Widget _spei() {
+    final caja = Caja.of(context);
+    if (caja.clabe.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7E2DA))),
@@ -742,8 +750,8 @@ class _QrPagoState extends State<QrPago> {
           ]),
           const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: _dato('Titular de la cuenta', titular)),
-            Expanded(child: _dato('Banco destino', banco)),
+            Expanded(child: _dato('Titular de la cuenta', caja.nombre)),
+            Expanded(child: _dato('Banco destino', 'Cuenta Básica / SPEI')),
           ]),
           const SizedBox(height: 8),
           const Text('CLABE interbancaria', style: TextStyle(fontSize: 12, color: stone)),
@@ -751,7 +759,7 @@ class _QrPagoState extends State<QrPago> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: const Color(0xFFFFF6F2), borderRadius: BorderRadius.circular(12)),
             child: Row(children: [
-              Expanded(child: Text(clabeVisible, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+              Expanded(child: Text(caja.clabeVisible, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
               TextButton(onPressed: _copiar, child: Text(_copiado ? 'Copiado' : 'Copiar')),
             ]),
           ),
