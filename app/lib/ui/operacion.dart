@@ -5,9 +5,12 @@ import '../caja.dart';
 import '../cuentas.dart';
 import '../modelos.dart';
 import '../servicios/asistente.dart';
-import '../servicios/vision.dart';
+import '../servicios/carrito_ia.dart';
+import '../servicios/foto.dart';
+import '../servicios/ia_service.dart';
 import '../servicios/voz.dart';
 import '../tema.dart';
+import 'avisos.dart';
 import 'marco.dart';
 import 'mic.dart';
 import 'productos.dart';
@@ -23,6 +26,9 @@ class RegistrarVenta extends StatefulWidget {
 class _RegistrarVentaState extends State<RegistrarVenta> {
   var _todos = false;
   var _foto = false;
+  var _analizando = false;
+  String? _avisoFoto;
+  IaError? _errorFoto;
 
   void _sumar(Producto p, {int delta = 1}) {
     final caja = Caja.of(context);
@@ -41,17 +47,54 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
     caja.setBorrador(lineas);
   }
 
+  /// Foto -> detector v3 (TensorRT) -> líneas editables con +/- (pantalla de revisión, bases 6d).
   Future<void> _fotoTap() async {
+    if (_analizando) return;
+    final foto = await tomarFoto(context, titulo: 'Foto de los productos');
+    if (foto == null || !mounted) return;
     final caja = Caja.of(context);
-    final halls = await identificar(null, null, caja.productos);
-    if (!mounted) return;
-    for (final h in halls) {
-      for (final p in caja.productos) {
-        if (p.id == h.productoId) _sumar(p, delta: h.cantidad);
-      }
+    setState(() {
+      _analizando = true;
+      _avisoFoto = null;
+      _errorFoto = null;
+    });
+    try {
+      final r = await const IaService().detectar(foto.bytes, nombre: foto.nombre);
+      if (!mounted) return;
+      final conteo = r['conteo'] is Map ? r['conteo'] as Map : const {};
+      caja.setBorrador(mezclar(caja.borrador, lineasDeConteo(conteo, caja.productos)));
+      final otros = (r['no_reconocidos'] as num?)?.toInt() ?? 0;
+      final mensaje = r['mensaje'] as String?;
+      setState(() {
+        _foto = true;
+        _avisoFoto = (mensaje != null && mensaje.isNotEmpty)
+            ? mensaje
+            : (otros > 0 ? 'Hay $otros producto(s) que no reconozco. Agrégalos a mano.' : null);
+      });
+    } on IaError catch (e) {
+      if (mounted) setState(() => _errorFoto = e);
+    } finally {
+      if (mounted) setState(() => _analizando = false);
     }
-    setState(() => _foto = true);
   }
+
+  void _cambiarLinea(int i, int delta) {
+    final caja = Caja.of(context);
+    final lineas = [...caja.borrador];
+    final n = lineas[i].cantidad + delta;
+    if (n <= 0) {
+      lineas.removeAt(i);
+    } else {
+      lineas[i] = lineas[i].copy(cantidad: n);
+    }
+    caja.setBorrador(lineas);
+  }
+
+  void _aMano() => setState(() {
+        _todos = true;
+        _errorFoto = null;
+        _avisoFoto = null;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +130,18 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
               ],
             ),
           ),
+          if (caja.aviso.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            AvisoIa(mensaje: caja.aviso, esError: false),
+          ],
+          if (_errorFoto != null) ...[
+            const SizedBox(height: 12),
+            AvisoIa(mensaje: _errorFoto!.mensaje, onManual: _aMano, onReintentar: _fotoTap),
+          ],
+          if (_avisoFoto != null) ...[
+            const SizedBox(height: 12),
+            AvisoIa(mensaje: _avisoFoto!, esError: false, onManual: _aMano),
+          ],
           const SizedBox(height: 16),
           Row(children: [
             const Expanded(child: Text('Más vendidos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
@@ -151,10 +206,15 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(backgroundColor: Colors.white, child: Icon(_foto ? Icons.check : Icons.photo_camera_outlined, color: ink)),
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: _analizando
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: grana))
+                    : Icon(_foto ? Icons.check : Icons.photo_camera_outlined, color: ink),
+              ),
               const SizedBox(height: 10),
               const Text('Escanear', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              Text(_foto ? 'Foto tomada' : 'Apunta al producto o precio', style: const TextStyle(fontSize: 12)),
+              Text(_analizando ? 'Analizando la foto...' : (_foto ? 'Foto revisada: ajusta abajo' : 'Apunta a los productos'), style: const TextStyle(fontSize: 12)),
             ],
           ),
         ),
@@ -210,13 +270,24 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
               child: const Text('Borrar todo', style: TextStyle(color: grana, fontWeight: FontWeight.w700)),
             ),
           ]),
-          for (final l in caja.borrador)
+          for (final (i, l) in caja.borrador.indexed)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(children: [
-                Text('${l.cantidad}  ${l.nombre}', style: const TextStyle(fontSize: 15)),
-                const Spacer(),
+                Expanded(child: Text('${l.cantidad}  ${l.nombre}', style: const TextStyle(fontSize: 15))),
                 Text(pesos(l.precio * l.cantidad), style: const TextStyle(fontWeight: FontWeight.w700)),
+                IconButton(
+                  tooltip: 'Uno menos',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _cambiarLinea(i, -1),
+                  icon: const Icon(Icons.remove_circle_outline, color: grana, size: 22),
+                ),
+                IconButton(
+                  tooltip: 'Uno más',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _cambiarLinea(i, 1),
+                  icon: const Icon(Icons.add_circle_outline, color: grana, size: 22),
+                ),
               ]),
             ),
           const Divider(),
@@ -231,6 +302,15 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
     );
   }
 }
+
+/// Gundani no respondió (sin red o tardó): el cobro SIMULADO se resuelve en el teléfono.
+/// Pasa por "pendiente" un momento y termina en pagado, o en falló si el QR está expirado.
+Future<bool> simularCobroLocal({bool expirado = false}) async {
+  await Future<void>.delayed(const Duration(milliseconds: 700));
+  return !expirado;
+}
+
+const avisoLocal = 'Gundani no respondió: cobro SIMULADO en el teléfono.';
 
 class ElegirMetodo extends StatefulWidget {
   const ElegirMetodo({super.key});
@@ -274,6 +354,12 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
       caja.raiz(const Ruta('pago-confirmado'));
     } on ErrorGundani catch (e) {
       if (!mounted) return;
+      if (e.sinRespuesta && await simularCobroLocal() && mounted) {
+        caja.setAviso(avisoLocal);
+        caja.guardarCobro(cobro);
+        caja.raiz(const Ruta('pago-confirmado'));
+        return;
+      }
       caja.ponerMensajePago(e.mensaje);
       caja.ir(const Ruta('pago-error'));
     }
@@ -289,6 +375,7 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const EtiquetaSimulado(),
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -312,14 +399,20 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
           const Text('¿Cómo te van a pagar?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const Text('Elige la forma de pago de tu cliente', style: TextStyle(fontSize: 13, color: stone)),
           const SizedBox(height: 12),
-          _opcion(Icons.qr_code_2, const Color(0xFFFFF1E6), 'Código QR', 'Cobro rápido con CoDi', () => _cobrar('qr'), cargando: _metodoCarga == 'qr'),
-          _opcion(Icons.account_balance_outlined, const Color(0xFFF3EBE6), 'Datos transferencia', 'Mostrar número de cuenta', () => _cobrar('transferencia'), cargando: _metodoCarga == 'transferencia'),
-          _opcion(Icons.payments_outlined, const Color(0xFFDCFCE7), 'Efectivo', 'Cobro en monedas o billetes', () => _cobrar('efectivo'), iconoColor: maguey, cargando: _metodoCarga == 'efectivo'),
+          _opcion(Icons.qr_code_2, const Color(0xFFFFF1E6), 'Código QR', _sug(caja, 'qr', 'Cobro rápido con CoDi'), () => _cobrar('qr'), cargando: _metodoCarga == 'qr'),
+          _opcion(Icons.account_balance_outlined, const Color(0xFFF3EBE6), 'Datos transferencia', _sug(caja, 'transferencia', 'Mostrar número de cuenta'), () => _cobrar('transferencia'), cargando: _metodoCarga == 'transferencia'),
+          _opcion(Icons.payments_outlined, const Color(0xFFDCFCE7), 'Efectivo', _sug(caja, 'efectivo', 'Cobro en monedas o billetes'), () => _cobrar('efectivo'), iconoColor: maguey, cargando: _metodoCarga == 'efectivo'),
           const SizedBox(height: 8),
           Boton(texto: 'Modificar cuenta o productos', fondo: const Color(0xFFFFF1E6), tinta: ink, icono: Icons.edit_outlined, onPressed: _guardando ? null : caja.atras),
         ],
       ),
     );
+  }
+
+  /// Forma de pago que pidió la persona por voz (accion forma_pago): se marca como sugerida.
+  String _sug(Caja caja, String metodo, String detalle) {
+    final voz = caja.cobro?.origen == 'voz' ? caja.cobro?.metodo : null;
+    return voz == metodo ? 'Sugerido por voz · $detalle' : detalle;
   }
 
   Widget _opcion(IconData icono, Color fondo, String titulo, String detalle, VoidCallback onTap, {Color iconoColor = const Color(0xFF9A3412), bool cargando = false}) {
@@ -603,13 +696,28 @@ class _QrPagoState extends State<QrPago> {
         caja.refrescarCaja();
       }
     } on ErrorGundani catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      if (e.sinRespuesta) {
+        final ok = await simularCobroLocal(expirado: _expirado);
+        if (!mounted) return;
+        if (ok) {
+          caja.guardarCobro((cobro ??
+                  Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'manual'))
+              .copy(metodo: 'qr', monto: monto, concepto: concepto));
+        }
         setState(() {
           _cobrando = false;
-          _mensaje = e.mensaje;
-          _aprobado = false;
+          _concepto = concepto;
+          _aprobado = ok;
+          _mensaje = ok ? 'Pago confirmado. $avisoLocal' : 'El QR expiró y no se cobró. $avisoLocal';
         });
+        return;
       }
+      setState(() {
+        _cobrando = false;
+        _mensaje = e.mensaje;
+        _aprobado = false;
+      });
     }
   }
 
@@ -638,6 +746,7 @@ class _QrPagoState extends State<QrPago> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
+          if (cobrar) EtiquetaSimulado(estado: _aprobado ? 'pagado' : (_cobrando ? 'pendiente' : null)),
           if (cobrar && monto != null)
             Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -847,6 +956,21 @@ class _PagoCreadoState extends State<PagoCreado> {
       }
     } on ErrorGundani catch (e) {
       if (!mounted) return;
+      if (e.sinRespuesta) {
+        final ok = await simularCobroLocal(expirado: !transferencia && _expirado);
+        if (!mounted) return;
+        if (ok) {
+          caja.setAviso(avisoLocal);
+          caja.guardarCobro((cobro ??
+                  Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: transferencia ? 'transferencia' : 'qr', origen: 'manual'))
+              .copy(metodo: transferencia ? 'transferencia' : 'qr', monto: monto, concepto: concepto));
+          caja.raiz(const Ruta('pago-confirmado'));
+        } else {
+          caja.ponerMensajePago('El QR expiró y no se cobró. $avisoLocal');
+          caja.ir(const Ruta('pago-error'));
+        }
+        return;
+      }
       decir(e.mensaje);
       caja.ponerMensajePago(e.mensaje);
       caja.ir(const Ruta('pago-error'));
@@ -867,6 +991,7 @@ class _PagoCreadoState extends State<PagoCreado> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
+          const EtiquetaSimulado(estado: 'pendiente'),
           Text('Monto a cobrar: ${pesos(monto)} MXN', style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
           Container(
@@ -954,6 +1079,7 @@ class PagoError extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const EtiquetaSimulado(estado: 'falló'),
           Text(caja.mensajePago, style: const TextStyle(fontSize: 18, height: 1.35)),
           const SizedBox(height: 16),
           Boton(texto: 'Volver a intentar', onPressed: caja.atras),
@@ -1020,6 +1146,7 @@ class _PagoConfirmadoState extends State<PagoConfirmado> with SingleTickerProvid
                       ),
                     ),
                     const SizedBox(height: 28),
+                    const Center(child: EtiquetaSimulado(estado: 'pagado')),
                     Text('Pago confirmado', style: epilogo(28, peso: FontWeight.w800, color: Color.lerp(ink, Colors.white, t)!)),
                     const SizedBox(height: 8),
                     Text(hecho?.concepto ?? 'Venta', style: TextStyle(fontSize: 18, color: Color.lerp(stone, Colors.white, t))),

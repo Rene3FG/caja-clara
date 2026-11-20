@@ -6,28 +6,24 @@ import 'package:http/http.dart' as http;
 import '../datos.dart';
 import '../modelos.dart';
 import '../pedido.dart';
+import 'config.dart';
 
-const apiUrl = String.fromEnvironment('API_URL');
-
-/// Asistente del VPS. Se cambia con --dart-define=GUNDANI_URL=...
-const gundaniDefinida = String.fromEnvironment(
-  'GUNDANI_URL',
-  defaultValue: 'http://80.241.220.188:8000',
-);
-
-String get apiBase => apiUrl.endsWith('/') ? apiUrl.substring(0, apiUrl.length - 1) : apiUrl;
-
-String get gundaniBase =>
-    gundaniDefinida.endsWith('/') ? gundaniDefinida.substring(0, gundaniDefinida.length - 1) : gundaniDefinida;
+export 'config.dart' show apiBase, gundaniBase;
 
 const esperaGundani = Duration(seconds: 30);
 
 /// ponytail: los tests ponen un cliente falso. En la app queda null y se usa el de siempre.
 http.Client? clienteHttp;
 
+/// 502/503/504/52x: el gateway o el túnel no llegan a Gundani (no es un rechazo de Gundani).
+bool _sinGundani(int status) => status == 502 || status == 503 || status == 504 || (status >= 520 && status <= 530);
+
 class ErrorGundani implements Exception {
-  const ErrorGundani(this.mensaje);
+  const ErrorGundani(this.mensaje, {this.sinRespuesta = false});
   final String mensaje;
+
+  /// true = no hubo respuesta (sin conexión o tardó). El cobro SIMULADO sigue en el teléfono.
+  final bool sinRespuesta;
 }
 
 class ResultadoAsistente {
@@ -184,6 +180,7 @@ Future<CobroSimulado> cobrarQr({
 Future<ResumenHoy> traerResumen() async {
   try {
     final res = await http.get(Uri.parse('$gundaniBase/api/caja/resumen')).timeout(esperaGundani);
+    if (_sinGundani(res.statusCode)) throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.', sinRespuesta: true);
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw const ErrorGundani('Gundani no pudo responder. Inténtalo otra vez.');
     }
@@ -225,9 +222,9 @@ Future<ResumenHoy> traerResumen() async {
   } on ErrorGundani {
     rethrow;
   } on TimeoutException {
-    throw const ErrorGundani('Gundani tardó demasiado. Inténtalo otra vez.');
+    throw const ErrorGundani('Gundani tardó demasiado. Inténtalo otra vez.', sinRespuesta: true);
   } catch (_) {
-    throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.');
+    throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.', sinRespuesta: true);
   }
 }
 
@@ -242,6 +239,7 @@ Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) asy
           body: jsonEncode(cuerpo),
         )
         .timeout(esperaGundani);
+    if (_sinGundani(res.statusCode)) throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.', sinRespuesta: true);
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw const ErrorGundani('Gundani no pudo responder. Inténtalo otra vez.');
     }
@@ -251,9 +249,9 @@ Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) asy
   } on ErrorGundani {
     rethrow;
   } on TimeoutException {
-    throw const ErrorGundani('Gundani tardó demasiado. Inténtalo otra vez.');
+    throw const ErrorGundani('Gundani tardó demasiado. Inténtalo otra vez.', sinRespuesta: true);
   } catch (_) {
-    throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.');
+    throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.', sinRespuesta: true);
   } finally {
     if (propio) cliente.close();
   }

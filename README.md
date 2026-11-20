@@ -71,6 +71,11 @@ Documentación interactiva: `http://localhost:8000/docs`
 
 App Flutter en `app/`. Ver [`app/README.md`](app/README.md).
 
+### Demo de punta a punta (app + modelos del equipo)
+
+`bash scripts/demo_up.sh` levanta detector, asistente, gateway y túnel; la app usa esa única URL.
+Guía completa: [`docs/DEMO.md`](docs/DEMO.md).
+
 ### Chequeo de salud
 
 ```bash

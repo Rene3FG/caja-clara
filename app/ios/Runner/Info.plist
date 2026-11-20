@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Para tomar foto de los productos o de la libreta y registrarlos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Para elegir una foto de los productos o de la libreta.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Cempasúchil escucha para anotar la venta.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

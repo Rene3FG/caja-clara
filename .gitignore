@@ -53,6 +53,7 @@ modelos/*
 # Logs (solo se versionan los copiados a logs/ como evidencia)
 *.log
 !logs/*.log
+logs/demo/
 
 # Editor / SO
 .vscode/

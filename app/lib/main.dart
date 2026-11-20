@@ -7,12 +7,14 @@ import 'tema.dart';
 import 'ui/fiados.dart';
 import 'ui/guia.dart';
 import 'ui/inicio.dart';
+import 'ui/libreta.dart';
 import 'ui/libro.dart';
 import 'ui/marco.dart';
 import 'ui/operacion.dart';
 import 'ui/perfil.dart';
 import 'ui/productos.dart';
 import 'ui/revisar.dart';
+import 'ui/servidor_ia.dart';
 import 'ui/sin_red.dart';
 import 'ui/splash.dart';
 
@@ -160,6 +162,10 @@ Widget _pantalla(Caja caja) {
         return const DesgloseVentas();
       case 'desglose-pagos':
         return const DesglosePagos();
+      case 'libreta':
+        return const PasarLibreta();
+      case 'servidor-ia':
+        return const ServidorYModelo();
       default:
         return const Inicio();
     }

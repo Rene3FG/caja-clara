@@ -58,6 +58,16 @@ class Libro extends StatelessWidget {
           const SizedBox(height: 8),
           _fecha(context, 'Hasta', caja.periodo.hasta, (d) => caja.setPeriodo(Periodo('fechas', desde: caja.periodo.desde, hasta: d))),
         ],
+        if (caja.aviso.startsWith('Libreta guardada')) ...[
+          const SizedBox(height: 10),
+          Text(caja.aviso, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: maguey)),
+        ],
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: () => caja.ir(const Ruta('libreta')),
+          icon: const Icon(Icons.document_scanner_outlined),
+          label: const Text('Pasar libreta a digital'),
+        ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(16),

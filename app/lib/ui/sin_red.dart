@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
 import '../cuentas.dart';
+import '../modelos.dart';
 import '../tema.dart';
 import 'widgets.dart';
 
@@ -24,6 +25,12 @@ class SinRed extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (caja.conectado && caja.pendientes > 0) Boton(texto: 'Enviar ahora', onPressed: caja.sincronizar),
+        const SizedBox(height: 4),
+        OutlinedButton.icon(
+          onPressed: () => caja.ir(const Ruta('servidor-ia')),
+          icon: const Icon(Icons.dns_outlined),
+          label: const Text('Servidor de IA y modelo en uso'),
+        ),
         for (final v in ventas)
           _fila('Venta  ${pesos(v.total)}', v.error ?? 'Pendiente'),
         for (final g in gastos)

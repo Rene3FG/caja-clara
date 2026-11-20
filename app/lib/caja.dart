@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'cuentas.dart';
 import 'modelos.dart';
 import 'servicios/asistente.dart';
+import 'servicios/config.dart';
 import 'servicios/sync.dart';
 
 const _clave = 'caja-clara-v1';
@@ -41,6 +42,7 @@ class Caja extends ChangeNotifier {
   bool get perfilListo => negocio.trim().isNotEmpty && nombre.trim().isNotEmpty;
 
   Future<void> iniciar() async {
+    await cargarServidor();
     final prefs = await SharedPreferences.getInstance();
     final crudo = prefs.getString(_clave);
     if (crudo == null) {
@@ -200,7 +202,11 @@ class Caja extends ChangeNotifier {
       resumen = await traerResumen();
       notifyListeners();
     } on ErrorGundani {
-      // La libreta del teléfono sigue visible.
+      // Sin Gundani el libro vuelve a las cuentas guardadas en el teléfono (no a un resumen viejo).
+      if (resumen != null) {
+        resumen = null;
+        notifyListeners();
+      }
     }
   }
 
@@ -224,11 +230,12 @@ class Caja extends ChangeNotifier {
     _persist();
   }
 
-  void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total}) {
+  /// [en] permite guardar ventas pasadas (p. ej. las de la libreta).
+  void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total, DateTime? en}) {
     ventas = [
       Venta(
         id: _id(),
-        en: DateTime.now(),
+        en: en ?? DateTime.now(),
         metodo: metodo,
         lineas: lineas,
         total: total,

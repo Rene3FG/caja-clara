@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../caja.dart';
 import '../modelos.dart';
 import '../tema.dart';
+import 'servidor_ia.dart';
 import 'widgets.dart';
 
 class FormularioPerfil extends StatefulWidget {
@@ -82,6 +83,8 @@ class _FormularioPerfilState extends State<FormularioPerfil> {
             const SizedBox(height: 12),
             Text(_aviso, style: const TextStyle(color: grana, fontSize: 15, height: 1.3)),
           ],
+          const SizedBox(height: 20),
+          const CampoServidorIa(),
           const SizedBox(height: 20),
           Boton(texto: 'Entrar a mi caja', onPressed: _guardar),
         ],

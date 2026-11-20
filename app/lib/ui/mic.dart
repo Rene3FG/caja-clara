@@ -2,7 +2,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
 import '../modelos.dart';
+import '../cuentas.dart';
 import '../servicios/asistente.dart';
+import '../servicios/carrito_ia.dart';
+import '../servicios/ia_service.dart';
 import '../servicios/voz.dart';
 import '../tema.dart';
 import 'voz_orb.dart';
@@ -75,20 +78,121 @@ class _MicGundaniState extends State<MicGundani> {
       _cargando = true;
       _error = null;
     });
+    // 1) Nuestro asistente LoRA (ventas: agregar, quitar, forma de pago, consulta).
+    String? dudaLora;
+    try {
+      final r = await const IaService().asistente(texto);
+      if (!mounted) return;
+      if (_aplicarLora(caja, r)) {
+        setState(() => _cargando = false);
+        return;
+      }
+      if (r['ok'] == false) {
+        final acc = r['accion'];
+        dudaLora = (r['error'] as String?) ?? (acc is Map ? acc['pregunta'] as String? : null);
+      }
+    } on IaError catch (e) {
+      dudaLora = e.mensaje;
+    }
+    // 2) Respaldo: Gundani (gastos y lo que el LoRA no cubre), por el mismo gateway.
     try {
       final r = await consultarGundani(texto);
       if (!mounted) return;
-      caja.setAviso(r.respuestaVoz);
-      decir(r.respuestaVoz);
       if (r.pideRevision) {
+        caja.setAviso(r.respuestaVoz);
+        decir(r.respuestaVoz);
         _abrirConVoz(caja, r);
       } else if (r.intencion == 'consultar_resumen') {
+        caja.setAviso(r.respuestaVoz);
+        decir(r.respuestaVoz);
         caja.refrescarCaja();
+      } else if (dudaLora != null) {
+        setState(() => _error = dudaLora);
+      } else {
+        caja.setAviso(r.respuestaVoz);
+        decir(r.respuestaVoz);
       }
     } on ErrorGundani catch (e) {
-      if (mounted) setState(() => _error = e.mensaje);
+      if (mounted) setState(() => _error = dudaLora ?? e.mensaje);
     } finally {
       if (mounted) setState(() => _cargando = false);
+    }
+  }
+
+  /// Aplica la respuesta del LoRA. Devuelve false si no es una acción de venta que entienda.
+  /// Nunca guarda: solo arma la cuenta para que la persona confirme (bases 6d).
+  bool _aplicarLora(Caja caja, Map<String, dynamic> r) {
+    if (r['ok'] != true) return false;
+    final acc = r['accion'];
+    if (acc is! Map) return false;
+    final tipo = acc['accion'];
+    final enVenta = caja.ruta.id == 'venta';
+    switch (tipo) {
+      case 'agregar':
+      case 'registrar_libreta':
+        final nuevas = lineasDeItems(r['items'] is List ? r['items'] as List : const [], caja.productos);
+        if (nuevas.isEmpty) return false;
+        caja.setBorrador(mezclar(enVenta ? caja.borrador : const [], nuevas));
+        final total = (r['total_propuesto'] as num?)?.toDouble() ?? 0;
+        final aviso = 'Propuesta: ${listaLineas([for (final l in nuevas) (nombre: l.nombre, cantidad: l.cantidad)])} '
+            '· total ${pesos(total)}. Revisa y confirma.';
+        caja.setAviso(aviso);
+        decir('Total ${pesos(total)}. Revisa y confirma.');
+        if (!enVenta) caja.ir(const Ruta('venta'));
+        return true;
+      case 'quitar':
+        final menos = lineasDeAccion(acc['productos'] is List ? acc['productos'] as List : const [], caja.productos);
+        if (menos.isEmpty) return false;
+        caja.setBorrador(mezclar(caja.borrador, menos, restar: true));
+        caja.setAviso('Quité: ${listaLineas([for (final l in menos) (nombre: l.nombre, cantidad: l.cantidad)])}. Revisa la cuenta.');
+        if (!enVenta) caja.ir(const Ruta('venta'));
+        return true;
+      case 'forma_pago':
+        final metodo = metodoApi('${acc['metodo'] ?? ''}');
+        final total = caja.borrador.fold<double>(0, (s, l) => s + l.precio * l.cantidad);
+        caja.ponerCobro(Cobro(tipo: 'venta', concepto: 'Venta', cantidad: 1, monto: total, metodo: metodo, origen: 'voz'));
+        caja.setAviso('Forma de pago: ${metodo == 'transferencia' ? 'transferencia' : 'efectivo'}. Toca Confirmar venta para cobrar.');
+        if (!enVenta) caja.ir(const Ruta('venta'));
+        return true;
+      case 'consulta':
+        final texto = _consultaLocal(caja, '${acc['tipo'] ?? 'ventas_hoy'}');
+        caja.setAviso(texto);
+        decir(texto);
+        caja.refrescarCaja();
+        return true;
+      case 'confirmar':
+        caja.setAviso('¿Quieres borrar toda la venta? Usa "Borrar todo" en la cuenta para confirmarlo.');
+        return true;
+      default:
+        return false; // aclarar, consulta_ley, fuera_de_alcance -> Gundani o mensaje
+    }
+  }
+
+  /// La consulta la calcula el código con las ventas guardadas en el teléfono, no el modelo.
+  String _consultaLocal(Caja caja, String tipo) {
+    final hoy = DateTime.now();
+    final deHoy = caja.ventas.where((v) => v.en.year == hoy.year && v.en.month == hoy.month && v.en.day == hoy.day).toList();
+    final total = deHoy.fold<double>(0, (s, v) => s + v.total);
+    switch (tipo) {
+      case 'efectivo_hoy':
+        final ef = deHoy.where((v) => v.metodo == Metodo.efectivo).fold<double>(0, (s, v) => s + v.total);
+        return 'Hoy llevas ${pesos(ef)} en efectivo.';
+      case 'pendientes':
+        return caja.pendientes == 0 ? 'No hay nada pendiente de enviar.' : 'Tienes ${caja.pendientes} registro(s) pendientes de enviar.';
+      case 'mas_vendido':
+      case 'menos_vendido':
+        final piezas = <String, int>{};
+        for (final v in deHoy) {
+          for (final l in v.lineas) {
+            piezas[l.nombre] = (piezas[l.nombre] ?? 0) + l.cantidad;
+          }
+        }
+        if (piezas.isEmpty) return 'Hoy todavía no hay ventas.';
+        final orden = piezas.entries.toList()..sort((a, b) => a.value.compareTo(b.value));
+        final e = tipo == 'mas_vendido' ? orden.last : orden.first;
+        return 'Lo ${tipo == 'mas_vendido' ? 'más' : 'menos'} vendido hoy: ${e.key} (${e.value}).';
+      default: // ventas_hoy, cierre_caja
+        return 'Hoy llevas ${deHoy.length} venta(s) por ${pesos(total)}.';
     }
   }
 
@@ -118,7 +222,7 @@ class _MicGundaniState extends State<MicGundani> {
     if (widget.expandir) return _inicio(caja);
     if (widget.solo) return _hablar();
     const analizando = Center(
-      child: Text('Gundani está analizando...', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+      child: Text('El asistente está analizando...', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
     );
     final fila = Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -199,7 +303,7 @@ class _MicGundaniState extends State<MicGundani> {
               const SizedBox(height: 10),
               Text(escuchando ? 'X' : 'Hablar', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               Text(
-                _error ?? (_cargando ? 'Gundani está analizando...' : '“Dos quesadillas y un café”'),
+                _error ?? (_cargando ? 'El asistente está analizando...' : '“Dos quesadillas y un café”'),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12, height: 1.2),
