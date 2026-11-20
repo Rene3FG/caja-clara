@@ -1,0 +1,9 @@
+{
+  "onnx": "/home/bebecho/Descargas/B_modelo.onnx",
+  "engine": "dino_rtx2060_fp16.engine",
+  "tensorrt": "11.5.0.63",
+  "precision": "tipos_del_onnx",
+  "minutos": 1.2,
+  "sha256_engine": "a146d3bf23d850a8f2215fe46c9a9338c8daf8503bcd3f550f971e40c4c981a2",
+  "fecha": "2026-11-19 23:15:40"
+}

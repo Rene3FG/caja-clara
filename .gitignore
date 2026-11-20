@@ -58,3 +58,16 @@ modelos/*
 .vscode/
 .idea/
 .DS_Store
+
+# IA: pesos, llaves y datos fuera de git
+*.pth
+*.onnx
+*.engine
+*.safetensors
+*.tgz
+.env
+lora_adaptador/
+resultados_asistente/
+datos/
+fotos/
+pruebas/
