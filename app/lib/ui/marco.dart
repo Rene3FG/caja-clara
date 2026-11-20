@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
-import '../modelos.dart';
 import '../tema.dart';
 import 'widgets.dart';
 
@@ -53,7 +52,7 @@ class Marco extends StatelessWidget {
           indicatorColor: const Color(0xFFFFDAD5),
           selectedIndex: _indice(caja.ruta.id),
           labelTextStyle: WidgetStateProperty.all(const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-          onDestinationSelected: (i) => caja.tab(const ['inicio', 'sin-red', 'libro', 'fiados'][i]),
+          onDestinationSelected: (i) => caja.tab(const ['inicio', 'sin-red', 'libro', 'productos'][i]),
           destinations: [
             const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
             NavigationDestination(
@@ -62,7 +61,7 @@ class Marco extends StatelessWidget {
               label: 'Sin red',
             ),
             const NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Libro'),
-            const NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups), label: 'Fiados'),
+            const NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Productos'),
           ],
         ),
       ],
@@ -70,7 +69,7 @@ class Marco extends StatelessWidget {
   }
 
   int _indice(String id) {
-    const ids = ['inicio', 'sin-red', 'libro', 'fiados'];
+    const ids = ['inicio', 'sin-red', 'libro', 'productos'];
     final i = ids.indexOf(id);
     return i < 0 ? 0 : i;
   }
@@ -86,59 +85,16 @@ class PerfilBoton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: 'Perfil',
-      onPressed: () => mostrarPerfil(context),
-      icon: Container(
+    return const Padding(
+      padding: EdgeInsets.only(right: 8),
+      child: SizedBox(
         width: 44,
         height: 44,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(color: Color(0xFFF3EBE6), shape: BoxShape.circle),
-        child: const Icon(Icons.person_outline, color: ink),
-      ),
-    );
-  }
-}
-
-void mostrarPerfil(BuildContext context) {
-  final caja = Caja.of(context);
-  showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(caja.nombre, style: epilogo(24, peso: FontWeight.w700)),
-            const SizedBox(height: 4),
-            Text(caja.negocio, style: const TextStyle(fontSize: 16, color: stone)),
-            const SizedBox(height: 16),
-            Boton(
-              texto: 'Mis productos',
-              fondo: Colors.white,
-              tinta: ink,
-              borde: ink,
-              onPressed: () {
-                Navigator.pop(ctx);
-                caja.raiz(const Ruta('productos'));
-              },
-            ),
-            const SizedBox(height: 12),
-            Boton(
-              texto: 'Ver la guía',
-              fondo: cempasuchil,
-              tinta: const Color(0xFF1F1A17),
-              onPressed: () {
-                Navigator.pop(ctx);
-                caja.reabrirGuia();
-                caja.raiz(const Ruta('guia'));
-              },
-            ),
-          ],
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: Color(0xFFF3EBE6), shape: BoxShape.circle),
+          child: Icon(Icons.person_outline, color: ink),
         ),
       ),
     );
+  }
 }

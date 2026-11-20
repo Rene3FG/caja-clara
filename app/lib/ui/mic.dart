@@ -81,16 +81,7 @@ class _MicGundaniState extends State<MicGundani> {
       caja.setAviso(r.respuestaVoz);
       decir(r.respuestaVoz);
       if (r.pideRevision) {
-        caja.setBorrador([]);
-        caja.ponerCobro(Cobro(
-          tipo: r.intencion == 'registrar_gasto' ? 'gasto' : 'venta',
-          concepto: r.concepto,
-          cantidad: r.cantidad == 0 ? 1 : r.cantidad,
-          monto: r.monto,
-          metodo: metodoApi(r.metodoPago),
-          origen: 'voz',
-        ));
-        caja.ir(const Ruta('revisar'));
+        _abrirConVoz(caja, r);
       } else if (r.intencion == 'consultar_resumen') {
         caja.refrescarCaja();
       }
@@ -99,6 +90,26 @@ class _MicGundaniState extends State<MicGundani> {
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
+  }
+
+  void _abrirConVoz(Caja caja, ResultadoAsistente r) {
+    final cobro = Cobro(
+      tipo: r.intencion == 'registrar_gasto' ? 'gasto' : 'venta',
+      concepto: r.concepto,
+      cantidad: r.cantidad == 0 ? 1 : r.cantidad,
+      monto: r.monto,
+      metodo: metodoApi(r.metodoPago),
+      origen: 'voz',
+    );
+    caja.ponerCobro(cobro);
+    if (cobro.tipo == 'gasto') {
+      caja.ir(const Ruta('gasto'));
+      return;
+    }
+    final linea = Linea.voz(concepto: r.concepto, cantidad: r.cantidad, monto: r.monto);
+    final enVenta = caja.ruta.id == 'venta';
+    caja.setBorrador(enVenta ? [...caja.borrador, linea] : [linea]);
+    if (!enVenta) caja.ir(const Ruta('venta'));
   }
 
   @override

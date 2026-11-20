@@ -30,6 +30,8 @@ class Caja extends ChangeNotifier {
   var borrador = <Linea>[];
   var aviso = '';
   Cobro? cobro;
+  Cobro? cobroHecho;
+  var mensajePago = '';
   ResumenHoy? resumen;
   var pila = <Ruta>[const Ruta('guia')];
 
@@ -172,7 +174,13 @@ class Caja extends ChangeNotifier {
     notifyListeners();
   }
 
+  void ponerMensajePago(String texto) {
+    mensajePago = texto;
+    notifyListeners();
+  }
+
   void guardarCobro(Cobro valor) {
+    cobroHecho = valor;
     if (valor.tipo == 'gasto') {
       agregarGasto(concepto: valor.concepto, monto: valor.monto, metodo: _metodo(valor.metodo));
     } else {

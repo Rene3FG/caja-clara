@@ -62,8 +62,8 @@ class _RevisarMovimientoState extends State<RevisarMovimiento> {
     final cobro = _armado();
     if (cobro == null || cobro.concepto.isEmpty || cobro.monto <= 0) return;
     caja.ponerCobro(cobro);
-    if (cobro.tipo == 'venta' && cobro.metodo == 'qr') {
-      caja.ir(Ruta('qr', monto: cobro.monto, metodo: Metodo.qr, cerrarVenta: true));
+    if (cobro.tipo == 'venta' && (cobro.metodo == 'qr' || cobro.metodo == 'transferencia')) {
+      caja.ir(const Ruta('pago-creado'));
       return;
     }
     setState(() {
@@ -77,14 +77,18 @@ class _RevisarMovimientoState extends State<RevisarMovimiento> {
       caja.guardarCobro(cobro);
       decir(voz);
       caja.refrescarCaja();
-      caja.raiz(const Ruta('inicio'));
+      caja.raiz(cobro.tipo == 'venta' ? const Ruta('pago-confirmado') : const Ruta('inicio'));
     } on ErrorGundani catch (e) {
-      if (mounted) {
-        setState(() {
-          _guardando = false;
-          _error = e.mensaje;
-        });
+      if (!mounted) return;
+      if (cobro.tipo == 'venta') {
+        caja.ponerMensajePago(e.mensaje);
+        caja.ir(const Ruta('pago-error'));
+        return;
       }
+      setState(() {
+        _guardando = false;
+        _error = e.mensaje;
+      });
     }
   }
 

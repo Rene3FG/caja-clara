@@ -15,7 +15,21 @@ import 'ui/productos.dart';
 import 'ui/revisar.dart';
 import 'ui/sin_red.dart';
 
-const _conMarco = {'inicio', 'sin-red', 'libro', 'fiados', 'productos'};
+const _conMarco = {'inicio', 'sin-red', 'libro', 'productos'};
+const _conTransicion = {'pago', 'pago-creado', 'pago-error', 'pago-confirmado'};
+
+Widget pantallaCaja(Caja caja) {
+  final pantalla = _pantalla(caja);
+  final id = caja.ruta.id;
+  final cuerpo = _conTransicion.contains(id)
+      ? AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          child: KeyedSubtree(key: ValueKey(id), child: pantalla),
+        )
+      : pantalla;
+  if (!_conMarco.contains(id)) return cuerpo;
+  return Marco(child: cuerpo);
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,14 +111,10 @@ class _Cuerpo extends StatelessWidget {
   const _Cuerpo();
 
   @override
-  Widget build(BuildContext context) {
-    final caja = Caja.of(context);
-    final pantalla = _pantalla(caja);
-    if (!_conMarco.contains(caja.ruta.id)) return pantalla;
-    return Marco(child: pantalla);
-  }
+  Widget build(BuildContext context) => pantallaCaja(Caja.of(context));
+}
 
-  Widget _pantalla(Caja caja) {
+Widget _pantalla(Caja caja) {
     switch (caja.ruta.id) {
       case 'guia':
         return const Guia();
@@ -132,6 +142,12 @@ class _Cuerpo extends StatelessWidget {
         return const RevisarMovimiento();
       case 'qr':
         return const QrPago();
+      case 'pago-creado':
+        return const PagoCreado();
+      case 'pago-error':
+        return const PagoError();
+      case 'pago-confirmado':
+        return const PagoConfirmado();
       case 'desglose-ventas':
         return const DesgloseVentas();
       case 'desglose-pagos':
@@ -139,5 +155,4 @@ class _Cuerpo extends StatelessWidget {
       default:
         return const Inicio();
     }
-  }
 }

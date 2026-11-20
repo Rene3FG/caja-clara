@@ -119,13 +119,14 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
             icono: Icons.receipt_long,
             onPressed: total > 0
                 ? () {
+                    final voz = caja.cobro?.origen == 'voz' ? caja.cobro : null;
                     caja.ponerCobro(Cobro(
                       tipo: 'venta',
                       concepto: listaLineas([for (final l in caja.borrador) (nombre: l.nombre, cantidad: l.cantidad)]),
                       cantidad: 1,
                       monto: total,
-                      metodo: 'efectivo',
-                      origen: _foto ? 'vision' : 'manual',
+                      metodo: voz?.metodo ?? 'efectivo',
+                      origen: voz != null ? 'voz' : (_foto ? 'vision' : 'manual'),
                     ));
                     caja.ir(const Ruta('pago'));
                   }
@@ -200,7 +201,12 @@ class _RegistrarVentaState extends State<RegistrarVenta> {
             const SizedBox(width: 6),
             const Expanded(child: Text('Cuenta actual', style: TextStyle(fontWeight: FontWeight.w800))),
             TextButton(
-              onPressed: caja.borrador.isEmpty ? null : () => caja.setBorrador([]),
+              onPressed: caja.borrador.isEmpty
+                  ? null
+                  : () {
+                      caja.setBorrador([]);
+                      if (caja.cobro?.origen == 'voz') caja.ponerCobro(null);
+                    },
               child: const Text('Borrar todo', style: TextStyle(color: grana, fontWeight: FontWeight.w700)),
             ),
           ]),
@@ -235,7 +241,7 @@ class ElegirMetodo extends StatefulWidget {
 
 class _ElegirMetodoState extends State<ElegirMetodo> {
   var _guardando = false;
-  String? _error;
+  String? _metodoCarga;
 
   Future<void> _cobrar(String metodo) async {
     final caja = Caja.of(context);
@@ -252,27 +258,24 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
             ))
         .copy(metodo: metodo, monto: total);
     caja.ponerCobro(cobro);
-    if (metodo == 'qr') {
-      caja.ir(Ruta('qr', monto: total, metodo: Metodo.qr, cerrarVenta: true));
+    if (metodo == 'qr' || metodo == 'transferencia') {
+      caja.ir(const Ruta('pago-creado'));
       return;
     }
     setState(() {
       _guardando = true;
-      _error = null;
+      _metodoCarga = metodo;
     });
     try {
       await confirmarMovimiento(cobro);
       if (!mounted) return;
       caja.guardarCobro(cobro);
       caja.refrescarCaja();
-      caja.raiz(const Ruta('inicio'));
+      caja.raiz(const Ruta('pago-confirmado'));
     } on ErrorGundani catch (e) {
-      if (mounted) {
-        setState(() {
-          _guardando = false;
-          _error = e.mensaje;
-        });
-      }
+      if (!mounted) return;
+      caja.ponerMensajePago(e.mensaje);
+      caja.ir(const Ruta('pago-error'));
     }
   }
 
@@ -308,14 +311,10 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
           const SizedBox(height: 16),
           const Text('¿Cómo te van a pagar?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const Text('Elige la forma de pago de tu cliente', style: TextStyle(fontSize: 13, color: stone)),
-          if (_error != null) ...[
-            const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(fontWeight: FontWeight.w700, color: granaDeep)),
-          ],
           const SizedBox(height: 12),
-          _opcion(Icons.qr_code_2, const Color(0xFFFFF1E6), 'Código QR', 'Cobro rápido con CoDi', () => _cobrar('qr')),
-          _opcion(Icons.account_balance_outlined, const Color(0xFFF3EBE6), 'Datos transferencia', 'Mostrar número de cuenta', () => _cobrar('transferencia')),
-          _opcion(Icons.payments_outlined, const Color(0xFFDCFCE7), 'Efectivo', 'Cobro en monedas o billetes', () => _cobrar('efectivo'), iconoColor: maguey),
+          _opcion(Icons.qr_code_2, const Color(0xFFFFF1E6), 'Código QR', 'Cobro rápido con CoDi', () => _cobrar('qr'), cargando: _metodoCarga == 'qr'),
+          _opcion(Icons.account_balance_outlined, const Color(0xFFF3EBE6), 'Datos transferencia', 'Mostrar número de cuenta', () => _cobrar('transferencia'), cargando: _metodoCarga == 'transferencia'),
+          _opcion(Icons.payments_outlined, const Color(0xFFDCFCE7), 'Efectivo', 'Cobro en monedas o billetes', () => _cobrar('efectivo'), iconoColor: maguey, cargando: _metodoCarga == 'efectivo'),
           const SizedBox(height: 8),
           Boton(texto: 'Modificar cuenta o productos', fondo: const Color(0xFFFFF1E6), tinta: ink, icono: Icons.edit_outlined, onPressed: _guardando ? null : caja.atras),
         ],
@@ -323,7 +322,7 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
     );
   }
 
-  Widget _opcion(IconData icono, Color fondo, String titulo, String detalle, VoidCallback onTap, {Color iconoColor = const Color(0xFF9A3412)}) {
+  Widget _opcion(IconData icono, Color fondo, String titulo, String detalle, VoidCallback onTap, {Color iconoColor = const Color(0xFF9A3412), bool cargando = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -348,7 +347,7 @@ class _ElegirMetodoState extends State<ElegirMetodo> {
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(titulo, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                    Text(detalle, style: const TextStyle(fontSize: 13, color: stone)),
+                    Text(cargando ? 'Cobrando...' : detalle, style: const TextStyle(fontSize: 13, color: stone)),
                   ]),
                 ),
                 const Icon(Icons.chevron_right, color: stone),
@@ -376,11 +375,34 @@ class _RegistrarGastoState extends State<RegistrarGasto> {
   var _guardando = false;
   String? _error;
 
+  var _leyoVoz = false;
+
   @override
-  void initState() {
-    super.initState();
-    _monto.addListener(() => setState(() {}));
-    _concepto.addListener(() => setState(() {}));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_leyoVoz) return;
+    _leyoVoz = true;
+    final cobro = Caja.of(context).cobro;
+    if (cobro != null && cobro.tipo == 'gasto' && cobro.origen == 'voz') {
+      if (cobro.concepto.trim().isNotEmpty) _concepto.text = cobro.concepto.trim();
+      if (cobro.monto > 0) {
+        _monto.text = cobro.monto == cobro.monto.roundToDouble() ? cobro.monto.round().toString() : cobro.monto.toString();
+      }
+      _origen = 'voz';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final actual = Caja.of(context).cobro;
+        if (actual != null && actual.tipo == 'gasto' && actual.origen == 'voz') {
+          Caja.of(context).ponerCobro(null);
+        }
+      });
+    }
+    _monto.addListener(_pintar);
+    _concepto.addListener(_pintar);
+  }
+
+  void _pintar() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -775,5 +797,247 @@ class _QrPagoState extends State<QrPago> {
       Text(etiqueta, style: const TextStyle(fontSize: 12, color: stone)),
       Text(valor, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
     ]);
+  }
+}
+
+class PagoCreado extends StatefulWidget {
+  const PagoCreado({super.key});
+
+  @override
+  State<PagoCreado> createState() => _PagoCreadoState();
+}
+
+class _PagoCreadoState extends State<PagoCreado> {
+  var _expirado = false;
+  var _cargando = false;
+  var _copiado = false;
+
+  Future<void> _cobrar() async {
+    if (_cargando) return;
+    final caja = Caja.of(context);
+    final cobro = caja.cobro;
+    final monto = cobro?.monto ?? 0;
+    final concepto = cobro?.concepto ?? 'Venta';
+    final transferencia = cobro?.metodo == 'transferencia';
+    setState(() => _cargando = true);
+    try {
+      if (transferencia) {
+        final listo = (cobro ??
+                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'transferencia', origen: 'manual'))
+            .copy(metodo: 'transferencia', monto: monto, concepto: concepto);
+        await confirmarMovimiento(listo);
+        if (!mounted) return;
+        caja.guardarCobro(listo);
+        caja.refrescarCaja();
+        caja.raiz(const Ruta('pago-confirmado'));
+        return;
+      }
+      final r = await cobrarQr(concepto: concepto, monto: monto, qrExpirado: _expirado);
+      if (!mounted) return;
+      decir(r.mensajeVoz);
+      if (r.ok) {
+        caja.guardarCobro((cobro ??
+                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'manual'))
+            .copy(metodo: 'qr', monto: monto, concepto: concepto));
+        caja.refrescarCaja();
+        caja.raiz(const Ruta('pago-confirmado'));
+      } else {
+        caja.ponerMensajePago(r.mensajeVoz.isEmpty ? 'No se pudo cobrar.' : r.mensajeVoz);
+        caja.ir(const Ruta('pago-error'));
+      }
+    } on ErrorGundani catch (e) {
+      if (!mounted) return;
+      decir(e.mensaje);
+      caja.ponerMensajePago(e.mensaje);
+      caja.ir(const Ruta('pago-error'));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final caja = Caja.of(context);
+    final monto = caja.cobro?.monto ?? 0;
+    final concepto = caja.cobro?.concepto ?? 'Venta';
+    final transferencia = caja.cobro?.metodo == 'transferencia';
+    final datos = transferencia
+        ? (caja.clabe.isEmpty ? 'Falta la CLABE' : 'CLABE ${caja.clabe}\nTitular ${caja.nombre}\nmonto ${pesos(monto)}')
+        : 'GUNDANI\n$concepto\n${pesos(monto)}';
+    return Scaffold(
+      appBar: Barra(titulo: 'Pago creado', onBack: _cargando ? () {} : caja.atras),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Text('Monto a cobrar: ${pesos(monto)} MXN', style: const TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7E2DA))),
+            child: Column(
+              children: [
+                QrImageView(data: datos, size: 200, backgroundColor: Colors.white),
+                const SizedBox(height: 8),
+                Text(
+                  transferencia ? 'El cliente escanea este código o usa los datos de abajo' : 'Muestra este código al cliente para escanear con su celular',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (transferencia && caja.clabe.isNotEmpty) _spei(caja),
+          if (caja.clabe.isEmpty)
+            const Text('Falta la CLABE para recibir pagos.', style: TextStyle(fontWeight: FontWeight.w700))
+          else if (!transferencia)
+            Text(caja.clabeVisible, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          const Text('Este cobro no mueve dinero de un banco.', style: TextStyle(fontWeight: FontWeight.w700)),
+          if (!transferencia)
+            SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('QR expirado', style: TextStyle(fontWeight: FontWeight.w700)),
+            value: _expirado,
+            onChanged: _cargando ? null : (v) => setState(() => _expirado = v),
+          ),
+          Boton(
+            texto: _cargando ? 'Cobrando...' : 'Listo, ya me pagaron',
+            icono: Icons.check_circle_outline,
+            onPressed: _cargando ? null : _cobrar,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _spei(Caja caja) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7E2DA))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.account_balance, size: 18, color: Color(0xFF9A3412)),
+            SizedBox(width: 6),
+            Expanded(child: Text('Datos para transferencia (SPEI)', style: TextStyle(fontWeight: FontWeight.w800))),
+          ]),
+          const SizedBox(height: 10),
+          Text('Titular de la cuenta', style: const TextStyle(fontSize: 12, color: stone)),
+          Text(caja.nombre, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          const Text('Banco destino', style: TextStyle(fontSize: 12, color: stone)),
+          const Text('Cuenta Básica / SPEI', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          const Text('CLABE interbancaria', style: TextStyle(fontSize: 12, color: stone)),
+          Text(caja.clabeVisible, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          TextButton(
+            onPressed: () async {
+              await copiarTexto(caja.clabe);
+              if (mounted) setState(() => _copiado = true);
+            },
+            child: Text(_copiado ? 'Copiado' : 'Copiar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PagoError extends StatelessWidget {
+  const PagoError({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final caja = Caja.of(context);
+    return Scaffold(
+      appBar: Barra(titulo: 'No se pudo cobrar', onBack: caja.atras),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(caja.mensajePago, style: const TextStyle(fontSize: 18, height: 1.35)),
+          const SizedBox(height: 16),
+          Boton(texto: 'Volver a intentar', onPressed: caja.atras),
+        ],
+      ),
+    );
+  }
+}
+
+const verdePago = Color(0xFF34C759);
+
+class PagoConfirmado extends StatefulWidget {
+  const PagoConfirmado({super.key});
+
+  @override
+  State<PagoConfirmado> createState() => _PagoConfirmadoState();
+}
+
+class _PagoConfirmadoState extends State<PagoConfirmado> with SingleTickerProviderStateMixin {
+  late final AnimationController _entrada = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))..forward();
+
+  @override
+  void dispose() {
+    _entrada.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final caja = Caja.of(context);
+    final hecho = caja.cobroHecho;
+    return AnimatedBuilder(
+      animation: _entrada,
+      builder: (context, _) {
+        final t = Curves.easeOut.transform(_entrada.value);
+        final fondo = Color.lerp(paper, verdePago, t)!;
+        return ColoredBox(
+          key: const Key('pago-confirmado-fondo'),
+          color: fondo,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: 'Volver',
+                        onPressed: () => caja.raiz(const Ruta('inicio')),
+                        icon: Icon(Icons.arrow_back, color: Color.lerp(ink, Colors.white, t)),
+                      ),
+                    ),
+                    const Spacer(),
+                    Transform.scale(
+                      scale: 0.4 + (0.6 * t),
+                      child: Container(
+                        width: 168,
+                        height: 168,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        child: const Icon(Icons.check, color: verdePago, size: 108),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    Text('Pago confirmado', style: epilogo(28, peso: FontWeight.w800, color: Color.lerp(ink, Colors.white, t)!)),
+                    const SizedBox(height: 8),
+                    Text(hecho?.concepto ?? 'Venta', style: TextStyle(fontSize: 18, color: Color.lerp(stone, Colors.white, t))),
+                    Text(pesos(hecho?.monto ?? 0), style: epilogo(36, peso: FontWeight.w800, color: Color.lerp(grana, Colors.white, t)!)),
+                    const Spacer(),
+                    Boton(
+                      texto: 'Volver al inicio',
+                      fondo: Colors.white,
+                      tinta: verdePago,
+                      onPressed: () => caja.raiz(const Ruta('inicio')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

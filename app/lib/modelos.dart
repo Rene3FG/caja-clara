@@ -54,6 +54,17 @@ class Linea {
   Map<String, dynamic> toJson() =>
       {'productoId': productoId, 'nombre': nombre, 'precio': precio, 'cantidad': cantidad};
 
+  factory Linea.voz({required String concepto, required double cantidad, required double monto}) {
+    final n = cantidad.round();
+    final piezas = n < 1 ? 1 : n;
+    return Linea(
+      productoId: '',
+      nombre: concepto.trim().isEmpty ? 'Venta' : concepto.trim(),
+      precio: monto / piezas,
+      cantidad: piezas,
+    );
+  }
+
   factory Linea.fromJson(Map<String, dynamic> j) => Linea(
         productoId: (j['productoId'] as String?) ?? '',
         nombre: j['nombre'] as String,

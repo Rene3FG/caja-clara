@@ -22,6 +22,9 @@ String get gundaniBase =>
 
 const esperaGundani = Duration(seconds: 30);
 
+/// ponytail: los tests ponen un cliente falso. En la app queda null y se usa el de siempre.
+http.Client? clienteHttp;
+
 class ErrorGundani implements Exception {
   const ErrorGundani(this.mensaje);
   final String mensaje;
@@ -229,8 +232,10 @@ Future<ResumenHoy> traerResumen() async {
 }
 
 Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) async {
+  final propio = clienteHttp == null;
+  final cliente = clienteHttp ?? http.Client();
   try {
-    final res = await http
+    final res = await cliente
         .post(
           Uri.parse('$gundaniBase$ruta'),
           headers: {'Content-Type': 'application/json'},
@@ -249,6 +254,8 @@ Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) asy
     throw const ErrorGundani('Gundani tardó demasiado. Inténtalo otra vez.');
   } catch (_) {
     throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.');
+  } finally {
+    if (propio) cliente.close();
   }
 }
 
