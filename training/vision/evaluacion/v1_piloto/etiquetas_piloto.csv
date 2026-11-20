@@ -1,0 +1,102 @@
+archivo,sesion,tipo,esperado,notas
+p01_001.jpg,p01,sabritas_sola,sabritas=1,
+p01_002.jpg,p01,sabritas_sola,sabritas=1,
+p01_003.jpg,p01,sabritas_sola,sabritas=1,
+p01_004.jpg,p01,sabritas_sola,sabritas=1,
+p01_005.jpg,p01,sabritas_sola,sabritas=1,
+p01_006.jpg,p01,sabritas_sola,sabritas=1,
+p01_007.jpg,p01,sabritas_sola,sabritas=1,
+p01_008.jpg,p01,sabritas_sola,sabritas=1,
+p01_009.jpg,p01,sabritas_sola,sabritas=1,
+p01_010.jpg,p01,sabritas_sola,sabritas=1,
+p01_011.jpg,p01,distractor_solo,,
+p01_012.jpg,p01,distractor_solo,,
+p01_013.jpg,p01,distractor_solo,,
+p01_014.jpg,p01,distractor_solo,,
+p01_015.jpg,p01,distractor_solo,,
+p01_016.jpg,p01,distractor_solo,,
+p01_017.jpg,p01,distractor_solo,,
+p01_018.jpg,p01,distractor_solo,,
+p01_019.jpg,p01,distractor_solo,,
+p01_020.jpg,p01,mezcla,sabritas=1,
+p01_021.jpg,p01,mezcla,sabritas=1,
+p01_022.jpg,p01,mezcla,sabritas=1,
+p01_023.jpg,p01,mezcla,sabritas=1,
+p01_024.jpg,p01,mezcla,sabritas=1,
+p01_025.jpg,p01,mezcla,sabritas=1,
+p01_026.jpg,p01,mezcla,sabritas=1,
+p01_027.jpg,p01,mezcla,sabritas=1,
+p01_028.jpg,p01,mezcla,sabritas=1,
+p01_029.jpg,p01,mezcla,sabritas=1,
+p02_001.jpg,p02,distractor_solo,,botella de agua
+p02_002.jpg,p02,distractor_solo,,botella de agua
+p02_003.jpg,p02,distractor_solo,,botella de agua
+p02_004.jpg,p02,distractor_solo,,botella de agua
+p02_005.jpg,p02,distractor_solo,,botella de agua
+p02_006.jpg,p02,distractor_solo,,botella de agua
+p02_007.jpg,p02,distractor_solo,,botella de agua
+p02_008.jpg,p02,distractor_solo,,botella de agua
+p02_009.jpg,p02,distractor_solo,,botella de agua
+p02_010.jpg,p02,distractor_solo,,botella de agua
+p02_011.jpg,p02,distractor_solo,,botella de agua
+p02_012.jpg,p02,distractor_solo,,botella de agua
+p02_013.jpg,p02,distractor_solo,,botella de agua
+p02_014.jpg,p02,distractor_solo,,botella de agua
+p02_015.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_016.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_017.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_018.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_019.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_020.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_021.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_022.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_023.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_024.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_025.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_026.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_027.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_028.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_029.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_030.jpg,p02,distractor_solo,,lata bebida energética (azul)
+p02_031.jpg,p02,chokis_sola,chokis=1,reverso plateado
+p02_032.jpg,p02,chokis_sola,chokis=1,
+p02_033.jpg,p02,chokis_sola,chokis=1,
+p02_034.jpg,p02,chokis_sola,chokis=1,
+p02_035.jpg,p02,chokis_sola,chokis=1,
+p02_036.jpg,p02,chokis_sola,chokis=1,
+p02_037.jpg,p02,chokis_sola,chokis=1,parcial: solo una esquina
+p02_038.jpg,p02,chokis_sola,chokis=1,
+p02_039.jpg,p02,chokis_sola,chokis=1,
+p02_040.jpg,p02,chokis_sola,chokis=1,
+p02_041.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_042.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_043.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_044.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_045.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_046.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_047.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_048.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_049.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_050.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_051.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_052.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_053.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_054.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_055.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_056.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_057.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_058.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_059.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_060.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_061.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_062.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_063.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_064.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_065.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_066.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_067.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_068.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_069.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_070.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_071.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)
+p02_072.jpg,p02,distractor_solo,,golden nuts (amarillo/rojo)

@@ -1,0 +1,1165 @@
+{
+  "gpu": "NVIDIA GeForce RTX 2060",
+  "sha256_engine": "a146d3bf23d850a8f2215fe46c9a9338c8daf8503bcd3f550f971e40c4c981a2",
+  "fotos": 101,
+  "ms_mediana": 87.8,
+  "por_umbral": [
+    {
+      "umbral": 0.3,
+      "fotos": 101,
+      "conteo_exacto": 0.376,
+      "deteccion_sabritas": 0.7,
+      "falsos_positivos": 0.761
+    },
+    {
+      "umbral": 0.4,
+      "fotos": 101,
+      "conteo_exacto": 0.366,
+      "deteccion_sabritas": 0.667,
+      "falsos_positivos": 0.761
+    },
+    {
+      "umbral": 0.5,
+      "fotos": 101,
+      "conteo_exacto": 0.406,
+      "deteccion_sabritas": 0.667,
+      "falsos_positivos": 0.704
+    },
+    {
+      "umbral": 0.6,
+      "fotos": 101,
+      "conteo_exacto": 0.396,
+      "deteccion_sabritas": 0.633,
+      "falsos_positivos": 0.704
+    },
+    {
+      "umbral": 0.7,
+      "fotos": 101,
+      "conteo_exacto": 0.426,
+      "deteccion_sabritas": 0.633,
+      "falsos_positivos": 0.662
+    }
+  ],
+  "umbral_app": 0.5,
+  "detalle_umbral_app": [
+    {
+      "archivo": "p01_001.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_002.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_003.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_004.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_005.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_006.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_007.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_008.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_009.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_010.jpg",
+      "sesion": "p01",
+      "tipo": "sabritas_sola",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_011.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_012.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_013.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_014.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_015.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_016.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_017.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_018.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_019.jpg",
+      "sesion": "p01",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_020.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_021.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_022.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_023.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_024.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_025.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_026.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_027.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_028.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": ""
+    },
+    {
+      "archivo": "p01_029.jpg",
+      "sesion": "p01",
+      "tipo": "mezcla",
+      "esperado": {
+        "sabritas": 1
+      },
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_001.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "skittles": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_002.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_003.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_004.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1,
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_005.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1,
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_006.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_007.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_008.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_009.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_010.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_011.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_012.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_013.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_014.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1
+      },
+      "correcto": false,
+      "notas": "botella de agua"
+    },
+    {
+      "archivo": "p02_015.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_016.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_017.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_018.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_019.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_020.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_021.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_022.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_023.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_024.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_025.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_026.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_027.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_028.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "coca_cola": 1
+      },
+      "correcto": false,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_029.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_030.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "lata bebida energética (azul)"
+    },
+    {
+      "archivo": "p02_031.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {},
+      "correcto": false,
+      "notas": "reverso plateado"
+    },
+    {
+      "archivo": "p02_032.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_033.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_034.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_035.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_036.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_037.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "parcial: solo una esquina"
+    },
+    {
+      "archivo": "p02_038.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_039.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_040.jpg",
+      "sesion": "p02",
+      "tipo": "chokis_sola",
+      "esperado": {
+        "chokis": 1
+      },
+      "detectado": {
+        "chokis": 1
+      },
+      "correcto": true,
+      "notas": ""
+    },
+    {
+      "archivo": "p02_041.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_042.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_043.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_044.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_045.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_046.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_047.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_048.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_049.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_050.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_051.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_052.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_053.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_054.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_055.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_056.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "sabritas": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_057.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_058.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_059.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_060.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_061.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_062.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_063.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_064.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_065.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_066.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_067.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_068.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {},
+      "correcto": true,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_069.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_070.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_071.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    },
+    {
+      "archivo": "p02_072.jpg",
+      "sesion": "p02",
+      "tipo": "distractor_solo",
+      "esperado": {},
+      "detectado": {
+        "doritos": 1
+      },
+      "correcto": false,
+      "notas": "golden nuts (amarillo/rojo)"
+    }
+  ]
+}
