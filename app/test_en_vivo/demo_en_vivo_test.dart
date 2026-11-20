@@ -10,7 +10,6 @@ import 'package:caja_clara/caja.dart';
 import 'package:caja_clara/main.dart';
 import 'package:caja_clara/modelos.dart';
 import 'package:caja_clara/servicios/asistente.dart';
-import 'package:caja_clara/servicios/config.dart';
 import 'package:caja_clara/servicios/foto.dart';
 import 'package:caja_clara/ui/mic.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
@@ -20,7 +19,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const url = String.fromEnvironment('DEMO_URL');
 const fotoProductos = String.fromEnvironment('FOTO_PRODUCTOS');
 const fotoLibreta = String.fromEnvironment('FOTO_LIBRETA');
 const apagado = bool.fromEnvironment('APAGADO');
@@ -34,7 +32,6 @@ void main() {
     HttpOverrides.global = _RedReal(); // flutter_test bloquea la red; aquí la queremos real
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
-    await guardarServidor(url);
     clienteHttp = null;
   });
 

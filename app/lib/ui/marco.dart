@@ -52,16 +52,11 @@ class Marco extends StatelessWidget {
           indicatorColor: const Color(0xFFFFDAD5),
           selectedIndex: _indice(caja.ruta.id),
           labelTextStyle: WidgetStateProperty.all(const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-          onDestinationSelected: (i) => caja.tab(const ['inicio', 'sin-red', 'libro', 'productos'][i]),
-          destinations: [
-            const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
-            NavigationDestination(
-              icon: _iconoSinRed(caja.pendientes, false),
-              selectedIcon: _iconoSinRed(caja.pendientes, true),
-              label: 'Sin red',
-            ),
-            const NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Libro'),
-            const NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Productos'),
+          onDestinationSelected: (i) => caja.tab(const ['inicio', 'libro', 'productos'][i]),
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
+            NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Libro'),
+            NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Productos'),
           ],
         ),
       ],
@@ -69,14 +64,9 @@ class Marco extends StatelessWidget {
   }
 
   int _indice(String id) {
-    const ids = ['inicio', 'sin-red', 'libro', 'productos'];
+    const ids = ['inicio', 'libro', 'productos'];
     final i = ids.indexOf(id);
     return i < 0 ? 0 : i;
-  }
-
-  Widget _iconoSinRed(int n, bool activo) {
-    if (n <= 0) return Icon(activo ? Icons.wifi_off : Icons.wifi_off_outlined);
-    return CircleAvatar(radius: 12, backgroundColor: grana, child: Text('$n', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)));
   }
 }
 

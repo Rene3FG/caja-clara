@@ -15,10 +15,9 @@ import 'ui/perfil.dart';
 import 'ui/productos.dart';
 import 'ui/revisar.dart';
 import 'ui/servidor_ia.dart';
-import 'ui/sin_red.dart';
 import 'ui/splash.dart';
 
-const _conMarco = {'inicio', 'sin-red', 'libro', 'productos'};
+const _conMarco = {'inicio', 'libro', 'productos'};
 const _conTransicion = {'pago', 'pago-creado', 'pago-error', 'pago-confirmado'};
 
 Widget pantallaCaja(Caja caja) {
@@ -132,8 +131,6 @@ Widget _pantalla(Caja caja) {
         return const FormularioPerfil();
       case 'inicio':
         return const Inicio();
-      case 'sin-red':
-        return const SinRed();
       case 'libro':
         return const Libro();
       case 'fiados':

@@ -1,5 +1,5 @@
 // Caja Clara - conexión de la app con la IA del equipo a través del gateway (un solo URL).
-// La URL sale de config.dart: la pegada en la app (Servidor de IA) o --dart-define=API_URL.
+// La URL sale de config.dart y está fija.
 // Todos los errores llegan como IaError con un mensaje listo para mostrar (bases 6e).
 
 import 'dart:async';
@@ -19,7 +19,7 @@ class IaError implements Exception {
   final TipoErrorIa tipo;
 
   static IaError sinUrl() =>
-      IaError('Falta la dirección del servidor de IA. Pégala en Sin red → Servidor y modelo.', TipoErrorIa.sinUrl);
+      IaError('Falta la dirección del servidor de IA.', TipoErrorIa.sinUrl);
   static IaError sinConexion() =>
       IaError('Sin conexión con el servidor de IA. Puedes capturar a mano.', TipoErrorIa.sinConexion);
   static IaError tardo() =>

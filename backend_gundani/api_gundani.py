@@ -111,6 +111,7 @@ init_db()
 
 class AsistenteRequest(BaseModel):
     texto: str
+    contexto_caja: Optional[dict] = None
 
 class MovimientoConfirmarRequest(BaseModel):
     tipo: str
@@ -156,7 +157,7 @@ def consultar_asistente(req: AsistenteRequest):
     resumen_usado = None
 
     if necesita_contexto_caja(texto_limpio):
-        resumen_usado = obtener_resumen_hoy()
+        resumen_usado = req.contexto_caja or obtener_resumen_hoy()
         contexto = (
             f"[CONTEXTO_CAJA: ventas_qr={resumen_usado['ventas_qr']}, "
             f"ventas_efectivo={resumen_usado['ventas_efectivo']}, "

@@ -679,46 +679,25 @@ class _QrPagoState extends State<QrPago> {
       _cobrando = true;
       _mensaje = null;
     });
-    try {
-      final r = await cobrarQr(concepto: concepto, monto: monto, qrExpirado: _expirado);
-      if (!mounted) return;
-      decir(r.mensajeVoz);
+    if (_expirado) {
       setState(() {
         _cobrando = false;
-        _mensaje = r.mensajeVoz;
-        _concepto = concepto;
-        _aprobado = r.ok;
+        _mensaje = 'El código expiró. No se anotó la venta.';
       });
-      if (r.ok) {
-        caja.guardarCobro((cobro ??
-                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'voz'))
-            .copy(metodo: 'qr', monto: monto, concepto: concepto));
-        caja.refrescarCaja();
-      }
-    } on ErrorGundani catch (e) {
-      if (!mounted) return;
-      if (e.sinRespuesta) {
-        final ok = await simularCobroLocal(expirado: _expirado);
-        if (!mounted) return;
-        if (ok) {
-          caja.guardarCobro((cobro ??
-                  Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'manual'))
-              .copy(metodo: 'qr', monto: monto, concepto: concepto));
-        }
-        setState(() {
-          _cobrando = false;
-          _concepto = concepto;
-          _aprobado = ok;
-          _mensaje = ok ? 'Pago confirmado. $avisoLocal' : 'El QR expiró y no se cobró. $avisoLocal';
-        });
-        return;
-      }
-      setState(() {
-        _cobrando = false;
-        _mensaje = e.mensaje;
-        _aprobado = false;
-      });
+      return;
     }
+    final listo = (cobro ?? Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'voz'))
+        .copy(metodo: 'qr', monto: monto, concepto: concepto);
+    final pendiente = await anotarCobro(caja, listo);
+    if (!mounted) return;
+    caja.guardarCobro(listo, pendiente: pendiente);
+    caja.refrescarCaja();
+    setState(() {
+      _cobrando = false;
+      _concepto = concepto;
+      _aprobado = true;
+      _mensaje = pendiente ? 'Quedó guardado en el teléfono. Se registra al volver la señal.' : 'Cobro anotado.';
+    });
   }
 
   Future<void> _copiar() async {
@@ -746,7 +725,7 @@ class _QrPagoState extends State<QrPago> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          if (cobrar) EtiquetaSimulado(estado: _aprobado ? 'pagado' : (_cobrando ? 'pendiente' : null)),
+          if (cobrar && !_aprobado) EtiquetaSimulado(estado: _cobrando ? 'pendiente' : null),
           if (cobrar && monto != null)
             Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -909,6 +888,16 @@ class _QrPagoState extends State<QrPago> {
   }
 }
 
+Future<bool> anotarCobro(Caja caja, Cobro cobro) async {
+  if (!caja.conectado) return true;
+  try {
+    await confirmarMovimiento(cobro);
+    return false;
+  } on ErrorGundani {
+    return true;
+  }
+}
+
 class PagoCreado extends StatefulWidget {
   const PagoCreado({super.key});
 
@@ -928,53 +917,27 @@ class _PagoCreadoState extends State<PagoCreado> {
     final monto = cobro?.monto ?? 0;
     final concepto = cobro?.concepto ?? 'Venta';
     final transferencia = cobro?.metodo == 'transferencia';
-    setState(() => _cargando = true);
-    try {
-      if (transferencia) {
-        final listo = (cobro ??
-                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'transferencia', origen: 'manual'))
-            .copy(metodo: 'transferencia', monto: monto, concepto: concepto);
-        await confirmarMovimiento(listo);
-        if (!mounted) return;
-        caja.guardarCobro(listo);
-        caja.refrescarCaja();
-        caja.raiz(const Ruta('pago-confirmado'));
-        return;
-      }
-      final r = await cobrarQr(concepto: concepto, monto: monto, qrExpirado: _expirado);
-      if (!mounted) return;
-      decir(r.mensajeVoz);
-      if (r.ok) {
-        caja.guardarCobro((cobro ??
-                Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: 'qr', origen: 'manual'))
-            .copy(metodo: 'qr', monto: monto, concepto: concepto));
-        caja.refrescarCaja();
-        caja.raiz(const Ruta('pago-confirmado'));
-      } else {
-        caja.ponerMensajePago(r.mensajeVoz.isEmpty ? 'No se pudo cobrar.' : r.mensajeVoz);
-        caja.ir(const Ruta('pago-error'));
-      }
-    } on ErrorGundani catch (e) {
-      if (!mounted) return;
-      if (e.sinRespuesta) {
-        final ok = await simularCobroLocal(expirado: !transferencia && _expirado);
-        if (!mounted) return;
-        if (ok) {
-          caja.setAviso(avisoLocal);
-          caja.guardarCobro((cobro ??
-                  Cobro(tipo: 'venta', concepto: concepto, cantidad: 1, monto: monto, metodo: transferencia ? 'transferencia' : 'qr', origen: 'manual'))
-              .copy(metodo: transferencia ? 'transferencia' : 'qr', monto: monto, concepto: concepto));
-          caja.raiz(const Ruta('pago-confirmado'));
-        } else {
-          caja.ponerMensajePago('El QR expiró y no se cobró. $avisoLocal');
-          caja.ir(const Ruta('pago-error'));
-        }
-        return;
-      }
-      decir(e.mensaje);
-      caja.ponerMensajePago(e.mensaje);
+    if (!transferencia && _expirado) {
+      caja.ponerMensajePago('El código expiró. No se anotó la venta.');
       caja.ir(const Ruta('pago-error'));
+      return;
     }
+    setState(() => _cargando = true);
+    final listo = (cobro ??
+            Cobro(
+              tipo: 'venta',
+              concepto: concepto,
+              cantidad: 1,
+              monto: monto,
+              metodo: transferencia ? 'transferencia' : 'qr',
+              origen: 'manual',
+            ))
+        .copy(metodo: transferencia ? 'transferencia' : 'qr', monto: monto, concepto: concepto);
+    final pendiente = await anotarCobro(caja, listo);
+    if (!mounted) return;
+    caja.guardarCobro(listo, pendiente: pendiente);
+    caja.refrescarCaja();
+    caja.raiz(const Ruta('pago-confirmado'));
   }
 
   @override
@@ -1146,7 +1109,6 @@ class _PagoConfirmadoState extends State<PagoConfirmado> with SingleTickerProvid
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const Center(child: EtiquetaSimulado(estado: 'pagado')),
                     Text('Pago confirmado', style: epilogo(28, peso: FontWeight.w800, color: Color.lerp(ink, Colors.white, t)!)),
                     const SizedBox(height: 8),
                     Text(hecho?.concepto ?? 'Venta', style: TextStyle(fontSize: 18, color: Color.lerp(stone, Colors.white, t))),

@@ -19,9 +19,6 @@ class Libro extends StatelessWidget {
     final vs = caja.ventas.where((v) => enRango(v.en, rango)).toList();
     final gs = caja.gastos.where((g) => enRango(g.en, rango)).toList();
     final corte = servidor == null ? ganancia([for (final v in vs) v.total], [for (final g in gs) g.monto]) : Corte(servidor.ventas, servidor.gastos, servidor.balance);
-    final nVentas = servidor?.movimientos.where((m) => m.tipo == 'venta').length ?? vs.length;
-    final nGastos = servidor?.movimientos.where((m) => m.tipo == 'gasto').length ?? gs.length;
-    final detalleSalidas = gs.isEmpty ? 'Pagos del periodo' : gs.take(2).map((g) => g.concepto).join(', ');
     final estado = caja.conectado && caja.pendientes == 0
         ? 'Todas tus cuentas están respaldadas y al día.'
         : 'Guardado en este teléfono. Se envía cuando haya señal.';
@@ -34,22 +31,16 @@ class Libro extends StatelessWidget {
           if (caja.conectado) const Row(children: [Icon(Icons.refresh, size: 14, color: maguey), SizedBox(width: 4), Text('Actualizado', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: maguey))]),
         ]),
         const SizedBox(height: 10),
-        Row(children: [
+        Wrap(spacing: 8, runSpacing: 8, children: [
           _chip('Hoy', caja.periodo.tipo == 'hoy', () => caja.setPeriodo(const Periodo('hoy'))),
-          const SizedBox(width: 8),
-          _chip('Esta semana', caja.periodo.tipo == 'semana', () => caja.setPeriodo(const Periodo('semana'))),
-          const SizedBox(width: 8),
-          _chip('Este mes', caja.periodo.tipo == 'mes', () => caja.setPeriodo(const Periodo('mes'))),
-        ]),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _chip('Fechas', caja.periodo.tipo == 'fechas', () {
+          _chip('Semana', caja.periodo.tipo == 'semana', () => caja.setPeriodo(const Periodo('semana'))),
+          _chip('Mes', caja.periodo.tipo == 'mes', () => caja.setPeriodo(const Periodo('mes'))),
+          _chip('Fechas', caja.periodo.tipo == 'fechas', () {
             final hasta = isoDia(ahora);
             final desde = isoDia(ahora.subtract(const Duration(days: 7)));
             caja.setPeriodo(Periodo('fechas', desde: caja.periodo.desde ?? desde, hasta: caja.periodo.hasta ?? hasta));
           }),
-        ),
+        ]),
         if (caja.periodo.tipo == 'fechas') ...[
           const SizedBox(height: 8),
           Text('${_eti(caja.periodo.desde)} – ${_eti(caja.periodo.hasta)}', style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -75,46 +66,26 @@ class Libro extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                const Text('Para tu bolsa', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(999)),
-                  child: const Text('Ganancia libre', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: maguey)),
-                ),
-              ]),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(999)),
+                child: const Text('Ganancia libre', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: maguey)),
+              ),
               const SizedBox(height: 6),
               Text('${pesos(corte.libre)} MXN', style: epilogo(36, peso: FontWeight.w800)),
-              const Text('Dinero limpio que ya te queda disponible después de pagar mercancía.', style: TextStyle(fontSize: 13, color: stone, height: 1.3)),
-              const SizedBox(height: 10),
-              const Text('LA CUENTA SIMPLE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: stone, letterSpacing: 0.4)),
-              const SizedBox(height: 6),
-              Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                _mini(pesos(corte.vendido), const Color(0xFFFEE2E2), grana),
-                const Text('−', style: TextStyle(fontWeight: FontWeight.w800)),
-                _mini(pesos(corte.comprado), const Color(0xFFFEE2E2), grana),
-                const Text('=', style: TextStyle(fontWeight: FontWeight.w800)),
-                _mini(pesos(corte.libre), const Color(0xFFDCFCE7), maguey),
-              ]),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        Row(children: [
-          const Expanded(child: Text('Movimientos del periodo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
-          Text('${nVentas + nGastos} registros', style: const TextStyle(fontSize: 13, color: stone)),
-        ]),
+        const Text('Movimientos del periodo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         _movimiento(
           Icons.point_of_sale,
           const Color(0xFFDCFCE7),
           maguey,
           'Total de ventas',
-          'Lo que entró al cajón',
           '+${pesos(corte.vendido)}',
           maguey,
-          '$nVentas ventas registradas',
           () => caja.ir(const Ruta('desglose-ventas')),
         ),
         const SizedBox(height: 10),
@@ -123,10 +94,8 @@ class Libro extends StatelessWidget {
           const Color(0xFFFEE2E2),
           grana,
           'Salidas de dinero',
-          detalleSalidas,
           '−${pesos(corte.comprado)}',
           grana,
-          '$nGastos pagos a proveedores',
           () => caja.ir(const Ruta('desglose-pagos')),
         ),
         const SizedBox(height: 14),
@@ -151,15 +120,7 @@ class Libro extends StatelessWidget {
     );
   }
 
-  Widget _mini(String texto, Color fondo, Color tinta) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(8)),
-      child: Text(texto, style: TextStyle(fontWeight: FontWeight.w800, color: tinta)),
-    );
-  }
-
-  Widget _movimiento(IconData icono, Color fondo, Color tinta, String titulo, String detalle, String monto, Color colorMonto, String cuenta, VoidCallback onTap) {
+  Widget _movimiento(IconData icono, Color fondo, Color tinta, String titulo, String monto, Color colorMonto, VoidCallback onTap) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -180,18 +141,14 @@ class Libro extends StatelessWidget {
                   child: Icon(icono, color: tinta),
                 ),
                 const SizedBox(width: 10),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(titulo, style: const TextStyle(fontWeight: FontWeight.w800)),
-                  Text(detalle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: stone)),
-                ])),
-                Text('$monto\npesos', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w800, color: colorMonto)),
+                Expanded(child: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w800))),
+                Text(monto, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w800, color: colorMonto)),
               ]),
               const SizedBox(height: 8),
-              Row(children: [
-                Text(cuenta, style: const TextStyle(fontSize: 13, color: stone)),
-                const Spacer(),
-                const Text('Toca para ver desglose', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                const Icon(Icons.chevron_right, size: 18),
+              const Row(children: [
+                Spacer(),
+                Text('Toca para ver desglose', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                Icon(Icons.chevron_right, size: 18),
               ]),
             ],
           ),

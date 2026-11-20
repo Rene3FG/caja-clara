@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'cuentas.dart';
 import 'modelos.dart';
 import 'servicios/asistente.dart';
-import 'servicios/config.dart';
 import 'servicios/sync.dart';
 
 const _clave = 'caja-clara-v1';
@@ -42,7 +41,6 @@ class Caja extends ChangeNotifier {
   bool get perfilListo => negocio.trim().isNotEmpty && nombre.trim().isNotEmpty;
 
   Future<void> iniciar() async {
-    await cargarServidor();
     final prefs = await SharedPreferences.getInstance();
     final crudo = prefs.getString(_clave);
     if (crudo == null) {
@@ -181,15 +179,15 @@ class Caja extends ChangeNotifier {
     notifyListeners();
   }
 
-  void guardarCobro(Cobro valor) {
+  void guardarCobro(Cobro valor, {bool? pendiente}) {
     cobroHecho = valor;
     if (valor.tipo == 'gasto') {
-      agregarGasto(concepto: valor.concepto, monto: valor.monto, metodo: _metodo(valor.metodo));
+      agregarGasto(concepto: valor.concepto, monto: valor.monto, metodo: _metodo(valor.metodo), pendiente: pendiente);
     } else {
       final lineas = borrador.isEmpty
           ? [Linea(productoId: '', nombre: valor.concepto, precio: valor.monto, cantidad: 1)]
           : borrador;
-      agregarVenta(metodo: _metodo(valor.metodo), lineas: lineas, total: valor.monto);
+      agregarVenta(metodo: _metodo(valor.metodo), lineas: lineas, total: valor.monto, pendiente: pendiente);
     }
     borrador = [];
     cobro = null;
@@ -230,8 +228,8 @@ class Caja extends ChangeNotifier {
     _persist();
   }
 
-  /// [en] permite guardar ventas pasadas (p. ej. las de la libreta).
-  void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total, DateTime? en}) {
+  void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total, bool? pendiente, DateTime? en}) {
+    final queda = pendiente ?? !conectado;
     ventas = [
       Venta(
         id: _id(),
@@ -239,21 +237,22 @@ class Caja extends ChangeNotifier {
         metodo: metodo,
         lineas: lineas,
         total: total,
-        pendiente: !conectado,
+        pendiente: queda,
       ),
       ...ventas,
     ];
     _persist();
-    if (conectado) sincronizar();
+    if (conectado && !queda) sincronizar();
   }
 
-  void agregarGasto({required String concepto, required double monto, required Metodo metodo}) {
+  void agregarGasto({required String concepto, required double monto, required Metodo metodo, bool? pendiente}) {
+    final queda = pendiente ?? !conectado;
     gastos = [
-      Gasto(id: _id(), en: DateTime.now(), concepto: concepto, monto: monto, metodo: metodo, pendiente: !conectado),
+      Gasto(id: _id(), en: DateTime.now(), concepto: concepto, monto: monto, metodo: metodo, pendiente: queda),
       ...gastos,
     ];
     _persist();
-    if (conectado) sincronizar();
+    if (conectado && !queda) sincronizar();
   }
 
   void marcarFiado(String id) {

@@ -107,14 +107,6 @@ class ResumenHoy {
   final List<MovimientoServidor> movimientos;
 }
 
-class CobroSimulado {
-  const CobroSimulado({required this.ok, required this.mensajeVoz, this.motivo});
-
-  final bool ok;
-  final String mensajeVoz;
-  final String? motivo;
-}
-
 String metodoApi(String valor) {
   final v = valor.toLowerCase();
   if (v.contains('qr')) return 'qr';
@@ -157,24 +149,6 @@ Future<void> confirmarMovimiento(Cobro cobro) async {
     'metodo_pago': metodoApi(cobro.metodo),
     'origen': cobro.origen,
   });
-}
-
-Future<CobroSimulado> cobrarQr({
-  required String concepto,
-  required double monto,
-  bool qrExpirado = false,
-}) async {
-  final data = await _post('/api/qr/cobrar', {
-    'cliente_id': 'cliente_demo',
-    'concepto': concepto,
-    'monto': monto,
-    'qr_expirado': qrExpirado,
-  });
-  return CobroSimulado(
-    ok: data['ok'] == true,
-    mensajeVoz: data['mensaje_voz'] as String? ?? '',
-    motivo: data['motivo'] as String?,
-  );
 }
 
 Future<ResumenHoy> traerResumen() async {

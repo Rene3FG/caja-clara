@@ -39,7 +39,7 @@ void main() {
     await tester.pumpWidget(_app(caja));
 
     expect(find.text('Inicio'), findsOneWidget);
-    expect(find.text('Sin red'), findsOneWidget);
+    expect(find.text('Sin red'), findsNothing);
     expect(find.text('Libro'), findsOneWidget);
     expect(find.text('Productos'), findsOneWidget);
     expect(find.text('Fiados'), findsNothing);
@@ -48,12 +48,27 @@ void main() {
     await tester.pump();
     expect(caja.ruta.id, 'productos');
     expect(find.text('Mis productos'), findsOneWidget);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 3);
+    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 2);
 
     await tester.tap(find.byIcon(Icons.person_outline));
     await tester.pump();
     expect(find.text('Ver la guía'), findsNothing);
     expect(find.text('Mis productos'), findsOneWidget);
+
+    await tester.tap(find.text('Libro'));
+    await tester.pump();
+    expect(find.text('Hoy'), findsOneWidget);
+    expect(find.text('Semana'), findsOneWidget);
+    expect(find.text('Mes'), findsOneWidget);
+    expect(find.text('Fechas'), findsOneWidget);
+    expect(find.text('Esta semana'), findsNothing);
+    expect(find.text('Para tu bolsa'), findsNothing);
+    expect(find.textContaining('Dinero limpio'), findsNothing);
+    expect(find.textContaining('CUENTA SIMPLE'), findsNothing);
+    expect(find.textContaining('registros'), findsNothing);
+    expect(find.text('Lo que entró al cajón'), findsNothing);
+    expect(find.textContaining('ventas registradas'), findsNothing);
+    expect(find.text('pesos'), findsNothing);
   });
 
   testWidgets('el QR con monto pasa por carga y error, y el confirmado vuelve al inicio', (tester) async {
@@ -95,16 +110,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
     await tester.pump(const Duration(milliseconds: 300));
     expect(llamadas, 1);
-    expect(caja.ruta.id, 'pago-error');
-    expect(find.text('Volver a intentar'), findsOneWidget);
-    expect(find.text('Gundani no pudo responder. Inténtalo otra vez.'), findsOneWidget);
-    expect(caja.ventas, isEmpty);
-
-    await tester.tap(find.text('Volver a intentar'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(caja.ruta.id, 'pago-creado');
-    expect(find.text('Listo, ya me pagaron'), findsOneWidget);
+    expect(caja.ruta.id, 'pago-confirmado');
+    expect(caja.ventas, hasLength(1));
+    expect(caja.ventas.single.pendiente, isTrue);
+    expect(find.text('Pago confirmado'), findsOneWidget);
+    expect(find.textContaining('saldo'), findsNothing);
 
     final listo = Caja()..cuentaId = '1';
     listo.cobroHecho = cobroDePrueba();
@@ -177,6 +187,51 @@ void main() {
     expect(find.text('Pago confirmado'), findsNothing);
     expect(find.text('QR expirado'), findsNothing);
     expect(caja.ventas, isEmpty);
+  });
+
+  testWidgets('sin señal, ya me pagaron guarda el cobro para después', (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    var llamadas = 0;
+    clienteHttp = clienteQueFalla(alLlamar: () => llamadas++);
+    final caja = Caja()
+      ..cuentaId = '1'
+      ..redNavegador = false;
+    caja.ponerCobro(cobroDePrueba().copy(metodo: 'qr'));
+    caja.raiz(const Ruta('pago-creado'));
+    await tester.pumpWidget(_app(caja));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('Listo, ya me pagaron'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(llamadas, 0);
+    expect(caja.ruta.id, 'pago-confirmado');
+    expect(caja.ventas.single.pendiente, isTrue);
+    expect(caja.ventas.single.total, 40);
+  });
+
+  test('al volver la señal el cobro pendiente se confirma', () async {
+    String? cuerpo;
+    clienteHttp = MockClient((request) async {
+      cuerpo = request.body;
+      return http.Response('{"ok":true}', 200);
+    });
+    final caja = Caja()
+      ..cuentaId = '1'
+      ..redNavegador = false;
+    final cobro = cobroDePrueba().copy(metodo: 'qr');
+    caja.ponerCobro(cobro);
+    caja.guardarCobro(cobro, pendiente: true);
+    caja.redNavegador = true;
+    await caja.sincronizar();
+
+    expect(caja.ventas.single.pendiente, isFalse);
+    expect(cuerpo, contains('"metodo_pago":"qr"'));
+    expect(cuerpo, contains('Pan'));
   });
 }
 

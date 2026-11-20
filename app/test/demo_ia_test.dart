@@ -5,10 +5,8 @@ import 'package:caja_clara/caja.dart';
 import 'package:caja_clara/main.dart';
 import 'package:caja_clara/modelos.dart';
 import 'package:caja_clara/servicios/asistente.dart';
-import 'package:caja_clara/servicios/config.dart';
 import 'package:caja_clara/servicios/foto.dart';
 import 'package:caja_clara/ui/mic.dart';
-import 'package:caja_clara/ui/servidor_ia.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
 import 'package:flutter_localizations/flutter_localizations.dart' show GlobalWidgetsLocalizations;
 import 'package:flutter_test/flutter_test.dart';
@@ -48,7 +46,6 @@ void main() {
   setUp(() async {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
-    await guardarServidor('https://demo.trycloudflare.com');
     clienteHttp = null;
     fotoDePrueba = (_) async => (bytes: [1, 2, 3], nombre: 'p.jpg');
   });
@@ -56,12 +53,11 @@ void main() {
   tearDown(() async {
     clienteHttp = null;
     fotoDePrueba = null;
-    await guardarServidor('');
   });
 
-  test('una sola URL: la pegada en la app manda sobre API_URL y Gundani va por el gateway', () {
-    expect(apiBase, 'https://demo.trycloudflare.com');
-    expect(gundaniBase, 'https://demo.trycloudflare.com');
+  test('la IA va al túnel y la caja a Gundani', () {
+    expect(apiBase, 'https://metro-norm-duo-lounge.trycloudflare.com');
+    expect(gundaniBase, 'http://80.241.220.188:8000');
   });
 
   testWidgets('(a) foto con chokis + sabritas -> cuenta editable con precios del catálogo y aviso', (tester) async {
@@ -237,7 +233,7 @@ void main() {
     final caja = tienda();
     caja.raiz(const Ruta('servidor-ia'));
     await tester.pumpWidget(_app(caja));
-    expect(find.byType(CampoServidorIa), findsOneWidget);
+    expect(find.text('Servidor de IA'), findsNothing);
 
     await tester.tap(find.text('Consultar modelos'));
     await tester.pumpAndSettle();
@@ -311,7 +307,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 800));
     expect(caja.ruta.id, 'pago-confirmado');
-    expect(find.text('SIMULADO · pagado'), findsOneWidget);
+    expect(find.text('SIMULADO · pagado'), findsNothing);
     expect(caja.ventas.single.total, 40);
   });
 

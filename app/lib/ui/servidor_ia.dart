@@ -1,68 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
-import '../servicios/config.dart';
 import '../servicios/ia_service.dart';
 import '../tema.dart';
 import 'avisos.dart';
 import 'widgets.dart';
-
-/// Campo "Servidor de IA": la URL del túnel se pega aquí y queda guardada en el teléfono.
-class CampoServidorIa extends StatefulWidget {
-  const CampoServidorIa({super.key});
-
-  @override
-  State<CampoServidorIa> createState() => _CampoServidorIaState();
-}
-
-class _CampoServidorIaState extends State<CampoServidorIa> {
-  final _url = TextEditingController(text: servidorGuardado);
-  String? _aviso;
-
-  @override
-  void dispose() {
-    _url.dispose();
-    super.dispose();
-  }
-
-  Future<void> _guardar() async {
-    final ok = await guardarServidor(_url.text);
-    if (!mounted) return;
-    setState(() => _aviso = !ok
-        ? 'Pega una dirección que empiece con https:// o http://'
-        : (apiBase.isEmpty ? 'Sin servidor: la IA no está disponible, la caja sigue a mano.' : 'Guardado. Usando $apiBase'));
-    if (ok) {
-      final caja = Caja.of(context);
-      caja.refrescarCaja();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Campo(
-          etiqueta: 'Servidor de IA',
-          controller: _url,
-          placeholder: 'https://xxxx.trycloudflare.com',
-          teclado: TextInputType.url,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          apiBase.isEmpty ? 'Pega la dirección del túnel que da la laptop del equipo.' : 'En uso: $apiBase',
-          style: const TextStyle(fontSize: 13, color: stone),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(onPressed: _guardar, icon: const Icon(Icons.save_outlined), label: const Text('Guardar servidor')),
-        if (_aviso != null) ...[
-          const SizedBox(height: 6),
-          Text(_aviso!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-        ],
-      ],
-    );
-  }
-}
 
 /// "Modelo en uso" (bases 6c): GPU, TensorRT, modelo base y hashes de lo que entrenó el equipo.
 class ModeloEnUso extends StatefulWidget {
@@ -192,7 +134,7 @@ class _ModeloEnUsoState extends State<ModeloEnUso> {
   }
 }
 
-/// Pantalla "Servidor y modelo en uso" (desde la pestaña Sin red).
+/// Pantalla "Servidor y modelo en uso".
 class ServidorYModelo extends StatelessWidget {
   const ServidorYModelo({super.key});
 
@@ -204,8 +146,6 @@ class ServidorYModelo extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [
-          CampoServidorIa(),
-          SizedBox(height: 24),
           ModeloEnUso(),
         ],
       ),
