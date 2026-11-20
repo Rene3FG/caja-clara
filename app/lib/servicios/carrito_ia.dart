@@ -22,6 +22,8 @@ const _alias = <String, List<String>>{
   'gansito': ['gansito'],
   'skittles': ['skittles'],
   'agua_1l': ['agua'],
+  'agua_horchata': ['horchata'],
+  'tlayuda': ['tlayuda'],
 };
 
 String _normal(String s) {

@@ -76,7 +76,7 @@ async def asistente(request: Request):
 @app.post("/libreta")
 async def libreta(foto: UploadFile = File(...)):
     datos = await foto.read()
-    return await _reenvia("POST", f"{ASI}/libreta", "lector de libreta", 60,
+    return await _reenvia("POST", f"{ASI}/libreta", "lector de libreta", 85,
                           files={"foto": (foto.filename or "libreta.jpg", datos, foto.content_type or "image/jpeg")})
 
 

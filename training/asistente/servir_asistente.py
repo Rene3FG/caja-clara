@@ -42,8 +42,8 @@ def main():
     ap.add_argument("--adaptador", default="resultados_asistente/lora_adaptador")
     ap.add_argument("--catalogo", default="datos_asistente/catalogo.json")
     ap.add_argument("--puerto", type=int, default=8001)
-    ap.add_argument("--giros", default=os.environ.get("GIROS", "tienda"),
-                    help="giros del catálogo que se atienden, separados por coma (por ahora solo tienda)")
+    ap.add_argument("--giros", default=os.environ.get("GIROS", "tienda,comida"),
+                    help="giros del catálogo que se atienden, separados por coma (por ahora sin materiales)")
     ap.add_argument("--modelo-vl", default=os.environ.get("MODELO_VL", "nvidia/nemotron-3.5-super-vl-120b-a12b"))
     a = ap.parse_args()
 
@@ -154,12 +154,14 @@ def main():
                  "de este catálogo, usa el nombre del catálogo:\n" + lineas_cat +
                  "\nNo agregues explicaciones, solo la lista.")
 
-    def transcribe(datos_img):
+    def transcribe(datos_img, giro=0):
         from PIL import Image, ImageOps
         llave = os.environ.get("NVIDIA_API_KEY")
         if not llave:
             raise RuntimeError("Falta NVIDIA_API_KEY en el servidor.")
         img = ImageOps.exif_transpose(Image.open(io.BytesIO(datos_img))).convert("RGB")
+        if giro:
+            img = img.rotate(giro, expand=True)
         img.thumbnail((1024, 1024))
         for q in (85, 70, 55):
             buf = io.BytesIO(); img.save(buf, "JPEG", quality=q)
@@ -194,6 +196,13 @@ def main():
             raise HTTPException(400, "El archivo no es una imagen válida (usa JPG o PNG).")
         try:
             transcripcion = transcribe(datos_img)
+            # Hoja fotografiada de lado (WhatsApp/galería quitan la orientación EXIF): si no salió
+            # ningún producto del catálogo, se lee girada a cada lado y gana la que reconozca más.
+            if not mencionados(transcripcion):
+                for giro in (90, 270):
+                    otra = transcribe(datos_img, giro)
+                    if len(mencionados(otra)) > len(mencionados(transcripcion)):
+                        transcripcion = otra
         except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
             return {"ok": False, "error": "No pude leer la foto ahora (sin conexión o servicio no disponible).", "detalle": str(e)[:200]}
         ms_vl = int((time.time() - t0) * 1000)
@@ -243,7 +252,7 @@ def main():
                 pendientes.append({"producto": None, "renglon": ren, "cantidad": None})
         if not r["items"] and not any(x["producto"] for x in pendientes):
             return {"ok": False, "accion": {"accion": "aclarar", "pregunta": err}, "transcripcion": transcripcion,
-                    "error": "No encontré productos de la tienda en la hoja.",
+                    "error": "No encontré productos del catálogo en la hoja.",
                     "texto_original": texto, "ms": ms}
         if pendientes:
             r["pendientes"] = pendientes
