@@ -732,7 +732,7 @@ class _QrPagoState extends State<QrPago> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          if (cobrar && !_aprobado) EtiquetaSimulado(estado: _cobrando ? 'pendiente' : null),
+          if (cobrar && !_aprobado) const EtiquetaSimulado(),
           if (cobrar && monto != null)
             Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -961,7 +961,7 @@ class _PagoCreadoState extends State<PagoCreado> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          const EtiquetaSimulado(estado: 'pendiente'),
+          const EtiquetaSimulado(),
           Text('Monto a cobrar: ${pesos(monto)} MXN', style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
           Container(
@@ -1049,7 +1049,7 @@ class PagoError extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const EtiquetaSimulado(estado: 'falló'),
+          const EtiquetaSimulado(),
           Text(caja.mensajePago, style: const TextStyle(fontSize: 18, height: 1.35)),
           const SizedBox(height: 16),
           Boton(texto: 'Volver a intentar', onPressed: caja.atras),

@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'caja.dart';
 import 'tema.dart';
-import 'ui/fiados.dart';
 import 'ui/guia.dart';
 import 'ui/inicio.dart';
 import 'ui/libreta.dart';
@@ -14,7 +13,6 @@ import 'ui/operacion.dart';
 import 'ui/perfil.dart';
 import 'ui/productos.dart';
 import 'ui/revisar.dart';
-import 'ui/servidor_ia.dart';
 import 'ui/splash.dart';
 
 const _conMarco = {'inicio', 'libro', 'productos'};
@@ -133,8 +131,6 @@ Widget _pantalla(Caja caja) {
         return const Inicio();
       case 'libro':
         return const Libro();
-      case 'fiados':
-        return const Fiados();
       case 'productos':
         return const ListaProductos();
       case 'producto':
@@ -161,8 +157,6 @@ Widget _pantalla(Caja caja) {
         return const DesglosePagos();
       case 'libreta':
         return const PasarLibreta();
-      case 'servidor-ia':
-        return const ServidorYModelo();
       default:
         return const Inicio();
     }

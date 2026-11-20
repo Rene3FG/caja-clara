@@ -56,27 +56,5 @@ mencionado, y calcula precios y totales.
 - **TensorRT 11.5:** el detector corre como engine optimizado en la laptop (~89 ms por foto en RTX 2060).
 - **build.nvidia.com:** Nemotron 3.5 Super VL para la libreta; Nemotron Bolt E4B como referencia de evaluación.
 
-## Tres decisiones de diseño
-
-1. **La IA propone, la persona confirma:** nada se guarda sin revisar; la cuenta se corrige con +/−.
-2. **Hablar o escribir, con sus palabras:** micrófono siempre a la mano y campo de texto al lado; entiende "cocas", "papitas", errores de dictado.
-3. **Si la IA duda, pregunta o deja pendiente:** nunca adivina un producto; los renglones dudosos de la libreta quedan para completar.
-
-Detalle y verificación: `docs/decisiones_hci.md`.
-
-## Resultados principales
-
-- **Detector v3:** en 36 fotos propias reservadas, conteo exacto 31% (v1) → **67%**; falsos positivos 100% → **11%**.
-  Test público (106 imágenes, TensorRT en RTX 2060): mAP50 1.00 en v1–v3; mAP 0.893 (v1), 0.887 (v2), 0.857 (v3).
-- **Asistente LoRA vs base (74 casos):** coincidencia exacta 1.4% → **86.5%**; JSON válido 45.9% → **100%**; reservados 0/14 → **13/14**.
-- **App:** 9 casos del recorrido contra los servicios reales (8 como se esperaba, 1 error del detector corregible en la revisión); 43 pruebas automáticas de la app.
-- **Pruebas de uso:** _[resumen de las 2 pruebas]_
-
-## Limitaciones
-
-- El detector pierde las chokis cuando están junto a sabritas (1/11 fotos mixtas correctas) y solo conoce 7 productos.
-- Leer la libreta por foto requiere internet; sin internet se dicta o se escribe.
-- Los cobros QR/transferencia son **simulados**; no hay conexión con bancos ni Banxico.
-- Datos del asistente sintéticos; pruebas de uso con pocas personas.
-
-_Declaración de uso de IA: `docs/DECLARACION_IA_Y_LICENCIAS.md`._
+## Limitaciones y siguientes pasos
+Ver `docs/funciones.md`.

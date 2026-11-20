@@ -22,6 +22,7 @@ class _GuiaState extends State<Guia> {
   String? _pregunta;
   var _respuesta = '';
   var _cargando = false;
+  var _esPreguntaPropia = false;
   SesionVoz? _sesion;
 
   @override
@@ -48,6 +49,7 @@ class _GuiaState extends State<Guia> {
         setState(() {
           _pregunta = pasos[caja.pasoGuia].pregunta;
           _respuesta = pasos[caja.pasoGuia].respuesta;
+          _esPreguntaPropia = false;
         });
       }
       caja.moverGuia(caja.pasoGuia, caja.vistaGuia + 1);
@@ -58,6 +60,7 @@ class _GuiaState extends State<Guia> {
         _pregunta = null;
         _respuesta = '';
         _texto.clear();
+        _esPreguntaPropia = false;
       });
       caja.moverGuia(caja.pasoGuia + 1, 1);
       return;
@@ -80,19 +83,21 @@ class _GuiaState extends State<Guia> {
     final q = _texto.text.trim();
     if (q.isEmpty || Caja.of(context).pasoGuia < 0 || _cargando) return;
     final caja = Caja.of(context);
-    final tema = pasos[caja.pasoGuia].id;
+    final actual = pasos[caja.pasoGuia];
     setState(() {
       _pregunta = q;
+      _esPreguntaPropia = true;
       _cargando = true;
       _texto.clear();
     });
     caja.moverGuia(caja.pasoGuia, 3);
-    final r = await preguntar(q, tema);
+    final r = await preguntar(q, actual.id, paso: actual);
     if (!mounted) return;
     setState(() {
       _respuesta = r;
       _cargando = false;
     });
+    decir(r);
   }
 
   Future<void> _mic() async {
@@ -306,6 +311,8 @@ class _GuiaState extends State<Guia> {
   }
 
   List<Widget> _duda(PasoGuia actual) {
+    final mostrarFijos = !_esPreguntaPropia && !_cargando;
+    final encabezado = _esPreguntaPropia || actual.lead != null;
     return [
       Align(
         alignment: Alignment.centerRight,
@@ -324,31 +331,33 @@ class _GuiaState extends State<Guia> {
         ),
       ),
       const SizedBox(height: 12),
-      if (actual.lead != null)
+      if (encabezado)
         Row(children: [
           const Icon(Icons.spa, size: 16, color: cempasuchil),
           const SizedBox(width: 6),
           const Text('Respuesta de Cempasúchil', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: stone)),
         ]),
-      if (actual.lead != null) const SizedBox(height: 8),
-      _tarjeta(
+      if (encabezado) const SizedBox(height: 8),
+      _cargando
+          ? const _Escribiendo()
+          : _tarjeta(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (actual.lead != null) Text(actual.lead!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: grana)),
-            Text(_cargando ? 'Un momento…' : _respuesta, style: const TextStyle(fontSize: 16, height: 1.4)),
-            if (actual.proteccion != null && !_cargando) ...[
+            if (mostrarFijos && actual.lead != null) Text(actual.lead!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: grana)),
+            Text(_respuesta, style: const TextStyle(fontSize: 16, height: 1.4)),
+            if (mostrarFijos && actual.proteccion != null) ...[
               const SizedBox(height: 10),
               _aviso(const Color(0xFFF3EBE6), actual.proteccion!, icono: Icons.check_circle, tinta: maguey),
             ],
           ],
         ),
       ),
-      if (actual.cajaRosa != null && !_cargando) ...[
+      if (mostrarFijos && actual.cajaRosa != null) ...[
         const SizedBox(height: 8),
         _aviso(const Color(0xFFFEE2E2), actual.cajaRosa!, icono: Icons.lock_outline, tinta: grana),
       ],
-      if (actual.cajaVerde != null && !_cargando) ...[
+      if (mostrarFijos && actual.cajaVerde != null) ...[
         const SizedBox(height: 8),
         _aviso(const Color(0xFFDCFCE7), actual.cajaVerde!, icono: Icons.check_circle, tinta: maguey),
       ],
@@ -499,6 +508,77 @@ class _GuiaState extends State<Guia> {
         style: FilledButton.styleFrom(backgroundColor: fondo, foregroundColor: tinta, padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
         child: Icon(icono),
       ),
+    );
+  }
+}
+
+class _Escribiendo extends StatefulWidget {
+  const _Escribiendo();
+
+  @override
+  State<_Escribiendo> createState() => _EscribiendoState();
+}
+
+class _EscribiendoState extends State<_Escribiendo> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulso = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
+
+  @override
+  void dispose() {
+    _pulso.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7E2DA)),
+      ),
+      child: AnimatedBuilder(
+        animation: _pulso,
+        builder: (context, child) {
+          final centro = -1.6 + _pulso.value * 3.2;
+          return ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (rect) => LinearGradient(
+              begin: Alignment(centro - 0.45, 0),
+              end: Alignment(centro + 0.45, 0),
+              colors: const [Color(0xFF000000), Color(0x33000000), Color(0xFF000000)],
+            ).createShader(rect),
+            child: child,
+          );
+        },
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Escribiendo', style: TextStyle(fontSize: 16, height: 1.4, color: stone)),
+            SizedBox(height: 12),
+            _Trazo(ancho: 1),
+            SizedBox(height: 8),
+            _Trazo(ancho: 0.72),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Trazo extends StatelessWidget {
+  const _Trazo({required this.ancho});
+
+  final double ancho;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: ancho,
+      alignment: Alignment.centerLeft,
+      child: Container(height: 10, decoration: BoxDecoration(color: const Color(0xFFE7E2DA), borderRadius: BorderRadius.circular(6))),
     );
   }
 }

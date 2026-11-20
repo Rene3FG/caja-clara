@@ -319,31 +319,33 @@ class _MicGundaniState extends State<MicGundani> {
     }
   }
 
-  /// La consulta la calcula el código con las ventas guardadas en el teléfono, no el modelo.
+  /// La consulta la calcula el código con las ventas del periodo del Libro, no el modelo.
   String _consultaLocal(Caja caja, String tipo) {
-    final hoy = DateTime.now();
-    final deHoy = caja.ventas.where((v) => v.en.year == hoy.year && v.en.month == hoy.month && v.en.day == hoy.day).toList();
-    final total = deHoy.fold<double>(0, (s, v) => s + v.total);
+    final ahora = DateTime.now();
+    final rango = rangoDe(caja.periodo, ahora);
+    final delPeriodo = caja.ventas.where((v) => enRango(v.en, rango)).toList();
+    final titulo = tituloPeriodo(caja.periodo, ahora);
+    final total = delPeriodo.fold<double>(0, (s, v) => s + v.total);
     switch (tipo) {
       case 'efectivo_hoy':
-        final ef = deHoy.where((v) => v.metodo == Metodo.efectivo).fold<double>(0, (s, v) => s + v.total);
-        return 'Hoy llevas ${pesos(ef)} en efectivo.';
+        final ef = delPeriodo.where((v) => v.metodo == Metodo.efectivo).fold<double>(0, (s, v) => s + v.total);
+        return '$titulo llevas ${pesos(ef)} en efectivo.';
       case 'pendientes':
         return caja.pendientes == 0 ? 'No hay nada pendiente de enviar.' : 'Tienes ${caja.pendientes} registro(s) pendientes de enviar.';
       case 'mas_vendido':
       case 'menos_vendido':
         final piezas = <String, int>{};
-        for (final v in deHoy) {
+        for (final v in delPeriodo) {
           for (final l in v.lineas) {
             piezas[l.nombre] = (piezas[l.nombre] ?? 0) + l.cantidad;
           }
         }
-        if (piezas.isEmpty) return 'Hoy todavía no hay ventas.';
+        if (piezas.isEmpty) return '$titulo todavía no hay ventas.';
         final orden = piezas.entries.toList()..sort((a, b) => a.value.compareTo(b.value));
         final e = tipo == 'mas_vendido' ? orden.last : orden.first;
-        return 'Lo ${tipo == 'mas_vendido' ? 'más' : 'menos'} vendido hoy: ${e.key} (${e.value}).';
+        return 'Lo ${tipo == 'mas_vendido' ? 'más' : 'menos'} vendido ($titulo): ${e.key} (${e.value}).';
       default: // ventas_hoy, cierre_caja
-        return 'Hoy llevas ${deHoy.length} venta(s) por ${pesos(total)}.';
+        return '$titulo llevas ${delPeriodo.length} venta(s) por ${pesos(total)}.';
     }
   }
 

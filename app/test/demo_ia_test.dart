@@ -207,6 +207,7 @@ void main() {
     await tester.tap(find.textContaining(RegExp('aceptar', caseSensitive: false)));
     await tester.pumpAndSettle();
     expect(tester.widget<FilledButton>(guardar).onPressed, isNotNull);
+    expect(find.text('Guardar en el libro (cobrando)'), findsNothing);
 
     await tester.ensureVisible(guardar);
     await tester.tap(guardar);
@@ -219,34 +220,48 @@ void main() {
     expect(caja.ruta.id, 'libro');
   });
 
-  testWidgets('(d) modelo en uso muestra hashes cortos y el completo al tocar', (tester) async {
+  testWidgets('libreta de hoy abre el cobro sin guardar todavía', (tester) async {
     _pantallaGrande(tester);
-    const det = 'e58f31e320305dfd1652907b0501d8fb6361af8864d53c92f5fd9842f81a31ed';
-    const asi = '72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d';
     clienteHttp = gateway({
-      '/salud': (_) => {
+      '/libreta': (_) => {
             'ok': true,
-            'detector': {'ok': true, 'modelo': 'DINO', 'gpu': 'NVIDIA GeForce RTX 2060', 'tensorrt': '11.5.0.63', 'sha256_engine': det},
-            'asistente': {'ok': true, 'modelo_base': 'Qwen/Qwen2.5-1.5B-Instruct', 'dispositivo': 'cuda', 'sha256_adaptador': asi},
+            'transcripcion': '2 sabritas',
+            'items': [
+              {'producto': 'sabritas', 'nombre': 'sabritas', 'cantidad': 2, 'precio': 20},
+            ],
+            'pendientes': [],
+            'requiere_fecha': true,
           },
     });
     final caja = tienda();
-    caja.raiz(const Ruta('servidor-ia'));
+    caja.raiz(const Ruta('libreta'));
     await tester.pumpWidget(_app(caja));
-    expect(find.text('Servidor de IA'), findsNothing);
-
-    await tester.tap(find.text('Consultar modelos'));
+    await tester.tap(find.text('Tomar foto de la libreta'));
     await tester.pumpAndSettle();
-    expect(find.text('NVIDIA GeForce RTX 2060'), findsOneWidget);
-    expect(find.text('11.5.0.63'), findsOneWidget);
-    expect(find.text('Qwen/Qwen2.5-1.5B-Instruct'), findsOneWidget);
-    expect(find.text('e58f31e320305dfd…'), findsOneWidget);
-    expect(find.text('72a3259e7285b8a8…'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Ver hash completo').first);
-    await tester.tap(find.text('Ver hash completo').first);
-    await tester.pump();
-    expect(find.text(det), findsOneWidget);
+    await tester.tap(find.textContaining('elegir fecha'));
+    await tester.pumpAndSettle();
+    final hoy = DateTime.now();
+    final ayer = hoy.subtract(const Duration(days: 1));
+    if (ayer.month != hoy.month) {
+      await tester.tap(find.byIcon(Icons.chevron_right));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.text('${hoy.day}').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining(RegExp('aceptar', caseSensitive: false)));
+    await tester.pumpAndSettle();
+
+    final cobrar = find.widgetWithText(FilledButton, 'Guardar en el libro (cobrando)');
+    expect(cobrar, findsOneWidget);
+    await tester.ensureVisible(cobrar);
+    await tester.tap(cobrar);
+    await tester.pumpAndSettle();
+
+    expect(caja.ruta.id, 'pago');
+    expect(caja.ventas, isEmpty);
+    expect(caja.borrador, isNotEmpty);
+    expect(caja.cobro?.monto, 40);
   });
 
   testWidgets('(e) gateway apagado: foto muestra el error y Capturar a mano abre el catálogo', (tester) async {
@@ -300,7 +315,7 @@ void main() {
     caja.ponerCobro(const Cobro(tipo: 'venta', concepto: '2 Sabritas sal', cantidad: 1, monto: 40, metodo: 'efectivo', origen: 'manual'));
     caja.raiz(const Ruta('pago'));
     await tester.pumpWidget(_app(caja));
-    expect(find.text('SIMULADO'), findsOneWidget);
+    expect(find.text('Codi (simulado)'), findsOneWidget);
 
     await tester.tap(find.text('Efectivo'));
     await tester.pump();

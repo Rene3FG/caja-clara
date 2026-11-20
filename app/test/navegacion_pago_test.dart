@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:caja_clara/caja.dart';
+import 'package:caja_clara/cuentas.dart';
 import 'package:caja_clara/main.dart';
 import 'package:caja_clara/modelos.dart';
 import 'package:caja_clara/servicios/asistente.dart';
@@ -215,9 +216,9 @@ void main() {
   });
 
   test('al volver la señal el cobro pendiente se confirma', () async {
-    String? cuerpo;
+    final cuerpos = <String>[];
     clienteHttp = MockClient((request) async {
-      cuerpo = request.body;
+      cuerpos.add(request.body);
       return http.Response('{"ok":true}', 200);
     });
     final caja = Caja()
@@ -230,8 +231,50 @@ void main() {
     await caja.sincronizar();
 
     expect(caja.ventas.single.pendiente, isFalse);
-    expect(cuerpo, contains('"metodo_pago":"qr"'));
-    expect(cuerpo, contains('Pan'));
+    expect(cuerpos.any((c) => c.contains('"metodo_pago":"qr"') && c.contains('Pan')), isTrue);
+  });
+
+  test('si la base está más nueva, el teléfono toma ese gasto', () async {
+    clienteHttp = MockClient((_) async => http.Response(
+          '{"usuario":{"id":"1","negocio":"","nombre":"","clabe":"","guiaHecha":false,"actualizado":"1970-01-01T00:00:00.000Z"},"productos":[],"ventas":[],"gastos":[{"id":"g-remoto","en":"2026-11-20T12:00:00.000","concepto":"Hielo","monto":50,"metodo":"efectivo","pendiente":false,"actualizado":"2099-01-01T00:00:00.000Z"}]}',
+          200,
+        ));
+    final caja = Caja()
+      ..cuentaId = '1'
+      ..redNavegador = true;
+    await caja.sincronizar();
+    expect(caja.gastos.single.concepto, 'Hielo');
+    expect(caja.gastos.single.monto, 50);
+  });
+
+  testWidgets('en Semana el Libro muestra la venta sincronizada', (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    clienteHttp = MockClient((_) async => http.Response('{"ok":true}', 200));
+    final caja = Caja()
+      ..cuentaId = '1'
+      ..negocio = 'La Esquina'
+      ..nombre = 'Rosa'
+      ..redNavegador = false;
+    final cobro = cobroDePrueba();
+    caja.ponerCobro(cobro);
+    caja.guardarCobro(cobro, pendiente: true);
+    caja.setPeriodo(const Periodo('semana'));
+    caja.redNavegador = true;
+    await caja.sincronizar();
+    caja.tab('libro');
+    await tester.pumpWidget(_app(caja));
+    await tester.pump();
+
+    expect(caja.ventas.single.pendiente, isFalse);
+    expect(find.textContaining('+\$40'), findsOneWidget);
+
+    caja.setPeriodo(const Periodo('hoy'));
+    await tester.pumpWidget(_app(caja));
+    await tester.pump();
+    expect(find.textContaining('+\$40'), findsOneWidget);
   });
 }
 

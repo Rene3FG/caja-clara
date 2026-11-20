@@ -27,23 +27,20 @@ bash scripts/demo_down.sh           # apagar todo (hazlo al terminar cada prueba
 - El túnel es público y sin autenticación: compártelo solo con el equipo y apágalo al terminar.
 - Logs en `logs/demo/` (ignorado por git).
 
-## 2. Poner la URL en la app
+## 2. Direcciones fijas
 
-Valores por defecto en `app/lib/servicios/config.dart`:
+La app no pide una URL. Están en `app/lib/servicios/config.dart`:
 
-- `apiBase`: el gateway de IA (la URL del túnel que imprime `demo_up.sh`).
-- `gundaniBase`: el VPS de Gundani (cobros simulados, movimientos y resumen de caja).
+- IA: `https://ordered-herein-avatar-incorporate.trycloudflare.com`
+- Caja (Gundani): `http://80.241.220.188:8000`
 
-**Perfil → Servidor IA** guarda otra URL en el teléfono (`shared_preferences`). Si hay una guardada, la
-IA **y** las llamadas a `/api` van a ella (el gateway reenvía `/api/*` a Gundani); si se borra el campo
-y se guarda, vuelven los valores por defecto. **Probar conexión** llama a `/salud` y dice si respondió.
-El túnel cambia cada vez que se reinicia la demo: basta con pegar la URL nueva ahí.
+La barra es Inicio, Libro y Productos.
 
 ```bash
 cd app
 flutter pub get && flutter analyze && flutter test
-flutter build apk --release      # requiere Android SDK
-adb install -r build/app/outputs/flutter-apk/app-release.apk
+flutter run
+flutter build apk --release   # requiere Android SDK
 ```
 
 Prueba en vivo (pantallas reales contra el gateway real, sin teléfono):
@@ -64,16 +61,14 @@ flutter test test_en_vivo --dart-define=DEMO_URL=$(cat ../logs/demo/url_tunel.tx
 | Botón **Hablar** / caja de texto (`ui/mic.dart`) | Texto → carrito (agregar, quitar, forma de pago, consulta) | `POST /asistente`; si el LoRA no lo cubre (p. ej. gastos): `POST /api/asistente` (Gundani) |
 | Libro → **Pasar libreta a digital** (`ui/libreta.dart`) | Foto de la hoja → transcripción, pendientes, fecha → ventas pasadas | `POST /libreta`; sin foto: `POST /asistente` con "pásame lo de la libreta: …" |
 | Elegir forma de pago, QR, Pago creado (`ui/operacion.dart`) | Cobro **SIMULADO** | `POST /api/movimientos/confirmar`, `POST /api/qr/cobrar` |
-| Libro (`ui/libro.dart`) | Resumen del día | `GET /api/caja/resumen`; sin Gundani, las ventas del teléfono |
-| Libro → **Modelos de IA en uso** (`ui/servidor_ia.dart`) | Modelos cargados y sus hashes | `GET /salud` |
+| Libro (`ui/libro.dart`) | Resumen del periodo (Hoy, Semana, Mes, Fechas). Hoy, si hay Gundani, usa su resumen | `GET /api/caja/resumen`; sin Gundani, las ventas del teléfono |
 
 Código de conexión: `app/lib/servicios/config.dart` (URL única), `ia_service.dart` (cliente y mensajes
 de error `IaError`), `carrito_ia.dart` (clase de la IA → producto del catálogo y líneas del carrito).
 
 ## 4. Qué significa SIMULADO
 
-Ningún cobro mueve dinero real. Todas las pantallas de pago muestran la etiqueta **SIMULADO**
-(con su estado: pendiente, pagado o falló):
+Ningún cobro mueve dinero real. Elegir pago, el QR, el pago creado y el error muestran la etiqueta **Codi (simulado)**:
 
 - El cobro lo resuelve Gundani (backend del equipo) a través del gateway.
 - El interruptor **QR expirado** fuerza el caso de fallo (bases 11).
@@ -92,8 +87,7 @@ Ningún cobro mueve dinero real. Todas las pantallas de pago muestran la etiquet
   `ok == false` muestra `error` / `pregunta` y deja reintentar.
 - **Libreta → /libreta**: transcripción arriba, lista editable abajo, cantidad para cada `pendientes`
   (o descartar), fecha con DatePicker (la IA no decide la fecha), guardado como ventas pasadas.
-- **Modelo en uso**: GPU, TensorRT, modelo base, engine y hashes (16 caracteres + "Ver hash completo").
-- **Errores (6e)**: sin URL, sin conexión, tardó, foto inválida, nada detectado → mensaje claro y
+- **Errores (6e)**: sin conexión, tardó, foto inválida, nada detectado → mensaje claro y
   botón **Capturar a mano**. Ninguna falla bloquea la venta.
 - **Nada se guarda sin confirmar (6d)**: la IA solo arma la cuenta; guardar o cobrar siempre lo toca la persona.
 

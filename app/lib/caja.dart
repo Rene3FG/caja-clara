@@ -28,6 +28,7 @@ class Caja extends ChangeNotifier {
   var modoRed = ModoRed.auto;
   var redNavegador = true;
   var periodo = const Periodo('hoy');
+  var marcas = <String, String>{};
   var borrador = <Linea>[];
   var aviso = '';
   Cobro? cobro;
@@ -97,6 +98,7 @@ class Caja extends ChangeNotifier {
     clabe = '';
     modoRed = ModoRed.auto;
     periodo = const Periodo('hoy');
+    marcas = {};
   }
 
   void _leer(Map<String, dynamic> j) {
@@ -116,6 +118,8 @@ class Caja extends ChangeNotifier {
     if (p is Map && p['tipo'] is String) {
       periodo = Periodo(p['tipo'] as String, desde: p['desde'] as String?, hasta: p['hasta'] as String?);
     }
+    final m = j['marcas'];
+    if (m is Map) marcas = {for (final e in m.entries) e.key.toString(): '${e.value}'};
   }
 
   Map<String, dynamic> _json() => {
@@ -132,6 +136,7 @@ class Caja extends ChangeNotifier {
         'clabe': clabe,
         'modoRed': modoRed.name,
         'periodo': {'tipo': periodo.tipo, 'desde': periodo.desde, 'hasta': periodo.hasta},
+        'marcas': marcas,
       };
 
   Future<void> _persist() async {
@@ -216,9 +221,10 @@ class Caja extends ChangeNotifier {
   }
 
   void guardarProducto({String? id, required String nombre, String? detalle, required double precio}) {
+    final pid = id ?? _id();
     if (id == null) {
       productos = [
-        Producto(id: _id(), nombre: nombre, detalle: detalle ?? '', precio: precio),
+        Producto(id: pid, nombre: nombre, detalle: detalle ?? '', precio: precio),
         ...productos,
       ];
     } else {
@@ -227,14 +233,16 @@ class Caja extends ChangeNotifier {
           if (p.id == id) p.copy(nombre: nombre, detalle: detalle, precio: precio) else p,
       ];
     }
+    _marcar(pid);
     _persist();
   }
 
   void agregarVenta({required Metodo metodo, required List<Linea> lineas, required double total, bool? pendiente, DateTime? en}) {
     final queda = pendiente ?? !conectado;
+    final vid = _id();
     ventas = [
       Venta(
-        id: _id(),
+        id: vid,
         en: en ?? DateTime.now(),
         metodo: metodo,
         lineas: lineas,
@@ -243,16 +251,19 @@ class Caja extends ChangeNotifier {
       ),
       ...ventas,
     ];
+    _marcar(vid);
     _persist();
     if (conectado && !queda) sincronizar();
   }
 
   void agregarGasto({required String concepto, required double monto, required Metodo metodo, bool? pendiente}) {
     final queda = pendiente ?? !conectado;
+    final gid = _id();
     gastos = [
-      Gasto(id: _id(), en: DateTime.now(), concepto: concepto, monto: monto, metodo: metodo, pendiente: queda),
+      Gasto(id: gid, en: DateTime.now(), concepto: concepto, monto: monto, metodo: metodo, pendiente: queda),
       ...gastos,
     ];
+    _marcar(gid);
     _persist();
     if (conectado && !queda) sincronizar();
   }
@@ -300,6 +311,7 @@ class Caja extends ChangeNotifier {
     this.negocio = n;
     this.nombre = p;
     this.clabe = c;
+    _marcar('perfil');
     pila = [const Ruta('inicio')];
     await _persist();
     return true;
@@ -315,18 +327,104 @@ class Caja extends ChangeNotifier {
   }
 
   Future<void> sincronizar() async {
+    if (!conectado) return;
     final pv = ventas.where((v) => v.pendiente).toList();
     final pg = gastos.where((g) => g.pendiente).toList();
-    if (pv.isEmpty && pg.isEmpty) return;
-    try {
-      await enviarPendientes(pv, pg);
-      ventas = [for (final v in ventas) if (v.pendiente) v.copy(pendiente: false, limpiarError: true) else v];
-      gastos = [for (final g in gastos) if (g.pendiente) g.copy(pendiente: false, limpiarError: true) else g];
-    } catch (_) {
-      ventas = [for (final v in ventas) if (v.pendiente) v.copy(error: 'Sigue guardado en el teléfono.') else v];
-      gastos = [for (final g in gastos) if (g.pendiente) g.copy(error: 'Sigue guardado en el teléfono.') else g];
+    if (pv.isNotEmpty || pg.isNotEmpty) {
+      try {
+        await enviarPendientes(pv, pg);
+        ventas = [for (final v in ventas) if (v.pendiente) v.copy(pendiente: false, limpiarError: true) else v];
+        gastos = [for (final g in gastos) if (g.pendiente) g.copy(pendiente: false, limpiarError: true) else g];
+        for (final v in pv) {
+          _marcar(v.id);
+        }
+        for (final g in pg) {
+          _marcar(g.id);
+        }
+      } catch (_) {
+        ventas = [for (final v in ventas) if (v.pendiente) v.copy(error: 'Sigue guardado en el teléfono.') else v];
+        gastos = [for (final g in gastos) if (g.pendiente) g.copy(error: 'Sigue guardado en el teléfono.') else g];
+      }
     }
+    if (cuentaId.isEmpty) {
+      _persist();
+      return;
+    }
+    final remoto = await cruzarEstado(_estado());
+    if (remoto != null) _traer(remoto);
     _persist();
+  }
+
+  String _marca(String id) => marcas[id] ?? '1970-01-01T00:00:00.000Z';
+
+  void _marcar(String id) => marcas[id] = DateTime.now().toUtc().toIso8601String();
+
+  Map<String, dynamic> _estado() => {
+        'usuario': {
+          'id': cuentaId,
+          'negocio': negocio,
+          'nombre': nombre,
+          'clabe': clabe,
+          'guiaHecha': guiaHecha,
+          'actualizado': _marca('perfil'),
+        },
+        'productos': [
+          for (final p in productos) {...p.toJson(), 'actualizado': _marca(p.id)},
+        ],
+        'ventas': [
+          for (final v in ventas) {...v.toJson(), 'actualizado': _marca(v.id)},
+        ],
+        'gastos': [
+          for (final g in gastos) {...g.toJson(), 'actualizado': _marca(g.id)},
+        ],
+      };
+
+  void _traer(Map<String, dynamic> remoto) {
+    final guia = guiaHecha;
+    final listo = perfilListo;
+    final u = remoto['usuario'];
+    if (u is Map) {
+      final mapa = u.map((k, v) => MapEntry(k.toString(), v));
+      final id = mapa['id'] as String? ?? '';
+      final remotoMarca = mapa['actualizado'] as String? ?? '';
+      final vacio = negocio.isEmpty && nombre.isEmpty && productos.isEmpty && ventas.isEmpty && gastos.isEmpty;
+      if (id.isNotEmpty && id != cuentaId && vacio) cuentaId = id;
+      if (remotoMarca.compareTo(_marca('perfil')) > 0) {
+        negocio = mapa['negocio'] as String? ?? negocio;
+        nombre = mapa['nombre'] as String? ?? nombre;
+        clabe = mapa['clabe'] as String? ?? clabe;
+        guiaHecha = mapa['guiaHecha'] == true;
+        marcas['perfil'] = remotoMarca;
+      }
+    }
+    _traerFilas(remoto['productos'], (mapa) {
+      final p = Producto.fromJson(mapa);
+      productos = [for (final x in productos) if (x.id != p.id) x, p];
+    });
+    _traerFilas(remoto['ventas'], (mapa) {
+      final v = Venta.fromJson(mapa);
+      ventas = [for (final x in ventas) if (x.id != v.id) x, v];
+    });
+    _traerFilas(remoto['gastos'], (mapa) {
+      final g = Gasto.fromJson(mapa);
+      gastos = [for (final x in gastos) if (x.id != g.id) x, g];
+    });
+    if ((guia != guiaHecha || listo != perfilListo) && pila.length == 1 && const {'guia', 'perfil', 'inicio'}.contains(ruta.id)) {
+      _abrir();
+    }
+  }
+
+  void _traerFilas(Object? lista, void Function(Map<String, dynamic>) aplicar) {
+    if (lista is! List) return;
+    for (final r in lista) {
+      if (r is! Map) continue;
+      final mapa = r.map((k, v) => MapEntry(k.toString(), v));
+      final id = mapa['id'] as String? ?? '';
+      final remoto = mapa['actualizado'] as String? ?? '';
+      if (id.isEmpty || _marca(id).compareTo(remoto) >= 0) continue;
+      aplicar(mapa);
+      marcas[id] = remoto;
+    }
   }
 
   static String _id() => DateTime.now().microsecondsSinceEpoch.toString();
