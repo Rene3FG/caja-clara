@@ -32,4 +32,4 @@ google-chrome --headless --no-pdf-header-footer --print-to-pdf=docs/entregas/02_
 ```
 
 Antes de cerrar: revocar la `NVIDIA_API_KEY` usada en desarrollo y verificar que los enlaces del Panel abran
-sin iniciar sesión (el repositorio es privado: hacerlo público o dar acceso al jurado).
+sin iniciar sesión (repositorio público desde el 2026-11-20; documento 02: https://github.com/Rene3FG/caja-clara/blob/main/docs/entregas/02_modelos_ia.pdf).
