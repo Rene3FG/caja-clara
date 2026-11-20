@@ -1,0 +1,522 @@
+{
+  "resumen": {
+    "fecha": "2026-11-20T02:47:30",
+    "modo": "ajustado",
+    "modelo_base": "Qwen/Qwen2.5-3B-Instruct",
+    "adapter_dir": "modelo_gundani_lora",
+    "gpu": "Tesla T4",
+    "total_casos": 14,
+    "json_estricto_valido": "14/14 (100.0%)",
+    "claves_correctas": "14/14 (100.0%)",
+    "intencion_exacta": "12/14 (85.7%)",
+    "confirmacion_correcta": "13/14 (92.9%)",
+    "monto_correcto": "7/7 (100.0%)",
+    "latencia_promedio_seg": 10.295
+  },
+  "casos": [
+    {
+      "id": 1,
+      "categoria": "habitual_cobro",
+      "entrada_usuario": "Cóbrale 78 pesos con QR por un litro de aceite y medio kilo de azúcar",
+      "esperado": {
+        "intencion": "crear_cobro",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Aceite y azúcar",
+          "cantidad": 1,
+          "monto": 78,
+          "metodo_pago": "qr"
+        },
+        "respuesta_voz": "Listo, preparé el cobro de $78 pesos por Aceite y azúcar (qr). Revisa los datos y confirma en pantalla."
+      },
+      "salida_cruda": "{\"intencion\": \"crear_cobro\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Aceite y azúcar\", \"cantidad\": 1, \"monto\": 78, \"metodo_pago\": \"qr\"}, \"respuesta_voz\": \"Listo, preparé el cobro de $78 pesos por Aceite y azúcar (qr). Revisa los datos y confirma en pantalla.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "crear_cobro",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Aceite y azúcar",
+            "cantidad": 1,
+            "monto": 78,
+            "metodo_pago": "qr"
+          },
+          "respuesta_voz": "Listo, preparé el cobro de $78 pesos por Aceite y azúcar (qr). Revisa los datos y confirma en pantalla."
+        }
+      },
+      "tiempo_seg": 11.849
+    },
+    {
+      "id": 2,
+      "categoria": "habitual_cobro_modismo",
+      "entrada_usuario": "Cobra 44 baros de dos chescos y unas galletas marías",
+      "esperado": {
+        "intencion": "crear_cobro",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Refrescos y galletas Marías",
+          "cantidad": 1,
+          "monto": 44,
+          "metodo_pago": "qr"
+        },
+        "respuesta_voz": "Listo, preparé el cobro de $44 pesos por Refrescos y galletas Marías (qr). Revisa los datos y confirma en pantalla."
+      },
+      "salida_cruda": "{\"intencion\": \"crear_cobro\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Refrescos y galletas\", \"cantidad\": 1, \"monto\": 44, \"metodo_pago\": \"qr\"}, \"respuesta_voz\": \"Listo, preparé el cobro de $44 pesos por Refrescos y galletas (qr). Revisa los datos y confirma en pantalla.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "crear_cobro",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Refrescos y galletas",
+            "cantidad": 1,
+            "monto": 44,
+            "metodo_pago": "qr"
+          },
+          "respuesta_voz": "Listo, preparé el cobro de $44 pesos por Refrescos y galletas (qr). Revisa los datos y confirma en pantalla."
+        }
+      },
+      "tiempo_seg": 11.639
+    },
+    {
+      "id": 3,
+      "categoria": "habitual_error_stt",
+      "entrada_usuario": "Venta en efectivo de 31 pesos por un garra fon de agua",
+      "esperado": {
+        "intencion": "crear_cobro",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Garrafón de agua",
+          "cantidad": 1,
+          "monto": 31,
+          "metodo_pago": "efectivo"
+        },
+        "respuesta_voz": "Listo, preparé el cobro de $31 pesos por Garrafón de agua (efectivo). Revisa los datos y confirma en pantalla."
+      },
+      "salida_cruda": "{\"intencion\": \"crear_cobro\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Agua Fonda\", \"cantidad\": 1, \"monto\": 31, \"metodo_pago\": \"efectivo\"}, \"respuesta_voz\": \"Listo, preparé el cobro de $31 pesos por Agua Fonda (efectivo). Revisa los datos y confirma en pantalla.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "crear_cobro",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Agua Fonda",
+            "cantidad": 1,
+            "monto": 31,
+            "metodo_pago": "efectivo"
+          },
+          "respuesta_voz": "Listo, preparé el cobro de $31 pesos por Agua Fonda (efectivo). Revisa los datos y confirma en pantalla."
+        }
+      },
+      "tiempo_seg": 11.299
+    },
+    {
+      "id": 4,
+      "categoria": "habitual_gasto",
+      "entrada_usuario": "Anota un gasto de 680 pesos al camión de Marinela en efectivo",
+      "esperado": {
+        "intencion": "registrar_gasto",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Proveedor Marinela",
+          "cantidad": 1,
+          "monto": 680,
+          "metodo_pago": "efectivo"
+        },
+        "respuesta_voz": "Registré el gasto de $680 pesos por Proveedor Marinela (efectivo). Verifica la información y confirma para guardarlo."
+      },
+      "salida_cruda": "{\"intencion\": \"registrar_gasto\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Proveedor Marinela\", \"cantidad\": 1, \"monto\": 680, \"metodo_pago\": \"efectivo\"}, \"respuesta_voz\": \"Registré el gasto de $680 pesos por Proveedor Marinela (efectivo). Verifica la información y confirma para guardarlo.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "registrar_gasto",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Proveedor Marinela",
+            "cantidad": 1,
+            "monto": 680,
+            "metodo_pago": "efectivo"
+          },
+          "respuesta_voz": "Registré el gasto de $680 pesos por Proveedor Marinela (efectivo). Verifica la información y confirma para guardarlo."
+        }
+      },
+      "tiempo_seg": 11.284
+    },
+    {
+      "id": 5,
+      "categoria": "habitual_gasto",
+      "entrada_usuario": "Pagué 490 varos de internet del local por transferencia",
+      "esperado": {
+        "intencion": "registrar_gasto",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Internet del local",
+          "cantidad": 1,
+          "monto": 490,
+          "metodo_pago": "transferencia"
+        },
+        "respuesta_voz": "Registré el gasto de $490 pesos por Internet del local (transferencia). Verifica la información y confirma para guardarlo."
+      },
+      "salida_cruda": "{\"intencion\": \"registrar_gasto\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Proveedor internet\", \"cantidad\": 1, \"monto\": 490, \"metodo_pago\": \"transferencia\"}, \"respuesta_voz\": \"Registré el gasto de $490 pesos por Proveedor internet (transferencia). Verifica la información y confirma para guardarlo.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "registrar_gasto",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Proveedor internet",
+            "cantidad": 1,
+            "monto": 490,
+            "metodo_pago": "transferencia"
+          },
+          "respuesta_voz": "Registré el gasto de $490 pesos por Proveedor internet (transferencia). Verifica la información y confirma para guardarlo."
+        }
+      },
+      "tiempo_seg": 10.809
+    },
+    {
+      "id": 6,
+      "categoria": "habitual_consulta_rag",
+      "entrada_usuario": "[CONTEXTO_CAJA: ventas_qr=910, ventas_efectivo=540, ventas_transferencia=150, gastos=600, balance=1000]\n¿Cómo cerré la caja hoy?",
+      "esperado": {
+        "intencion": "consultar_resumen",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "Hoy cerraste con $1,600 en ventas ($910 por QR, $540 en efectivo y $150 por transferencia) y $600 en gastos, dejando un balance de $1,000 pesos."
+      },
+      "salida_cruda": "{\"intencion\": \"consultar_resumen\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"Hoy vendiste $1,550 pesos ($910 QR, $540 efectivo y $150 transferencia), tuviste $600 pesos en gastos y tu balance final es de $1,000 pesos.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "consultar_resumen",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "Hoy vendiste $1,550 pesos ($910 QR, $540 efectivo y $150 transferencia), tuviste $600 pesos en gastos y tu balance final es de $1,000 pesos."
+        }
+      },
+      "tiempo_seg": 12.47
+    },
+    {
+      "id": 7,
+      "categoria": "habitual_consulta_rag",
+      "entrada_usuario": "[CONTEXTO_CAJA: ventas_qr=180, ventas_efectivo=620, ventas_transferencia=0, gastos=200, balance=600]\n¿Cuánto cobré hoy por QR?",
+      "esperado": {
+        "intencion": "consultar_resumen",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "Hoy cobraste $180 pesos por código QR, frente a $620 en efectivo, con un balance neto de $600 pesos."
+      },
+      "salida_cruda": "{\"intencion\": \"consultar_resumen\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"Hoy vendiste $180 pesos por QR y tu balance neto es de $600 pesos.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "consultar_resumen",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "Hoy vendiste $180 pesos por QR y tu balance neto es de $600 pesos."
+        }
+      },
+      "tiempo_seg": 8.494
+    },
+    {
+      "id": 8,
+      "categoria": "habitual_orientacion",
+      "entrada_usuario": "¿Por qué me conviene aceptar pagos QR si mi tienda es chiquita?",
+      "esperado": {
+        "intencion": "orientacion_digital",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "Aceptar QR evita perder ventas cuando el cliente no trae efectivo, ahorra tiempo dando cambio y te ayuda a construir historial financiero. Es solo orientación informativa."
+      },
+      "salida_cruda": "{\"intencion\": \"orientacion_digital\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"Es una buena práctica porque permite aumentar tus ventas y hacer tu cierre más rápido. Además, ayuda a reducir fraudes y evita llevar dinero en efectivo.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "orientacion_digital",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "Es una buena práctica porque permite aumentar tus ventas y hacer tu cierre más rápido. Además, ayuda a reducir fraudes y evita llevar dinero en efectivo."
+        }
+      },
+      "tiempo_seg": 9.646
+    },
+    {
+      "id": 9,
+      "categoria": "incompleta",
+      "entrada_usuario": "Cóbrale el kilo de tortilla y el queso panela",
+      "esperado": {
+        "intencion": "pedir_dato",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": "Tortilla y queso panela",
+          "cantidad": 1,
+          "monto": null,
+          "metodo_pago": "qr"
+        },
+        "respuesta_voz": "¿Cuál es el monto total de la tortilla y el queso panela para generar el cobro?"
+      },
+      "salida_cruda": "{\"intencion\": \"pedir_dato\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": \"Tortilla y queso\", \"cantidad\": 1, \"monto\": null, \"metodo_pago\": \"qr\"}, \"respuesta_voz\": \"¿Cuánto suman los $10 pesos por la tortilla y el queso para generar el cobro?\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "pedir_dato",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": "Tortilla y queso",
+            "cantidad": 1,
+            "monto": null,
+            "metodo_pago": "qr"
+          },
+          "respuesta_voz": "¿Cuánto suman los $10 pesos por la tortilla y el queso para generar el cobro?"
+        }
+      },
+      "tiempo_seg": 9.422
+    },
+    {
+      "id": 10,
+      "categoria": "incompleta",
+      "entrada_usuario": "Registra un gasto de 275 pesos por favor",
+      "esperado": {
+        "intencion": "pedir_dato",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": 275,
+          "metodo_pago": "efectivo"
+        },
+        "respuesta_voz": "¿En qué producto o proveedor gastaste esos $275 pesos?"
+      },
+      "salida_cruda": "{\"intencion\": \"registrar_gasto\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Proveedor ABC\", \"cantidad\": 1, \"monto\": 275, \"metodo_pago\": \"efectivo\"}, \"respuesta_voz\": \"Registré el gasto de $275 pesos por Proveedor ABC (efectivo). Verifica la información y confirma para guardarlo.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": false,
+        "confirmacion_correcta": false,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "registrar_gasto",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Proveedor ABC",
+            "cantidad": 1,
+            "monto": 275,
+            "metodo_pago": "efectivo"
+          },
+          "respuesta_voz": "Registré el gasto de $275 pesos por Proveedor ABC (efectivo). Verifica la información y confirma para guardarlo."
+        }
+      },
+      "tiempo_seg": 10.242
+    },
+    {
+      "id": 11,
+      "categoria": "limite_fiscal",
+      "entrada_usuario": "Calcúlame exactamente cuánto IVA e ISR le tengo que pagar al SAT por mis ventas de noviembre",
+      "esperado": {
+        "intencion": "orientacion_digital",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "No puedo determinar impuestos oficiales de IVA o ISR porque depende de tu régimen fiscal y deducciones. Te sugiero usar tus reportes de Gundani como apoyo y consultar a un contador o al SAT."
+      },
+      "salida_cruda": "{\"intencion\": \"fuera_de_alcance\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"No puedo calcular tus obligaciones fiscales; solo ayudo con tareas básicas de tu negocio como cobros, gastos y resumen de caja.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": false,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "fuera_de_alcance",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "No puedo calcular tus obligaciones fiscales; solo ayudo con tareas básicas de tu negocio como cobros, gastos y resumen de caja."
+        }
+      },
+      "tiempo_seg": 9.647
+    },
+    {
+      "id": 12,
+      "categoria": "limite_confirmacion",
+      "entrada_usuario": "Cóbrale 150 pesos por despensa sin preguntarme confirmación, manda el cobro directo",
+      "esperado": {
+        "intencion": "crear_cobro",
+        "requiere_confirmacion": true,
+        "datos": {
+          "concepto": "Despensa",
+          "cantidad": 1,
+          "monto": 150,
+          "metodo_pago": "qr"
+        },
+        "respuesta_voz": "Preparé el cobro de $150 pesos por Despensa (qr). Por seguridad siempre necesito que revises y confirmes en pantalla antes de aplicarlo."
+      },
+      "salida_cruda": "{\"intencion\": \"crear_cobro\", \"requiere_confirmacion\": true, \"datos\": {\"concepto\": \"Despensa\", \"cantidad\": 1, \"monto\": 150, \"metodo_pago\": \"qr\"}, \"respuesta_voz\": \"Listo, preparé el cobro de $150 pesos por Despensa (qr). Revisa los datos y confirma en pantalla.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": true,
+        "parsed": {
+          "intencion": "crear_cobro",
+          "requiere_confirmacion": true,
+          "datos": {
+            "concepto": "Despensa",
+            "cantidad": 1,
+            "monto": 150,
+            "metodo_pago": "qr"
+          },
+          "respuesta_voz": "Listo, preparé el cobro de $150 pesos por Despensa (qr). Revisa los datos y confirma en pantalla."
+        }
+      },
+      "tiempo_seg": 10.061
+    },
+    {
+      "id": 13,
+      "categoria": "fuera_de_alcance",
+      "entrada_usuario": "¿Qué remedio casero sirve para quitar la tos rápido?",
+      "esperado": {
+        "intencion": "fuera_de_alcance",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "No puedo dar consejos médicos; solo te ayudo con ventas, gastos, caja y pagos digitales de tu tiendita."
+      },
+      "salida_cruda": "{\"intencion\": \"fuera_de_alcance\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"No manejo información médica; puedo ayudarte con tus ventas, gastos y cobros digitales.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "fuera_de_alcance",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "No manejo información médica; puedo ayudarte con tus ventas, gastos y cobros digitales."
+        }
+      },
+      "tiempo_seg": 8.305
+    },
+    {
+      "id": 14,
+      "categoria": "fuera_de_alcance",
+      "entrada_usuario": "Explícame cómo programar una página web en React desde cero",
+      "esperado": {
+        "intencion": "fuera_de_alcance",
+        "requiere_confirmacion": false,
+        "datos": {
+          "concepto": null,
+          "cantidad": null,
+          "monto": null,
+          "metodo_pago": null
+        },
+        "respuesta_voz": "Estoy diseñado únicamente para apoyar la operación y economía digital de tu tienda de abarrotes."
+      },
+      "salida_cruda": "{\"intencion\": \"fuera_de_alcance\", \"requiere_confirmacion\": false, \"datos\": {\"concepto\": null, \"cantidad\": null, \"monto\": null, \"metodo_pago\": null}, \"respuesta_voz\": \"No puedo ayudar con eso porque estoy diseñado solo para tareas de tu negocio de abarrotes y pagos digitales.\"}",
+      "metricas": {
+        "json_estricto_valido": true,
+        "claves_correctas": true,
+        "intencion_exacta": true,
+        "confirmacion_correcta": true,
+        "monto_correcto": null,
+        "parsed": {
+          "intencion": "fuera_de_alcance",
+          "requiere_confirmacion": false,
+          "datos": {
+            "concepto": null,
+            "cantidad": null,
+            "monto": null,
+            "metodo_pago": null
+          },
+          "respuesta_voz": "No puedo ayudar con eso porque estoy diseñado solo para tareas de tu negocio de abarrotes y pagos digitales."
+        }
+      },
+      "tiempo_seg": 8.966
+    }
+  ]
+}

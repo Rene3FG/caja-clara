@@ -1,0 +1,29 @@
+{
+  "proyecto": "Gundani - Asistente Conversacional para Abarrotes",
+  "modelo_base": "Qwen/Qwen2.5-3B-Instruct",
+  "licencia_modelo_base": "Apache-2.0",
+  "tecnica": "QLoRA (4-bit NF4 + LoRA FP16)",
+  "fecha_inicio": "2026-11-20T02:35:47",
+  "fecha_fin": "2026-11-20T02:44:41",
+  "duracion_segundos": 533.62,
+  "gpu": "Tesla T4",
+  "dataset": {
+    "train": 108,
+    "val": 15
+  },
+  "hiperparametros": {
+    "epochs": 5,
+    "learning_rate": 0.0002,
+    "batch_size_efectivo": 8,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "max_length": 512
+  },
+  "metricas_entrenamiento": {
+    "global_step": 65,
+    "train_loss": 0.2714,
+    "best_eval_loss": 0.2228
+  },
+  "artefacto_guardado": "modelo_gundani_lora"
+}
