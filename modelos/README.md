@@ -1,7 +1,13 @@
 # Modelos
 
-Los pesos **no** están en git (pasan del límite de 100 MB de GitHub). Se entregan en el paquete de
-entrenamiento y en la laptop de la demo viven en `~/caja-clara/detector` y `~/caja-clara/asistente`
+Los pesos **no** están en git (pasan del límite de 100 MB de GitHub).
+
+**Descarga (pública, solo lectura):** https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es
+Contiene `dino_v3.onnx` (sha256 `1ecd0cc1…`), `dino_v3_rtx2060.engine` (`e58f31e3…`), `adaptador_lora/`
+(`adapter_model.safetensors` `72a3259e…`), `LEEME.txt` y `SHA256SUMS.txt` (verificar con `sha256sum -c SHA256SUMS.txt`).
+El checkpoint .pth quedó en el laboratorio DLI, que se reinició; se entrega el ONNX (portable) y el engine (RTX 2060).
+
+En la laptop de la demo viven en `~/caja-clara/detector` y `~/caja-clara/asistente`
 (`scripts/demo_up.sh` los busca ahí; se cambia con `DETECTOR_DIR` / `ASISTENTE_DIR`).
 
 ## Artefactos que usa la app

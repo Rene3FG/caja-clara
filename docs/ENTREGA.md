@@ -9,8 +9,8 @@
 | **B.** Código, entrenamientos, dependencias, conexión app↔modelos | Este repositorio; `README.md` | ✅ |
 | **B.** Componentes previos, herramientas de IA, licencias | `docs/DECLARACION_IA_Y_LICENCIAS.md` | ✍️ firma y fecha del líder |
 | **B.** Funciones implementadas / simuladas / pendientes | `docs/funciones.md` | ✅ |
-| **C.** Paquete de entrenamiento — detector | `training/vision/` (cuaderno, specs, logs, distribución, evaluaciones) + pesos | ✍️ subir `.pth`/`.onnx`/`.engine` (ubicación en el Panel) |
-| **C.** Paquete de entrenamiento — asistente | `training/asistente/` (datos, config, logs, evaluaciones) + adaptador | ✍️ subir `lora_adaptador/` (ubicación en el Panel) |
+| **C.** Paquete de entrenamiento — detector | `training/vision/` (cuaderno, specs, logs, distribución, evaluaciones) + pesos | ✅ `.onnx` + `.engine` en https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es (el `.pth` quedó en el DLI, que se reinició) |
+| **C.** Paquete de entrenamiento — asistente | `training/asistente/` (datos, config, logs, evaluaciones) + adaptador | ✅ `adaptador_lora/` en https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es |
 | **C.** Evaluación del detector v1–v3 en el test (106) | `training/detector/evaluar_test_publico.py` (TensorRT, RTX 2060) → `logs/eval_test_publico_v*.json`, tabla en `docs/evidencias.md` | ✅ |
 | **D.** Ficha (PDF, ≤ 4 páginas) | `docs/pdf/ficha_proyecto.pdf` (fuente `docs/ficha_proyecto.md`) | ✍️ nombres y cifras de las pruebas de uso |
 | **E.** Evidencias | `docs/evidencias.md`, `logs/pruebas_app_2026-11-20.json` | ⏳ pruebas de uso y tiempos |

@@ -108,9 +108,8 @@ celular en el mostrador, con distractores (`training/vision/evaluacion/v{1,2,3}_
 - `chokis` no tiene objetos en este test, así que no entra al promedio (criterio COCO).
 - Esta evaluación usó TensorRT, no `tao evaluate`. En TAO, v1 había dado mAP 0.915 (cuaderno, celda 26), por
   lo que la cifra puede variar un poco según el motor.
-- El test público son fotos de catálogo con un producto cada una, parecidas a las de entrenamiento:
-  **sobreestima** el desempeño. La bajada de v1 a v3 aquí, junto con la subida en p03, indica que v2 y v3
-  cambiaron precisión en fotos de catálogo por robustez en fotos reales.
+- El test público (fotos de catálogo, un producto cada una) **sobreestima** el desempeño. Que v3 baje aquí y
+  suba en p03 indica que v2 y v3 cambiaron precisión en catálogo por robustez en fotos reales.
 - **El umbral 0.5 no se eligió con el test.** Es el valor por defecto de `servir_detector.py` desde su primer
   commit (`21ef0e8`, 2026-11-19), que es anterior a todas las evaluaciones con fotos propias (`26471a3` y `ae43471`). No se
   movió al ver los resultados: en p03 un umbral de 0.7 habría dado 0 % de falsos positivos y aun así se dejó 0.5.
@@ -177,9 +176,10 @@ preproceso y postproceso (<code>evaluacion/v3_p03/resultados.json</code>, <code>
   `training/vision/specs/train*.yaml`; los datos se preparan con `training/vision/preparar_datos.py`.
 - **Engine e inferencia:** `training/detector/construir_engine.py` construye el engine y
   `servir_detector.py` (`API_DETECTOR.md`) lo sirve.
-- **Pesos:** `.pth`, `.onnx` y `.engine` pesan más de 100 MB y no caben en GitHub. Se entregan en el paquete
-  de entrenamiento (`modelos/README.md`). Cualquiera puede verificar el engine cargado con `GET /salud`, que
-  devuelve su sha256.
+- **Pesos o archivo del modelo resultante:** carpeta pública de solo lectura **https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es**
+  (`dino_v3.onnx` sha256 `1ecd0cc1…62de4eb4`; `dino_v3_rtx2060.engine` `e58f31e3…f81a31ed`; se verifica con
+  `sha256sum -c SHA256SUMS.txt`). El checkpoint .pth quedó en el laboratorio DLI, que se reinició; se entrega el ONNX (portable) y el engine (RTX 2060). Pesan más de 100 MB y por eso no van en GitHub. `GET /salud` devuelve
+  el sha256 del engine cargado.
 
 ## B. Modelo de lenguaje: asistente
 
@@ -237,8 +237,9 @@ Tres ejemplos reales de `data/train.jsonl`:
 <code>entrenar_lora.py</code> (docstring), <code>docs/DECLARACION_IA_Y_LICENCIAS.md</code> (DLI), <code>modelos/README.md</code> (sha256 completo
 <code>72a3259e7285b8a8b7a0ac5c5355d7a802ff78b3f42ee19277cb1f9aef42fa0d</code>), <code>entrenamiento_lora.log</code> (18,464,768 parámetros entrenables).
 <b>Código y configuración:</b> <code>training/asistente/entrenar_lora.py</code> y <code>config_lora.yaml</code>; cuadernos <code>03_caja_clara_asistente_lora.ipynb</code>
-y <code>04_log_evaluacion_lora.ipynb</code>. <b>Acceso:</b> el adaptador (74 MB, <code>lora_adaptador/</code>) se carga sobre el modelo base que
-se descarga de Hugging Face con <code>servir_asistente.py --adaptador …</code>. <code>GET /salud</code> devuelve su sha256.</p>
+y <code>04_log_evaluacion_lora.ipynb</code>. <b>Modelo ajustado, adaptadores o mecanismo reproducible de acceso:</b> el adaptador (74 MB, carpeta <code>adaptador_lora/</code>,
+<code>adapter_model.safetensors</code> sha256 <code>72a3259e…aef42fa0d</code>) está en <b>https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es</b> junto con <code>SHA256SUMS.txt</code>. Se carga sobre el
+modelo base de Hugging Face con <code>servir_asistente.py --adaptador adaptador_lora</code>, y <code>GET /salud</code> devuelve su sha256.</p>
 
 ### B.5 Evaluación: base contra adaptado
 
@@ -354,12 +355,10 @@ y VPS; entrenamiento en NVIDIA DLI (Tesla T4).
 El tiempo que la persona tarda en revisar y confirmar todavía no se ha medido.
 <span class="falta">[FALTA: tiempo total por venta, pendiente de las pruebas de uso, `docs/pruebas_uso.md`]</span>
 
-**Implementado y simulado** (`docs/funciones.md`):
-
-- **Implementado:** venta por foto, voz y texto; revisión y corrección; libreta por dictado y por foto;
-  guardado en el teléfono y envío diferido sin red; consulta de los hashes de los modelos en uso.
-- **Simulado:** el cobro QR o transferencia (DiMo/CoDi) es **SIMULADO** con tres estados: aprobado, QR
-  expirado y saldo insuficiente. No hay conexión con bancos y la app lo marca como simulación.
+**Implementado:** venta por foto, voz y texto; revisión y corrección; libreta por dictado y por foto; guardado
+en el teléfono y envío diferido sin red; hashes de los modelos en uso. **Simulado:** el cobro QR o transferencia
+(DiMo/CoDi), con estados aprobado, QR expirado y saldo insuficiente; no hay conexión con bancos y la app lo marca
+como simulación (`docs/funciones.md`).
 
 **Manejo de fallas:** si un servicio no responde, el gateway devuelve 503 o 504 con el mensaje "Puedes
 capturar a mano" y la persona **captura la venta a mano**. Sin red, la venta queda en el teléfono y se envía
@@ -380,14 +379,11 @@ podrían servirse con **NVIDIA NIM**, o el detector en un **Jetson** por tienda 
 python3 training/vision/preparar_datos.py --publicos <oxxo> <mercado> --propias <p> --train-sesiones p01 p02 p04
 tao model dino train -e training/vision/specs/train_v3.yaml   # y tao model dino export (cuaderno 02)
 python3 training/detector/construir_engine.py dino_v3.onnx dino_v3_rtx2060.engine
-python3 training/detector/evaluar_test_publico.py --test datos/final/test --engine v3=dino_v3_rtx2060.engine
 python3 training/asistente/generar_dataset.py --n 1400 --seed 1234   # luego entrenar_lora.py --entrenar --evaluar
-python3 backend_gundani/entrenar_qlora.py && python3 backend_gundani/evaluar_modelo.py
-bash scripts/demo_up.sh     # levanta detector, asistente, gateway y túnel; imprime URL y hashes e58f31e3… / 72a3259e…
+bash scripts/demo_up.sh     # detector + asistente + gateway + túnel; imprime URL y hashes
 ```
 
 **Enlaces:** repositorio github.com/Rene3FG/caja-clara · ProductosOXXO_V02:
 universe.roboflow.com/ipsum/productosoxxo_v02 · Dataset Mercado: universe.roboflow.com/fundamentosia/dataset-mercado ·
 DINO base: NGC `nvidia/tao/pretrained_dino_coco` · Qwen2.5-1.5B-Instruct: huggingface.co/Qwen/Qwen2.5-1.5B-Instruct ·
-Nemotron 3.5 Super VL: build.nvidia.com · Pesos (`.pth`, `.onnx`, `.engine`, `lora_adaptador/`):
-<span class="falta">[FALTA: ubicación en el Panel]</span>
+Nemotron 3.5 Super VL: build.nvidia.com · **Pesos** (ONNX, engine, adaptador LoRA y `SHA256SUMS.txt`): https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es
