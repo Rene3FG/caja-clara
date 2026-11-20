@@ -72,8 +72,8 @@ cd app && flutter pub get && flutter test
 flutter build apk --release
 ```
 
-La URL del servidor de IA está fija en `app/lib/servicios/config.dart` (`apiBase`). Si la URL del túnel
-cambia al reiniciar la demo, hay que actualizarla ahí y recompilar el APK.
+La URL por defecto está en `app/lib/servicios/config.dart`. Si el túnel cambia al reiniciar la demo, se
+pega la nueva en la app (**Perfil → Servidor IA → Guardar servidor**) y se revisa con **Probar conexión**, sin recompilar.
 `/libreta` necesita `NVIDIA_API_KEY` en `~/caja-clara/.env` (nunca en git).
 
 ## Cómo verificar que la app usa los modelos entrenados

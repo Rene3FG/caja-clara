@@ -16,9 +16,9 @@ class Hallazgo {
 /// ponytail: sin pesos del detector, la demo señala el primer producto.
 /// El reemplazo es POST /detectar cuando se compila con API_URL.
 Future<List<Hallazgo>> identificar(List<int>? bytes, String? nombreArchivo, List<Producto> productos) async {
-  if (apiBase.isNotEmpty && bytes != null) {
+  if (servidorIa.isNotEmpty && bytes != null) {
     try {
-      final req = http.MultipartRequest('POST', Uri.parse('$apiBase/detectar'));
+      final req = http.MultipartRequest('POST', Uri.parse('$servidorIa/detectar'));
       req.files.add(http.MultipartFile.fromBytes('foto', bytes, filename: nombreArchivo ?? 'foto.jpg'));
       final res = await http.Response.fromStream(await req.send().timeout(const Duration(seconds: 12)));
       if (res.statusCode == 200) {

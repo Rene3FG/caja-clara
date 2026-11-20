@@ -8,7 +8,7 @@ import '../modelos.dart';
 import '../pedido.dart';
 import 'config.dart';
 
-export 'config.dart' show apiBase, gundaniBase;
+export 'config.dart' show apiBase, gundaniBase, servidorIa, servidorApi;
 
 const esperaGundani = Duration(seconds: 30);
 
@@ -153,7 +153,7 @@ Future<void> confirmarMovimiento(Cobro cobro) async {
 
 Future<ResumenHoy> traerResumen() async {
   try {
-    final res = await http.get(Uri.parse('$gundaniBase/api/caja/resumen')).timeout(esperaGundani);
+    final res = await http.get(Uri.parse('$servidorApi/api/caja/resumen')).timeout(esperaGundani);
     if (_sinGundani(res.statusCode)) throw const ErrorGundani('No hay señal con Gundani. Inténtalo otra vez.', sinRespuesta: true);
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw const ErrorGundani('Gundani no pudo responder. Inténtalo otra vez.');
@@ -208,7 +208,7 @@ Future<Map<String, dynamic>> _post(String ruta, Map<String, dynamic> cuerpo) asy
   try {
     final res = await cliente
         .post(
-          Uri.parse('$gundaniBase$ruta'),
+          Uri.parse('$servidorApi$ruta'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(cuerpo),
         )

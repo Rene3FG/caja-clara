@@ -2,7 +2,7 @@ import '../cuentas.dart';
 import '../modelos.dart';
 import 'asistente.dart';
 
-/// La cola pendiente se confirma en Gundani. La IA va por [apiBase], aparte.
+/// La cola pendiente se confirma en Gundani. Va por [servidorApi].
 Future<void> enviarPendientes(List<Venta> ventas, List<Gasto> gastos) async {
   for (final venta in ventas) {
     await confirmarMovimiento(Cobro(

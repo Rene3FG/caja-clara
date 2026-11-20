@@ -29,13 +29,15 @@ bash scripts/demo_down.sh           # apagar todo (hazlo al terminar cada prueba
 
 ## 2. Poner la URL en la app
 
-Las dos direcciones están fijas en `app/lib/servicios/config.dart`:
+Valores por defecto en `app/lib/servicios/config.dart`:
 
 - `apiBase`: el gateway de IA (la URL del túnel que imprime `demo_up.sh`).
-- `gundaniBase`: el VPS de Gundani (cobros simulados, movimientos y resumen de caja), al que la app va directo.
+- `gundaniBase`: el VPS de Gundani (cobros simulados, movimientos y resumen de caja).
 
-**El túnel cambia cada vez que se reinicia la demo.** Antes de presentar: levantar la demo, copiar la
-URL de `logs/demo/url_tunel.txt` a `apiBase`, recompilar e instalar.
+**Perfil → Servidor IA** guarda otra URL en el teléfono (`shared_preferences`). Si hay una guardada, la
+IA **y** las llamadas a `/api` van a ella (el gateway reenvía `/api/*` a Gundani); si se borra el campo
+y se guarda, vuelven los valores por defecto. **Probar conexión** llama a `/salud` y dice si respondió.
+El túnel cambia cada vez que se reinicia la demo: basta con pegar la URL nueva ahí.
 
 ```bash
 cd app

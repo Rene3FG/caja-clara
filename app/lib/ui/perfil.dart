@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../caja.dart';
 import '../modelos.dart';
+import '../servicios/config.dart';
+import '../servicios/ia_service.dart';
 import '../tema.dart';
 import 'widgets.dart';
 
@@ -16,7 +18,11 @@ class _FormularioPerfilState extends State<FormularioPerfil> {
   final _negocio = TextEditingController();
   final _nombre = TextEditingController();
   final _clabe = TextEditingController();
+  final _servidor = TextEditingController(text: servidorGuardado ?? '');
   var _aviso = '';
+  String? _avisoServidor;
+  bool? _servidorOk;
+  var _probando = false;
   var _lleno = false;
 
   @override
@@ -35,7 +41,46 @@ class _FormularioPerfilState extends State<FormularioPerfil> {
     _negocio.dispose();
     _nombre.dispose();
     _clabe.dispose();
+    _servidor.dispose();
     super.dispose();
+  }
+
+  Future<void> _guardarServidor() async {
+    final ok = await guardarServidor(_servidor.text);
+    if (!mounted) return;
+    setState(() {
+      _servidorOk = ok ? null : false;
+      _avisoServidor = !ok
+          ? 'Escribe una dirección que empiece con https:// o http://'
+          : (servidorGuardado == null ? 'Sin dirección propia: se usa la de la app.' : 'Guardado. Usando $servidorIa');
+      if (ok) _servidor.text = servidorGuardado ?? '';
+    });
+    if (ok) Caja.of(context).refrescarCaja();
+  }
+
+  /// Prueba lo escrito en el campo (sin guardarlo) o, si está vacío, el servidor en uso.
+  Future<void> _probar() async {
+    final escrito = _servidor.text.trim();
+    final url = escrito.isEmpty ? servidorIa : normalizarServidor(escrito);
+    if (url == null) {
+      setState(() {
+        _servidorOk = false;
+        _avisoServidor = 'Escribe una dirección que empiece con https:// o http://';
+      });
+      return;
+    }
+    setState(() {
+      _probando = true;
+      _servidorOk = null;
+      _avisoServidor = 'Probando $url …';
+    });
+    final (ok, mensaje) = await IaService(base: url).probarConexion();
+    if (!mounted) return;
+    setState(() {
+      _probando = false;
+      _servidorOk = ok;
+      _avisoServidor = mensaje;
+    });
   }
 
   Future<void> _guardar() async {
@@ -78,6 +123,39 @@ class _FormularioPerfilState extends State<FormularioPerfil> {
             placeholder: '18 números',
             teclado: TextInputType.number,
           ),
+          const SizedBox(height: 12),
+          Campo(
+            etiqueta: 'Servidor IA',
+            controller: _servidor,
+            placeholder: apiBase,
+            teclado: TextInputType.url,
+          ),
+          const SizedBox(height: 6),
+          Text('En uso: $servidorIa', style: const TextStyle(fontSize: 13, color: stone)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            OutlinedButton.icon(
+              onPressed: _guardarServidor,
+              icon: const Icon(Icons.save_outlined),
+              label: const Text('Guardar servidor'),
+            ),
+            OutlinedButton.icon(
+              onPressed: _probando ? null : _probar,
+              icon: const Icon(Icons.wifi_tethering),
+              label: const Text('Probar conexión'),
+            ),
+          ]),
+          if (_avisoServidor != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _avisoServidor!,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _servidorOk == null ? stone : (_servidorOk! ? maguey : grana),
+              ),
+            ),
+          ],
           if (_aviso.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(_aviso, style: const TextStyle(color: grana, fontSize: 15, height: 1.3)),

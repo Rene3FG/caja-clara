@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'cuentas.dart';
 import 'modelos.dart';
 import 'servicios/asistente.dart';
+import 'servicios/config.dart' show cargarServidor;
 import 'servicios/sync.dart';
 
 const _clave = 'caja-clara-v1';
@@ -41,6 +42,7 @@ class Caja extends ChangeNotifier {
   bool get perfilListo => negocio.trim().isNotEmpty && nombre.trim().isNotEmpty;
 
   Future<void> iniciar() async {
+    await cargarServidor();
     final prefs = await SharedPreferences.getInstance();
     final crudo = prefs.getString(_clave);
     if (crudo == null) {

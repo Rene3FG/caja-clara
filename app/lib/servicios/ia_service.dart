@@ -1,5 +1,5 @@
 // Caja Clara - conexión de la app con la IA del equipo a través del gateway (un solo URL).
-// La URL sale de config.dart y está fija.
+// La URL es la guardada en Perfil ("Servidor IA") o, si no hay, la de config.dart.
 // Todos los errores llegan como IaError con un mensaje listo para mostrar (bases 6e).
 
 import 'dart:async';
@@ -39,9 +39,12 @@ class IaError implements Exception {
 bool sinServidor(int status) => status == 502 || status == 503 || (status >= 520 && status <= 530);
 
 class IaService {
-  const IaService();
+  const IaService({this.base});
 
-  String get baseUrl => apiBase;
+  /// Para probar otra URL antes de guardarla (botón "Probar conexión").
+  final String? base;
+
+  String get baseUrl => base ?? servidorIa;
 
   Future<Map<String, dynamic>> _json(
     Future<http.Response> Function(http.Client c) peticion,
@@ -93,6 +96,18 @@ class IaService {
   /// r['detector']['sha256_engine'], r['asistente']['sha256_adaptador']
   Future<Map<String, dynamic>> salud() =>
       _json((c) => c.get(Uri.parse('$baseUrl/salud')), const Duration(seconds: 8));
+
+  /// Botón "Probar conexión": llama a /salud y devuelve (ok, mensaje para mostrar).
+  Future<(bool, String)> probarConexion() async {
+    try {
+      final r = await salud();
+      if (r['ok'] != true) return (false, 'El servidor respondió, pero algo no está listo.');
+      String estado(String k) => (r[k] is Map && (r[k] as Map)['ok'] == true) ? 'listo' : 'no responde';
+      return (true, 'Conectado. Detector: ${estado('detector')} · Asistente: ${estado('asistente')}.');
+    } on IaError catch (e) {
+      return (false, e.mensaje);
+    }
+  }
 
   /// Foto de productos -> {detecciones, conteo, no_reconocidos, ms, requiere_revision, mensaje?}
   /// Si no hay nada (ni productos ni no reconocidos) lanza IaError.nadaDetectado.
