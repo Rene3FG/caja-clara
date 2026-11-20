@@ -382,7 +382,7 @@ python3 training/asistente/generar_dataset.py --n 1400 --seed 1234   # luego ent
 bash scripts/demo_up.sh     # detector + asistente + gateway + túnel; imprime URL y hashes
 ```
 
-**Enlaces:** repositorio github.com/Rene3FG/caja-clara · ProductosOXXO_V02:
-universe.roboflow.com/ipsum/productosoxxo_v02 · Dataset Mercado: universe.roboflow.com/fundamentosia/dataset-mercado ·
-DINO base: NGC `nvidia/tao/pretrained_dino_coco` · Qwen2.5-1.5B-Instruct: huggingface.co/Qwen/Qwen2.5-1.5B-Instruct ·
-Nemotron 3.5 Super VL: build.nvidia.com · **Pesos** (ONNX, engine, adaptador LoRA y `SHA256SUMS.txt`): https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es
+**Enlaces:** repositorio https://github.com/Rene3FG/caja-clara · ProductosOXXO_V02:
+https://universe.roboflow.com/ipsum/productosoxxo_v02 · Dataset Mercado: https://universe.roboflow.com/fundamentosia/dataset-mercado ·
+DINO base: NGC `nvidia/tao/pretrained_dino_coco` · Qwen2.5-1.5B-Instruct: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct ·
+Nemotron 3.5 Super VL: https://build.nvidia.com · **Pesos** (ONNX, engine, adaptador LoRA y `SHA256SUMS.txt`): https://drive.google.com/drive/folders/1azEYXom6Bl0GA8qvHUFa2ylVHGPlq_Es
